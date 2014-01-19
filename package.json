@@ -1,0 +1,15 @@
+{
+  "name": "threeflow.js",
+  "version": "0.0.0",
+  "description": "Render three.js scenes using the open source sunflow renderer\"",
+  "main": "./lib/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "Jamie Owen",
+  "license": "BSD",
+  "dependencies": {
+    "express": "~3.4.8"
+  }
+}

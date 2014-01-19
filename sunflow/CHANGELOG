@@ -1,0 +1,471 @@
+v0.07.2
+* Filled in and corrected javadoc comments in org.sunflow.core package
+* Upgraded to Janino 2.5.5
+* Added experimental Ant build file
+* Removed hard coded sRGB curve
+* Fixes to bucket renderer anti-aliasing
+* Camera motion blur
+* Added bezier patch meshes to parser
+* Added normal smoothing to FileMesh
+* Implemented BVH2 case properly in BoundingIntervalHierarchy (needs benchmarking)
+* Added binary STL format to FileMesh
+* Upgraded to Janino 2.5.4
+* Improvements to Geometry class to handle tesselation failures
+* Created FileMesh class for on-demand loading of meshes (supports RA3/OBJ)
+* Tweaks to Benchmark class for third parties
+* Small bugfixes
+* Added little_endian option for particle files
+
+v0.07.1
+* Added Modifier concept - used to implement bump/normal mapping at the moment
+* Added bucket dumping debugging option to bucket render - saves out unfiltered buckets as they are rendered
+* Fixed jitter option - added to SCParser image block
+* Added basic absorbtion model to GlassShader
+* Added ngon sampling to ThinLens for bokeh effects
+* Renamed MeshLight to TriangleMeshLight
+* Updated LightSource interface - lights must now do their own loop to take mutltiple samples
+* Spherical triangle sampling for triangle lights
+* New wireframe shader (-quick_wire command line option)
+* Added calls to get triangle vertices
+* Added camera space utility functions
+* Upgraded to Janino 2.5.3
+* Upgraded to Janino 2.5.2
+* Added sun light to SunSkyLight - modified LightSource interface slightly
+* Added support for "noinstance" keyword
+* Unified instance handling in .sc parser
+* Added -pathgi command line argument
+* Added basic animation support
+* Added SunSkyLight
+* Added QuadMesh primitive type (using bilinear patches)
+* Added real sphere lights
+* Console display now outputs to stderr to allow stdout to be used for output redirection
+* Added fisheye lens to .sc parser
+* Added imgpipe display compatible with mental ray imgpipe protocol
+* Experimental fix to light bleeding problem
+* Removed -accel command line option
+* Deprecated use of accel keyword in .sc files - the default is usually best
+* Moved accel into an option parameter
+* Added -filter command line option
+* When baking a lightmap without viewdep, a camera is not required in the scene
+* Added -bakedir command line option
+* Added baking.viewdep option to control lightmap baking style
+* Lightmap baking can now either be view-dependent (to the current camera) or orthographic (perpendicular to the point being shaded)
+* Added XYZColor class to represent colors with CIE coordinates
+* Rengereated golden images for Benchmark data
+* Fixed a subtle problem with float/int constructors for the Color class
+* Added lightmap baking - only triangular meshes are supported at the moment
+* Renamed DLASurface to ParticleSurface
+* SCParser: Made all the options in the image block optional
+* Added fake spherical lights (approximated by point lights - using the trick from the Lightcuts paper)
+* Bug fix to RA2Parser (was passing fov argument to camera incorectly)
+* Added a method to dump Mesh objects to .obj files (usefull for procedural geometry debugging)
+* Added DLASurface for efficient rendering of large sets of spheres
+* Split Camera into CameraLens (which is an interface to generate rays in camera space) and an internal Camera class which rotates the rays into world space
+* Upgraded to Janino 2.5.1
+* Upgraded to Janino 2.5.0
+* Parser now generates bezier patch primitives intead of triangles is the subdivs/smooth parameters are ommited
+* Added exact Ray/Bezier-patch intersection code
+* Added Teapot and Gumbo primitives, both using bezier patch descriptions
+* Added Bezier patch mesh, which generates a triangle mesh at runtime
+* Added janino-tesselatable primitive
+* Added on demand tesselation of primitives
+* Added a parser for hair curve data as export by Shave and Haircut (http://www.joealter.com)
+* Added a hair curve primitive
+* Implemented parameter system for all render object creation
+* Textures are now loaded on demand, when they are first accessed
+* Modified bucketOrder call in SunflowAPI to create inverted bucket orders
+* Added InvertedBucketOrder
+* Added RandomBucketOrder
+* Added Box primitive
+* Removed SimpleShader from parser classes
+* Added SimpleShader which shades using facing ratio
+* Modified IDShader to be based on instance ID only, and to use facing ratio for better shading
+* Added -quick_id option on the command line to override using IDShader
+* Slight simplification of KDTree traversal
+* Added ParameterList class to store arbitrary name/value pairs
+* AccelerationStructure's are now built on demand for each geometry
+* Added verbosity control to the UI system. Accessible on the command line using "-v n".
+* Modified Scene to use an InstanceList
+* Converted Janino invocations to use the default system compiler
+* Upgraded to Janino 2.5.0
+* Modified Mesh class to implement the AggregateTraceable interface
+* Added AggregateTraceable interface
+* Implemented Instance/Traceable combination
+* Added checks for black diffuse/specular components
+* Added PerlinVector which produce vector valued noise
+* Renamed ImprovedNoise to PerlinScalar and added renderman-like calls
+
+v0.06.4
+* Upgraded to Janino 2.4.7
+* Regenerated golden benchmark files
+* Implemented BanchoffSurface primitive (from RJii's submission)
+* Implemented Torus primitive (from RJii's submission)
+* Added robust quadratic and quartic solvers
+* Improved uv calculations on Sphere
+* Added Matrix parsing to SCParser
+* Rewrote Sphere to use a Matrix4 transformation instead of center/radius positioning
+* Added getCorner() to BoundingBox
+* Added Matrix4 class
+* Upgraded to Janino 2.4.6
+* Minor tweaks to the benchmark mode
+* Upgraded to Janino 2.4.5
+* Improved the built-in benchmark mode
+* Minor optimizations
+* Optimized the traversal for KDTree and BoudingIntervalHierarchy a little
+* Upgraded to Janino 2.4.4
+* Initial implementation of the Bounding Interval Hierarchy paper
+* Small fix to TexturedWard and TexturedPhong shaders (null check)
+* Created UberShader with individual diffuse and reflection components
+
+v0.06.3
+* Moved texture search path functionality out of TextureCache and into SunflowAPI
+* Fixed missing text in progress bar during KDTree build in the GUI
+* Leave \ in paths when opening files in the GUI. This avoids problems with windows network paths.
+* Fixed quantization issues in the SRGB conversions
+* Deprecated "glossy-samples" and "light-samples" settings
+* Each light and each glossy shader now accepts their own number of samples in the scene file
+* ward and phong shader types now parse an optional argument: samples which sets the number of glossy rays
+* Added TexturedWardShader (texture applies to diffuse component)
+* Added TexturedPhongShader (texture applies to diffuse component)
+* Disable computation of glossy reflections if samples are set to 0 (even for secondary bounces)
+* Moved diffuse and specularPhong light integration into ShadingState for easy re-use
+* Minor optimization to light iterator
+* Changed all lights to be parsed as a color/intensity so that color LUTs may assume [0,1] components
+* Added a mechanism options for specifying color space in .sc files
+* Non HDR images are now automatically converted into linear space by the application of an inverse SRGB LUT
+* Added sRGB curves to Color class
+* Removed all gamma correction code
+* Moved getNextColor/Point/Vector out of Parser and into SCParser
+* Fixed fresnel calculations in GlassShader
+* Added ambocc gi engine
+* Fixed cube grid inside/outside classification for ray coming from outside the surface
+* Fixed basis inversion in all shaders - added facefoward method to ShadingState
+* Fixed javadoc comments that refered to outdated methods
+* Added javadoc comments to SunflowAPI
+* Fixed use of deprecated constructor for scanner
+* Upgraded to Janino 2.4.3
+* Fixed bug in UniformGrid which could lead to missing cells
+
+v0.06.2
+* Fixed timing issue with tiling windows on startup
+* Added -resoluton w h command line option
+* Maximize if resolution is not sufficient
+* Added includepath support
+* Added include search path support
+* Added SearchPath class to abstract search path functionality
+* Fixed missing basis vector for non-textured triangles
+* Added quick_ambocc command line option
+* Default for exr output is now float/zip
+* Changed sphere intersection to >=
+
+v0.06.1
+* Public release
+
+v0.06.0
+* Removed -kd command line option
+* Made KDTree3 into KDTree and KDTree into KDTreeOld - the new algorithm is stable enough to be the default
+* Upgraded to Janino 2.4.2
+* Fixed texture search path caching and added option to add texture search paths in the scene file
+* Upgraded to Janino 2.4.1
+* Optimizations to KDTree3 leading to reduced memory usage
+* Added version number into FastDisplay title bar
+* Removed KDTree2
+* Increased resolution limit for uniform grids to 256
+* Allow meshes to be built without triangle indices - for meshes which just contain raw triangles
+* New KDTree algorithm based on KDTree2 - produces the same trees about 2x faster
+* New KDTree algorithm implemented as KDTree2 - produces better trees
+* Removed all serialVersionUID's
+* Moved Render and IPR buttons into image panel
+* -buildonly now exits with error code 0
+* Allow gamma correction on the command line for all display types
+* Seperated gamma correction from toRGB() method
+* Merged IrradianceCache classes together
+* Added parameter to getIrradiance() to take into account the diffuse reflectance of the surface. Allows for importance tracking and other optimizations
+* Instant GI method introduced (with bias correction options)
+* Photon maps can classify the types of bounces they wish to allow
+* Photon tracing takes place per-map
+* Multi-threaded IPR
+* Changed sigma table to be 128 pixels wide
+* Added -nogi command line option
+* Added generalized PhotonStore interface
+* Fixed photon distribution bug in CornellBox primitive
+* Changed UI.print* methods to use printf formatting and refactored all print* calls
+* Created seperate method to load caustic samples into light sample list
+* Removed interpolation of normals from BucketRenderer
+* Require all light shaders to trace shadow rays themselves - allows for selective shadow tracing
+* Modified LightSample to store only a shadow ray and diffuse/specular contributions
+* LightSample iteration in shaders now makes use of the extended for loop syntax
+* Light server doesn't warn about disabling photon mapping if photon mapping was not enabled
+* SCParser adds the directory of the scene being loaded to search paths
+* Added texture search paths
+* Changed most output statements to use String.format for number display
+* Replaced single trace depth with individual settings for diffuse, reflection and refraction depths
+* Fixed IBL to use shorter shadow rays so it won't self shadow
+* traceShadow returns a colored opacity
+* Added Color.blend with the blend factor as a Color
+* Removed adaptive shadow testing for area lights (not a huge win for transparent shadows)
+* Removed special case for intersection with shadow rays
+* Added -gamma option to the command line
+* Extra info about the scene bounding box is displayed before rendering begins
+* Added IDShader which uses a constant color per primitive
+* Fixed incorrect handling of specular/glossy rays behind diffuse bounces
+* Added TextureShinyDiffuseShader and corresponding parser construct
+* Gamma correction menu in GUI
+* Removed epsilon for SmallTriangle intersection test
+* Only displays which need to be synchronized are. Most can be safely written to by multiple threads
+* FastDisplay updates the BufferedImage all at once on imageEnd
+* Added BucketThread into BucketRenderer instead of abstract class
+* Removed an extra level of function calls from bucket based renderers
+* Moved CamParser into RA2Parser
+* Added Color constructor for greyscale colors
+* Optimized FakeGI to not use Math.acos
+* More SCParser cleanups
+* Fixed bug in adaptive AA for background sampling
+* Added option to view adaptive AA sampling in BucketRenderer
+* New parameter to KDTree generation: SMALL_PROBABILITY which indicates when to cull nodes of very small size. 1e-6 seems to be a good default
+* Default leaf size is now 0 to allow potential empty space cutoff in leaves
+* Fixed serious bug in KDTree generation
+* Option to dump KDTree as an obj
+* Renamed -norender command line option to -buildonly 
+* Fixed small bug in uv setting method
+* More SCParser cleanup
+* Fixed handling of /* */ for peekNextToken
+* Upgraded to Janino 2.4.0
+* Moved Bucket and Progressive renderers into their own package
+* Removed TriangleMesh, Mesh now has enough functionality that this is no longer needed
+* Timer displays ms if the measured time is below 10 seconds
+* Added RA2Parser and CameraParser for RTCore comparison benchmarks
+* Broke up SCParser into several methods
+* Added peekNextToken function to parser
+* Added C style block comment handling to parser
+* Added an irradiance cache which works without photons
+* Removed old GUI
+* Added Janino detection to GUI
+* Removed texture messages from parser
+* Simpler KDTree traversal algorithm
+* KDTree stores nodes in breadth first order (children are always next to each other)
+* KDTree now builds compressed tree directly
+* Created IntArray utility class for fast growable arrays of integers
+* Removed KDTreeOld and KDTreeHavran
+* Precompute AA base threshold
+* Removed unecessary calls to Color.copy() and Color.black()
+* Added an init message to QMC precomputation
+* Halved the size of the QMC tables
+* Removed stack allocation on each intersect by re-using scratch space inside IntersectionState
+* Split RenderState into IntersectionState and ShadingState
+* Fixed a small bug in the photon emission code for triangle lights. Thanks to lynx for pointing it out.
+* Renamed SunflowGUI3 to SunflowGUI
+* Renamed SunflowGUI to SunflowGUIOld
+* Moved command line operation into new GUI
+* Switched to JDesktopPane style for GUI
+* Fixed canceled task exit for photon tracing
+* Fixed cancel task logic
+* Created SunflowGUI3 - script based UI
+* Removed unused IrradianceCache from core package
+* Removed unused methods from Ray
+* Removed special handling for incorrect smooth normals from light sampling code
+* IntersectonAccelerators are built from an ArrayList to avoid allocating an extra array if it isn't needed
+* Filters have size only, not width and height
+* Removed procedural demos from root package
+* Added -norender flag for scripts which call render() themselves
+* FrameDisplay won't open a window larger than the current resolution
+* Enhanced image panel is now shared by SunflowGUI and standalone FrameDisplay
+* Zoom image using mouse-wheel
+* Added String based methods in SunflowAPI for built-in types
+* Fit image using Ctrl+middle mouse button
+* Reset image using middle mouse button
+* Reset/Fit image menu options
+* Dim image by modifying colors to 50% instead of clearing alternate scanlines
+* Pan/Zoom rendered image in the GUI using left/right mouse buttons
+* Procedural scene creation - run with a java file which implements a build method
+* Flag to avoid rebuild acceleration structure if no geometry changed
+
+v0.05.5
+* Added customizable leaf size in kdtree builder (-kd n on command line)
+* Added SmallTriangle to reduce memory usage when loading really large meshes (-smallmesh at the command line)
+* Basic bump and normal mapping support
+* Tangent space computation on meshes that have valid uvs
+* Background color support
+* Added texture support to amb-occ2 shader type in the parser
+* Support for multiple shaders per mesh
+* Removed gamma correction
+* Renamed KDTree to be the most recent code. Old code is accesible as: KDTreeOld (-accel kdtree_old on the command line)
+* Renamed [BSP] to [KDT]
+* Minor speedups and reduce mem-usage in UniformGrid
+* Optimized build process for KDTree
+* Switched to enhanced for loop where appropriate
+* Minor tweaks to kdtree builder
+
+v0.05.4
+* Removed Memory.sizeof for Object[]. This was printing the wrong information on 64bit systems.
+* Bitmap constructor now throws its exceptions instead of silently catching them
+* Added support for picking the channel type for OpenEXR files
+* Added support for picking the compression type for OpenEXR files
+* Removed unused snippets from OpenEXR code
+* Refactored OpenEXR code to make it fit inside one Display class
+* Added OpenEXR display driver (submitted by RJii)
+* The Display interface now expects its image data to have (0, 0) be the top-left corner
+* Added ImprovedNoise code from Ken Perlin
+* Proof of concept janino shader support allows arbitrary shaders to be created on the fly
+* Parser supports grabbing code blocks
+* Fixed a bug in photon shader override process
+* Shader table is now stored by the API instead of the parser
+* Removed colormap support from TGA loader
+* Added -lopri and -hipri command line settings for thread priority
+* Added thread priority option
+* Added -accel command line option
+* Optimization to the bounding box test in each accel struct
+* Improved the robustness of the KDTree intersection
+
+v0.05.3
+* Added some basic documentation to the README
+* Minor quantization tweaks
+* Can save any type of bitmap from framedisplay's or the gui (PNG or TGA)
+* Added proper command line handling to SunflowGUI. Run with -h to see a list of options
+* Added option to control the number of rendering threads (used for bucket processing and photon tracing)
+* Moved intersection acceleration and primitive storage into Scene to unclutter LightServer
+* Split primitives into regular and bounded primitives to avoid having to seperate the two in each intersection accel
+* Don't allocate any memory for empty cells in UniformGrid
+* Protected GridPhotonMap with a read/write lock
+* Protected IrradianceCache with a read/write lock
+* Added "Save Image" to the GUI to save rendered frames
+* Basic drag and drop support for scene files into SunflowGUI (submitted by RJii)
+* TGA read/write support. Reading support is not complete, but should handle the most common file types (submitted by RJii)
+
+v0.05.2
+* Include keyword for scene files. Allows seperating large meshes from the scene.
+* Parser supports grouping tokens together by using quotes. This allows filenames with spaces.
+* Parser supports comments starting in the middle of a line (after keywords for example)
+* Removed point set surfaces
+* Introduce Mesh and MeshLight and got rid of Triangle/Triangle light and Vertex classes
+* Default glossy samples is now 4
+* Phong shader has customizable number of rays
+* Fixed sampling of adaptive lights through diffuse bounces. This improves path tracing performance.
+
+v0.05.1
+* Public release
+
+v0.05.0
+* Added ConstantShader
+* Added a path tracing gi engine
+* Bug fixes to parser around deprecated statements
+* More error checking before photon tracing
+* Added helper methods to Parser for colors, points and vectors
+* Better error checking in SceneParser
+* Introduced GiEngine class as a way to abstract the global illumination engine
+* Split parser out of SunflowAPI into SceneParser
+* Split non-image methods out of Display and into UserInterface
+* Multi-threaded photon tracing
+* deprecated options are now flagged as such by the parser
+* shader override feature
+* refactored photonmap package + new photon emission style
+* fixed potential bug in PhotonMap when rendering with multiple threads
+* synchronized TextureCache
+* imagePrepare method in Display
+* Javadoc Ant build file
+* Lights are now responsible for generating their own sampling pattern
+* Moved ConsoleDisplay into org.sunflow.core.display
+* Moved Display interface into the core package
+* Progressive rendering mode
+* Method in display drivers to fill area with a flat color
+* Programmable bucket ordering
+* Added KDTree intersection accelerator
+* Added TriangleFilter
+* Added BlackmanHarrisFilter
+* Added SincFilter
+* Added LanczosFilter
+* Added filter keyword to scene format
+* Made the sigma sampling table as large as the maximum resolution (16k)
+* Moved the case for light facing away from geometric normal into the light server
+* Inverted bucket order so first bucket start in the upper left corner of the image
+* Adaptive sampling for light sources (experimental - disabled for now)
+* Console display can now show preview window if no filename is given
+* Moved to Java 5, made all appropriate containers parameterized
+* Fix for percentage display on large tasks in ConsoleDisplay
+* Added low memory FlatTriangle for large triangle meshes
+* Moved .sc file parser into api
+* Removed RenderOptions class, merged all settings into light server
+* Improved DOF lens sampling - concentric map disk sampling
+* Moved TriMesh code into core, native support for large triangle meshes
+* Computation of tangent vectors for spheres
+* Added storage for a surface orthonormal basis inside RenderState
+* Implemented Ward BRDF shader
+* GUI now dims the previous image when re-rendering an image of the same resolution
+* Synchronized writes of tile regions to Display
+* Added preview of tile region before rendering the tile
+* Added SphericalCamera to parser
+* Added ShinyDiffuseShader, a combination of diffuse and perfect mirror shader
+* Precomputed exponents for RGBE decompression
+* Corrected flipping of HDR images on load
+* Added options to lock samples inside IBL
+* Moved shadow computations outside the shader, this simplifies the shader API a little
+* Changed LightSample to use a linked list
+* Switched QMC computations back to doubles as well as all sampling operations
+* Added optimized calculation of base 2 halton points
+* Added other radical inversion methods to QMC class
+* ImageBasedLight: improved sampling using the histogram technique presented on the PBRT webpage
+* Fixed internal reflection issue on glass shader
+* ImageBasedLight: infinite sphere surrounding scene which can be mapped with angular probes or lon/lat environment maps
+* .hdr image loading
+* Added option for picking intersection accelerator in api and in .sc file format
+* Fix to irradiance caching when number of samples is 0 (cache disabled)
+* Cornell box primitive
+* RainbowTest for motion blur
+* Moving camera
+* Thinlens camera
+* Depth of field and motion blur super sampling
+* Added Re-open option to GUI to quickly reload the same scene for tweaking
+* Fix to final gather QMC - was missing instance number
+* Fix to BVH for infinite extent geometry
+* Removed path tracing shader and traceDiffuse call in LightServer
+* Image filtering with programable filters
+* Made main bucket rendering multi-threaded
+* Made light samples a parameter of each individual light
+* Added gamma correction option in GUI
+* Fixed thread synchronization issue with cancel dialog in GUI
+* Moved shader methods into RenderState
+* Changed Shader an interface for easier integration with third party software
+* Timer class for better time display in statistics
+* ProgressDisplay class renamed to Display
+* Display driver interface - Scene no longer stores output bitmap
+* Hilbert tile scan order
+* Arbitrary image resolution (not rounded to step sizes)
+* Custom tile sizes and bug fixes to tile-rendering
+* SunflowAPI frontend for scene creation
+* Spherical camera shader
+* Menger sponge example using cube grid
+* Added cube grid primitive
+* Large mesh rendering example
+* Added maximum distance option for ambient occlusion computation
+
+v0.04.0
+* Fixed light server info display when using photon grids
+* Bug fix in Vector3.encode
+* Rewrote UniformGrid accelerator
+* Switch from double to float throughout the code to save memory
+* Faster ray/triangle intersection
+* Experimental point cloud tracing
+* BVH acceleration structure
+
+v0.03.0
+* Experimental photon grid algorithm
+* Path tracing shader
+* Glossy phong shader
+* Fully deterministic rendering (no more calls to Math.random()) - removed unused QMC sequence code
+* Ambient occlusion shader
+* Adaptive over and under sampling
+
+v0.02.2
+* Added scene format description to README
+* Changed Color class to use doubles instead of floats
+* Moved light sampling book-keeping into RenderState instead of LightServer
+* Seperated out PhotonMap class into GlobalPhotonMap and CausticPhotonMap
+* Reduced memory usage in global photon map after irradiance computation
+* Reduced memory usage in Bitmap class
+* Fixed variance calculation on adaptive AA
+* Added madd (multiply and add) operator to Color class
+* Irradiance Gradients
+* Changed QMC sequence interface to include multi-dimensional sequences.
+
+v0.02.1
+* Initial public release

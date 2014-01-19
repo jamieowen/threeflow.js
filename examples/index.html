@@ -1,0 +1,26 @@
+<!doctype html>
+
+<html>
+  <head>
+    <title>example</title>
+    <script src="js/three.js"></script>
+    <script src="js/threeflow.js"></script>
+    <script>
+      var initialise = function()
+      {
+        console.log("initialise");
+        console.log(THREE);
+        console.log(THREE.SunflowRenderer);
+
+        var scene = new THREE.Scene()
+        var renderer = new THREE.SunflowRenderer()
+
+      }
+
+    </script>
+  </head>
+  <body onload="initialise();">
+
+
+  </body>
+</html>

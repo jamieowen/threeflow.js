@@ -3,24 +3,223 @@
 <html>
   <head>
     <title>example</title>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/three.js"></script>
+    <script src="js/TrackballControls.js"></script>
     <script src="js/threeflow.js"></script>
     <script>
       var initialise = function()
       {
-        console.log("initialise");
-        console.log(THREE);
-        console.log(THREE.SunflowRenderer);
+        var scenes          = createScenes();
+        var currentScene    = null;
 
-        var scene = new THREE.Scene()
-        var renderer = new THREE.SunflowRenderer()
+        var sunflowRenderer = new THREE.SunflowRenderer();
+        sunflowRenderer.connect();
 
+        var renderer = new THREE.WebGLRenderer({antialias:true});
+        renderer.setSize(window.innerWidth,window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        var camera = new THREE.PerspectiveCamera(50,window.innerWidth/window.innerHeight,1,10000);
+        camera.position.set(0,500,500);
+        camera.lookAt( new THREE.Vector3(0,0,0) );
+
+        var controls = new THREE.TrackballControls(camera);
+
+        var render = function()
+        {
+            requestAnimationFrame(render);
+            controls.update();
+            renderer.render(currentScene,camera);
+        }
+
+        var setScene = function(index)
+        {
+            currentScene = scenes[index];
+            currentScene.add(camera);
+        }
+
+        var onRenderClick = function( event ){
+            event.preventDefault();
+            sunflowRenderer.render(currentScene,camera,window.innerWidth,window.innerHeight);
+        }
+
+        document.getElementById("renderButton").addEventListener( "click", onRenderClick );
+
+        setScene(0);
+        render();
+      }
+
+
+      var createScenes = function()
+      {
+        var scenes = [];
+
+        var scene = new THREE.Scene();
+        var ix,iz;
+        var size = 5;
+        var radius = 50;
+        var spacing = radius*3;
+
+        // Material Spheres Scene.
+        var material = new THREE.MeshBasicMaterial({color:0xff0000});
+        var geom = new THREE.PlaneGeometry(size*spacing*2,size*spacing*2);
+        var mesh = new THREE.Mesh(geom,material);
+        mesh.rotation.x = Math.PI/2;
+        mesh.position.y = -radius;
+        scene.add(mesh);
+
+        geom = new THREE.SphereGeometry(radius);
+
+        for( ix = 0; ix<size;ix++)
+        {
+            for(iz = 0; iz<size; iz++){
+                material = new THREE.MeshBasicMaterial( {color:0xff0000} );
+                mesh = new THREE.Mesh( geom, material );
+                mesh.position.x = ( ix*spacing ) - ((spacing*(size-1))/2);
+                mesh.position.z = ( iz*spacing ) - ((spacing*(size-1))/2);
+                scene.add( mesh );
+            }
+        }
+        scenes.push(scene);
+
+        return scenes;
       }
 
     </script>
+
+     <script id="scCornellBox" type="text/sunflow">
+         image {
+             resolution 800 600
+             aa 0 2
+             filter gaussian
+         }
+
+         trace-depths {
+             diff 4
+             refl 3
+             refr 2
+         }
+
+         photons {
+             caustics 1000000 kd 100 0.5
+         }
+
+
+         % uncomment this block and comment the following GI block to switch gi engines
+
+         /*
+         gi {
+             type irr-cache
+             samples 512
+             tolerance 0.01
+             spacing 0.05 5.0
+             % comment the following line to use path tracing for secondary bounces
+             global   1000000 grid 100 0.75
+         }
+         */
+
+
+         gi {
+             type igi
+             samples 64         % number of virtual photons per set
+             sets 1             % number of sets (increase this to translate shadow boundaries into noise)
+             b 0.00003          % bias - decrease this values until bright spots dissapear
+             bias-samples 0     % set this >0 to make the algorithm unbiased
+         }
+
+         shader {
+             name debug_caustics
+             type view-caustics
+         }
+
+         shader {
+             name debug_globals
+             type view-global
+         }
+
+         shader {
+             name debug_gi
+             type view-irradiance
+         }
+
+         %% use these to view the effect of the individual gi components
+         % override debug_caustics false
+         % override debug_globals false
+         % override debug_gi false
+
+
+         camera {
+             type pinhole
+             eye    0 -205 50
+             target 0 0 50
+             up     0 0 1
+             fov    45
+             aspect 1.333333
+         }
+
+         shader {
+             name Grey
+             type diffuse
+             diff 0.7 0.7 0.7
+         }
+
+         shader {
+             name Blue
+             type diffuse
+             diff 0.25 0.25 0.8
+         }
+
+         shader {
+             name Red
+             type diffuse
+             diff 0.8 0.25 0.25
+         }
+
+         shader {
+             name Mirror
+             type mirror
+             refl 0.7 0.7 0.7
+         }
+
+         shader {
+             name Glass
+             type glass
+             eta 1.6
+             color 1 1 1
+         }
+
+         object {
+             shader none
+             type cornellbox
+             corner0 -60 -60 0
+             corner1  60  60 100
+             left    0.80 0.25 0.25
+             right   0.25 0.25 0.80
+             top     0.70 0.70 0.70
+             bottom  0.70 0.70 0.70
+             back    0.70 0.70 0.70
+             emit    15 15 15
+             samples 32
+         }
+
+         object {
+             shader Mirror
+             type sphere
+             c -30 30 20
+             r 20
+         }
+
+         object {
+             shader Glass
+             type sphere
+             c 28 2 20
+             r 20
+         }
+
+     </script>
   </head>
   <body onload="initialise();">
-
-
+    <button id="renderButton" style="position:absolute;z-index:100;">Render</button>
   </body>
 </html>

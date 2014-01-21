@@ -20,7 +20,7 @@
         renderer.setSize(window.innerWidth,window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        var camera = new THREE.PerspectiveCamera(50,window.innerWidth/window.innerHeight,1,10000);
+        var camera = new THREE.PerspectiveCamera(35,window.innerWidth/window.innerHeight,1,10000);
         camera.position.set(0,500,500);
         camera.lookAt( new THREE.Vector3(0,0,0) );
 
@@ -62,19 +62,25 @@
         var spacing = radius*3;
 
         // Material Spheres Scene.
-        var material = new THREE.MeshBasicMaterial({color:0xff0000});
+        var material = new THREE.MeshLambertMaterial({color:0x112299,ambient:0xffffff,side:THREE.DoubleSide,shading:THREE.FlatShading});
         var geom = new THREE.PlaneGeometry(size*spacing*2,size*spacing*2);
         var mesh = new THREE.Mesh(geom,material);
         mesh.rotation.x = Math.PI/2;
-        mesh.position.y = -radius;
+        mesh.position.y = -(radius*2);
         scene.add(mesh);
+
+        //var ambient = new THREE.AmbientLight(0x333333);
+        //scene.add(ambient);
+        var light = new THREE.PointLight(0xffffff, 1, 10000);
+        light.position.set(500,500,500);
+        scene.add(light);
 
         geom = new THREE.SphereGeometry(radius);
 
         for( ix = 0; ix<size;ix++)
         {
             for(iz = 0; iz<size; iz++){
-                material = new THREE.MeshBasicMaterial( {color:0xff0000} );
+                material = new THREE.MeshLambertMaterial( {color:0xaa9900,ambient:0x000000,shading:THREE.FlatShading} );
                 mesh = new THREE.Mesh( geom, material );
                 mesh.position.x = ( ix*spacing ) - ((spacing*(size-1))/2);
                 mesh.position.z = ( iz*spacing ) - ((spacing*(size-1))/2);

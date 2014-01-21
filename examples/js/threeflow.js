@@ -163,7 +163,7 @@
         scContents += '  eye ' + ScExporter.exportVector(camera.position) + '\n';
         scContents += '  target ' + ScExporter.exportVector(camera.rotation) + '\n';
         scContents += '  up ' + ScExporter.exportVector(camera.up) + "\n";
-        scContents += '  fov ' + (camera.fov + 50) + '\n';
+        scContents += '  fov ' + 59. + '\n';
         scContents += '  aspect ' + camera.aspect + '\n';
         scContents += '}\n\n';
       } else {
@@ -187,25 +187,88 @@
     };
 
     ScExporter.exportObjects = function(index) {
-      var mesh, scContents;
+      var face, geometry, mesh, scContents, vertex, _i, _j, _len, _len1, _ref, _ref1;
       scContents = '';
+      for (geometry in index.geometries) {
+        geometry = index.geometries[geometry];
+        scContents += 'object {\n';
+        scContents += '  noinstance\n';
+        scContents += '  type generic-mesh\n';
+        scContents += '  name ' + geometry.uuid + '\n';
+        scContents += '  points ' + geometry.vertices.length + '\n';
+        _ref = geometry.vertices;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          vertex = _ref[_i];
+          scContents += '    ' + ScExporter.exportVector(vertex) + '\n';
+        }
+        scContents += '  triangles ' + geometry.faces.length + '\n';
+        _ref1 = geometry.faces;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          face = _ref1[_j];
+          scContents += '    ' + ScExporter.exportFace(face) + '\n';
+        }
+        scContents += '  normals none\n';
+        scContents += '  uvs none\n';
+        scContents += '}\n\n';
+      }
       for (mesh in index.meshes) {
         mesh = index.meshes[mesh];
-        if (mesh.geometry instanceof THREE.SphereGeometry) {
-          scContents += 'object {\n';
-          scContents += '  shader ' + mesh.material.uuid + '\n';
-          scContents += '  type sphere\n';
-          scContents += '  name ' + mesh.uuid + '\n';
-          scContents += '  c ' + ScExporter.exportVector(mesh.position) + '\n';
-          scContents += '  r ' + mesh.geometry.radius + '\n';
-          scContents += '}\n\n';
-        }
+        /*
+        if mesh.geometry instanceof THREE.SphereGeometry
+          scContents += 'object {\n'
+          scContents += '  shader ' + mesh.material.uuid + '\n'
+          scContents += '  type sphere\n'
+          scContents += '  name ' + mesh.uuid + '\n'
+          scContents += '  c ' + ScExporter.exportVector(mesh.position) + '\n'
+          scContents += '  r ' + mesh.geometry.radius + '\n'
+          scContents += '}\n\n'
+        else
+        */
+
+        scContents += 'instance {\n';
+        scContents += '  name ' + mesh.uuid + '\n';
+        scContents += '  geometry ' + mesh.geometry.uuid + '\n';
+        scContents += ScExporter.exportTransform(mesh);
+        scContents += '  shader ' + mesh.material.uuid + '\n';
+        scContents += '}\n\n';
       }
       return scContents;
     };
 
     ScExporter.exportVector = function(vector) {
       return vector.x + " " + vector.y + " " + vector.z;
+    };
+
+    ScExporter.exportFace = function(face) {
+      return face.a + " " + face.b + " " + face.c;
+    };
+
+    ScExporter.exportTransform = function(object3d) {
+      var scContents, toDEGREES;
+      toDEGREES = 180 / Math.PI;
+      scContents = '';
+      scContents += '  transform {\n';
+      scContents += '    translate ' + ScExporter.exportVector(object3d.position) + '\n';
+      if (object3d.rotation.x !== 0) {
+        scContents += '    rotatex ' + object3d.rotation.x * toDEGREES + '\n';
+      }
+      if (object3d.rotation.y !== 0) {
+        scContents += '    rotatey ' + object3d.rotation.y * toDEGREES + '\n';
+      }
+      if (object3d.rotation.z !== 0) {
+        scContents += '    rotatez ' + object3d.rotation.z * toDEGREES + '\n';
+      }
+      if (object3d.scale.x !== 1) {
+        scContents += '    scalex ' + object3d.scale.x + '\n';
+      }
+      if (object3d.scale.y !== 1) {
+        scContents += '    scaley ' + object3d.scale.y + '\n';
+      }
+      if (object3d.scale.z !== 1) {
+        scContents += '    scalez ' + object3d.scale.z + '\n';
+      }
+      scContents += '  }\n';
+      return scContents;
     };
 
     ScExporter.exportColor = function(color) {

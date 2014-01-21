@@ -85,7 +85,7 @@ class ScExporter
       scContents += '  target ' + ScExporter.exportVector(camera.rotation) + '\n'
       #scContents += '  target ' + ScExporter.exportVector( new THREE.Vector3(0,0,0) ) + '\n'
       scContents += '  up ' + ScExporter.exportVector(camera.up) + "\n"
-      scContents += '  fov ' + ( camera.fov + 50 ) + '\n'
+      scContents += '  fov ' + ( 59 ) + '\n'
       scContents += '  aspect ' + camera.aspect + '\n'
       scContents += '}\n\n'
     else
@@ -108,8 +108,31 @@ class ScExporter
 
   @exportObjects:(index)->
     scContents = ''
+
+    # create generic meshes for use with object instancing
+    for geometry of index.geometries
+      geometry = index.geometries[geometry]
+      scContents += 'object {\n'
+      scContents += '  noinstance\n'
+      #scContents += '  shader none\n'
+      scContents += '  type generic-mesh\n'
+      scContents += '  name ' + geometry.uuid + '\n'
+      scContents += '  points ' + geometry.vertices.length + '\n'
+      for vertex in geometry.vertices
+        scContents += '    ' + ScExporter.exportVector(vertex) + '\n'
+      scContents += '  triangles ' + geometry.faces.length + '\n'
+      for face in geometry.faces
+        scContents += '    ' + ScExporter.exportFace(face) + '\n'
+      # TODO: normals and uvs.
+      scContents += '  normals none\n'
+      scContents += '  uvs none\n'
+      scContents += '}\n\n'
+
     for mesh of index.meshes
       mesh = index.meshes[mesh]
+
+      # handle THREE primitives and map to sunflow primitives.
+      ###
       if mesh.geometry instanceof THREE.SphereGeometry
         scContents += 'object {\n'
         scContents += '  shader ' + mesh.material.uuid + '\n'
@@ -118,11 +141,55 @@ class ScExporter
         scContents += '  c ' + ScExporter.exportVector(mesh.position) + '\n'
         scContents += '  r ' + mesh.geometry.radius + '\n'
         scContents += '}\n\n'
+      else
+      ###
+
+      # Handle mesh as custom geometry via sunflow instancing.
+      scContents += 'instance {\n'
+      scContents += '  name ' + mesh.uuid + '\n'
+      scContents += '  geometry ' + mesh.geometry.uuid + '\n'
+      scContents += ScExporter.exportTransform mesh
+      scContents += '  shader ' + mesh.material.uuid + '\n'
+      #scContents += '  modifier \n'
+      scContents += '}\n\n'
+
 
     scContents
 
   @exportVector:(vector)->
     vector.x + " " + vector.y + " " + vector.z
+
+  @exportFace:(face)->
+    face.a + " " + face.b + " " + face.c
+
+  @exportTransform:(object3d)->
+    toDEGREES = 180/Math.PI
+    scContents = ''
+    scContents += '  transform {\n'
+    scContents += '    translate ' + ScExporter.exportVector(object3d.position) + '\n'
+
+    if object3d.rotation.x isnt 0
+      scContents += '    rotatex ' + object3d.rotation.x * toDEGREES + '\n'
+
+    if object3d.rotation.y isnt 0
+      scContents += '    rotatey ' + object3d.rotation.y * toDEGREES + '\n'
+
+    if object3d.rotation.z isnt 0
+      scContents += '    rotatez ' + object3d.rotation.z * toDEGREES + '\n'
+
+    if object3d.scale.x isnt 1
+      scContents += '    scalex ' + object3d.scale.x + '\n'
+
+    if object3d.scale.y isnt 1
+      scContents += '    scaley ' + object3d.scale.y + '\n'
+
+    if object3d.scale.z isnt 1
+      scContents += '    scalez ' + object3d.scale.z + '\n'
+
+    scContents += '  }\n'
+
+    scContents
+
 
   @exportColor:(color)->
     '{ "sRGB nonlinear" ' + color.r + ' ' + color.g + ' ' + color.b + ' }'

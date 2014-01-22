@@ -25,7 +25,7 @@
         camera.position.set(0,500,500);
         camera.lookAt( new THREE.Vector3(0,0,0) );
 
-        var controls = new THREE.TrackballControls(camera);
+        var controls = new THREE.TrackballControls(camera,renderer.domElement);
 
         var render = function()
         {

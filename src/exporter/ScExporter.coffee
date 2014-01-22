@@ -166,7 +166,7 @@ class ScExporter
     scContents = ''
     scContents += '  transform col'
 
-    for element in object3d.matrix.elements
+    for element in object3d.matrixWorld.elements
       scContents += ' ' + element
 
     scContents += '\n'

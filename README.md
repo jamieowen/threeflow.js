@@ -6,10 +6,10 @@ Roadmap
 
 ### General Scene Support
 
-1. Basic Scene File Export *done*
-2. Local Transforms *done*
+1. Basic Scene File Export **done**
+2. Local Transforms **done**
 3. World Transforms
-4. Object Instancing *done*
+4. Object Instancing **done**
 5. Sunflow Primitives
 6. Color Spaces?
 

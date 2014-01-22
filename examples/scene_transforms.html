@@ -1,0 +1,83 @@
+<!doctype html>
+
+<html>
+<head>
+    <title>scene_transforms</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/vendor/three.js"></script>
+    <script src="js/vendor/dat.gui.js"></script>
+    <script src="js/vendor/TrackballControls.js"></script>
+    <script src="js/threeflow.js"></script>
+    <script>
+        var init = function()
+        {
+            // Scene
+            // Nested objects to test matrix transforms.
+
+            var scene = new THREE.Scene();
+            var geometry = new THREE.SphereGeometry( 20 );
+            var material = new THREE.MeshLambertMaterial({color:0x112299,ambient:0xffffff,side:THREE.DoubleSide,shading:THREE.FlatShading});
+            var sphere = new THREE.Mesh( geometry, material );
+            scene.add( sphere );
+
+            // recursive method to generate spheres wrapped around spheres..
+            var wrapSphere = function(sphere,scale,count,axes,axesOffset,depth,maxDepth){
+                if( depth === maxDepth )
+                    return;
+
+                var newSphere,step;
+                step = (Math.PI*2)/count;
+                for( var i = 0; i<count; i++ ){
+                    newSphere = new THREE.Mesh(geometry,material);
+                    newSphere.position.x = Math.cos(i*step)*geometry.radius;
+                    newSphere.position.y = Math.sin(i*step)*geometry.radius;
+                    newSphere.scale.set(scale,scale,scale);
+                    sphere.add( newSphere );
+
+                    wrapSphere( newSphere,scale,count,axes,axesOffset+1,depth+1,maxDepth);
+                }
+            }
+
+            wrapSphere( sphere,.75,5,["x","y","z"],0,0,3);
+
+            var sunflowRenderer = new THREE.SunflowRenderer();
+            sunflowRenderer.connect();
+
+            var light = new THREE.PointLight(0xffffff, 1, 10000);
+            light.position.set(500,500,500);
+            scene.add(light);
+
+            var renderer = new THREE.WebGLRenderer({antialias:true});
+            renderer.setSize(window.innerWidth,window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            var camera = new THREE.PerspectiveCamera(35,window.innerWidth/window.innerHeight,1,10000);
+            camera.position.set(0,500,500);
+            camera.lookAt( new THREE.Vector3(0,0,0) );
+
+            var controls = new THREE.TrackballControls(camera);
+
+            var render = function()
+            {
+                requestAnimationFrame(render);
+                controls.update();
+                renderer.render(scene,camera);
+            }
+
+
+
+            var onRenderClick = function( event ){
+                event.preventDefault();
+                sunflowRenderer.render(scene,camera,window.innerWidth,window.innerHeight);
+            }
+
+            document.getElementById("renderButton").addEventListener( "click", onRenderClick );
+
+            render();
+        }
+    </script>
+</head>
+<body onload="init();">
+<button id="renderButton" style="position:absolute;z-index:100;">Render</button>
+</body>
+</html>

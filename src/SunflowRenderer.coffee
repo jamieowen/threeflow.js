@@ -17,6 +17,7 @@ THREE.SunflowRenderer = class SunflowRenderer
     @rendering = false
 
     @imageSettings =
+      enabled: true
       resolutionX: 800
       resolutionY: 600
       antialiasMin: 0
@@ -34,16 +35,21 @@ THREE.SunflowRenderer = class SunflowRenderer
       refraction: 4
 
     @causticsSettings =
-      @enabled: false
-      @photons: 10000
-      @kdEstimate: 100
-      @kdRadius: 0.5
+      enabled: false
+      photons: 10000
+      kdEstimate: 100
+      kdRadius: 0.5
 
     # TODO: GI Type settings.
     @giSettings =
+      enabled: false
       type: THREE.SunflowRenderer.GI_TYPES[0]
       samples: 64
       sets: 1
+
+    @gui = new DatGUI @
+    @gui.create()
+    console.log @gui
 
 
   connect:()->

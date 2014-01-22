@@ -3,6 +3,10 @@ THREE = window.THREE || {}
 
 THREE.SunflowRenderer = class SunflowRenderer
 
+  # http://wiki.panotools.org/PanoTools_Anti_Aliasing_Filters
+  @IMAGE_FILTERS = ['box','triangle','gaussian','mitchell','catmull-rom','blackman-harris','sinc','lanczos','ospline']
+  @GI_TYPES = ["igi"]
+
   constructor:(options)->
     options = options || {}
 
@@ -11,6 +15,35 @@ THREE.SunflowRenderer = class SunflowRenderer
 
     @connected = false
     @rendering = false
+
+    @imageSettings =
+      resolutionX: 800
+      resolutionY: 600
+      antialiasMin: 0
+      antialiasMax: 2
+      samples: 4
+      contrast: 0.1
+      filter: THREE.SunflowRenderer.IMAGE_FILTERS[0]
+      jitter: false
+      # TODO: bucket size/order ?
+
+    @traceDepthsSettings =
+      enabled: false
+      diffusion: 1
+      reflection: 4
+      refraction: 4
+
+    @causticsSettings =
+      @enabled: false
+      @photons: 10000
+      @kdEstimate: 100
+      @kdRadius: 0.5
+
+    # TODO: GI Type settings.
+    @giSettings =
+      type: THREE.SunflowRenderer.GI_TYPES[0]
+      samples: 64
+      sets: 1
 
 
   connect:()->

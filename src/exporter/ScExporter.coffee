@@ -163,31 +163,13 @@ class ScExporter
     face.a + " " + face.b + " " + face.c
 
   @exportTransform:(object3d)->
-    toDEGREES = 180/Math.PI
     scContents = ''
-    scContents += '  transform {\n'
-    scContents += '    translate ' + ScExporter.exportVector(object3d.position) + '\n'
+    scContents += '  transform col'
 
-    if object3d.rotation.x isnt 0
-      scContents += '    rotatex ' + object3d.rotation.x * toDEGREES + '\n'
+    for element in object3d.matrix.elements
+      scContents += ' ' + element
 
-    if object3d.rotation.y isnt 0
-      scContents += '    rotatey ' + object3d.rotation.y * toDEGREES + '\n'
-
-    if object3d.rotation.z isnt 0
-      scContents += '    rotatez ' + object3d.rotation.z * toDEGREES + '\n'
-
-    if object3d.scale.x isnt 1
-      scContents += '    scalex ' + object3d.scale.x + '\n'
-
-    if object3d.scale.y isnt 1
-      scContents += '    scaley ' + object3d.scale.y + '\n'
-
-    if object3d.scale.z isnt 1
-      scContents += '    scalez ' + object3d.scale.z + '\n'
-
-    scContents += '  }\n'
-
+    scContents += '\n'
     scContents
 
 

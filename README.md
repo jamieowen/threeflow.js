@@ -8,7 +8,7 @@ Roadmap
 
 1. Basic Scene File Export *done*
 2. Local Transforms *done*
-3  World Transforms
+3. World Transforms
 4. Object Instancing *done*
 5. Sunflow Primitives
 6. Color Spaces?
@@ -24,7 +24,7 @@ Roadmap
 7. Alpha Channels
 8. Predefined Settings.
 
-# Command Line Options
+### Command Line Options
 1. No GUI
 2. see docs...
 

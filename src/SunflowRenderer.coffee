@@ -15,6 +15,8 @@ THREE.SunflowRenderer = class SunflowRenderer
     @port = options.port || 3000
     @host = options.host || "http://localhost"
 
+    @exporter = new Exporter()
+
     @connected = false
     @rendering = false
 

@@ -10,7 +10,11 @@
   THREE.SunflowRenderer = SunflowRenderer = (function() {
     SunflowRenderer.IMAGE_FILTERS = ['box', 'triangle', 'gaussian', 'mitchell', 'catmull-rom', 'blackman-harris', 'sinc', 'lanczos', 'ospline'];
 
-    SunflowRenderer.GI_TYPES = ["igi"];
+    SunflowRenderer.GI_TYPES = ['igi', 'irr-cache', 'path', 'ambocc', 'fake'];
+
+    SunflowRenderer.IRR_CACHE_MAP_TYPES = ['grid', 'path'];
+
+    SunflowRenderer.BUCKET_ORDERS = ['hilbert', 'spiral', 'column', 'row', 'diagonal', 'random'];
 
     function SunflowRenderer(options) {
       this.onRenderComplete = __bind(this.onRenderComplete, this);
@@ -31,7 +35,10 @@
         samples: 4,
         contrast: 0.1,
         filter: THREE.SunflowRenderer.IMAGE_FILTERS[0],
-        jitter: false
+        jitter: false,
+        bucketSize: 48,
+        bucketOrder: THREE.SunflowRenderer.BUCKET_ORDERS[0],
+        bucketOrderReverse: false
       };
       this.traceDepthsSettings = {
         enabled: false,
@@ -45,15 +52,38 @@
         kdEstimate: 100,
         kdRadius: 0.5
       };
-      this.giSettings = {
-        enabled: false,
-        type: THREE.SunflowRenderer.GI_TYPES[0],
+      this.giIgiSettings = {
         samples: 64,
-        sets: 1
+        sets: 1,
+        bias: 0.01,
+        biasSamples: 0
+      };
+      this.giIrrCacheSettings = {
+        samples: 512,
+        tolerance: 0.01,
+        spacingMin: 0.05,
+        spacingMax: 5.0,
+        globalEnabled: false,
+        globalPhotons: 10000,
+        globalMap: THREE.SunflowRenderer.IRR_CACHE_MAP_TYPES[0],
+        globalEstimate: 100,
+        globalRadius: 0.75
+      };
+      this.giPathSettings = {
+        samples: 32
+      };
+      this.giAmbOccSettings = {
+        samples: 32,
+        bright: 0xffffff,
+        dark: 0x000000,
+        maxDistance: 3.0
+      };
+      this.giFakeSettings = {
+        up: new THREE.Vector3(),
+        sky: 0x000000,
+        ground: 0xffffff
       };
       this.gui = new DatGUI(this);
-      this.gui.create();
-      console.log(this.gui);
     }
 
     SunflowRenderer.prototype.connect = function() {
@@ -318,12 +348,13 @@
   DatGUI = (function() {
     function DatGUI(renderer) {
       this.renderer = renderer;
+      this.create();
     }
 
     DatGUI.prototype.create = function() {
       this.gui = new dat.GUI();
       this.imageFolder = this.gui.addFolder("Image Settings");
-      this.imageFolder.add(this.renderer.imageSettings, 'resolutionX').name("TEST");
+      this.imageFolder.add(this.renderer.imageSettings, 'resolutionX');
       this.imageFolder.add(this.renderer.imageSettings, 'resolutionY');
       this.imageFolder.add(this.renderer.imageSettings, 'antialiasMin');
       this.imageFolder.add(this.renderer.imageSettings, 'antialiasMax');
@@ -341,11 +372,6 @@
       this.causticsFolder.add(this.renderer.causticsSettings, 'photons');
       this.causticsFolder.add(this.renderer.causticsSettings, 'kdEstimate');
       this.causticsFolder.add(this.renderer.causticsSettings, 'kdRadius');
-      this.giFolder = this.gui.addFolder("Global Illumination");
-      this.giFolder.add(this.renderer.giSettings, 'enabled');
-      this.giFolder.add(this.renderer.giSettings, 'type', THREE.SunflowRenderer.GI_TYPES);
-      this.giFolder.add(this.renderer.giSettings, 'samples');
-      this.giFolder.add(this.renderer.giSettings, 'sets');
       return null;
     };
 

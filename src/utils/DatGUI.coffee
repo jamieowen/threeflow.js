@@ -1,11 +1,11 @@
 class DatGUI
   constructor:(@renderer)->
+    @create()
 
   create:()->
     @gui = new dat.GUI()
     @imageFolder = @gui.addFolder "Image Settings"
-    @imageFolder.add(@renderer.imageSettings,'resolutionX').name("TEST")
-
+    @imageFolder.add(@renderer.imageSettings,'resolutionX')
     @imageFolder.add @renderer.imageSettings,'resolutionY'
     @imageFolder.add @renderer.imageSettings,'antialiasMin'
     @imageFolder.add @renderer.imageSettings,'antialiasMax'
@@ -26,11 +26,11 @@ class DatGUI
     @causticsFolder.add @renderer.causticsSettings,'kdEstimate'
     @causticsFolder.add @renderer.causticsSettings,'kdRadius'
 
-    @giFolder = @gui.addFolder "Global Illumination"
-    @giFolder.add @renderer.giSettings,'enabled'
-    @giFolder.add @renderer.giSettings,'type',THREE.SunflowRenderer.GI_TYPES
-    @giFolder.add @renderer.giSettings,'samples'
-    @giFolder.add @renderer.giSettings,'sets'
+    #@giFolder = @gui.addFolder "Global Illumination"
+    #@giFolder.add @renderer.giSettings,'enabled'
+    #@giFolder.add @renderer.giSettings,'type',THREE.SunflowRenderer.GI_TYPES
+    #@giFolder.add @renderer.giSettings,'samples'
+    #@giFolder.add @renderer.giSettings,'sets'
 
     null
 

@@ -24,7 +24,6 @@ class ImageSettingsExporter extends BlockExporter
     super()
 
     @imageSettings =
-      enabled: true
       resolutionX: 800
       resolutionY: 600
       antialiasMin: 0
@@ -37,19 +36,43 @@ class ImageSettingsExporter extends BlockExporter
       bucketOrder: THREE.SunflowRenderer.BUCKET_ORDERS[0]
       bucketOrderReverse: false
 
-
-  handles:(object3d)->
-    return null
-
   settings:()->
     return @imageSettings
 
-  export:(object3d)->
+  addToIndex:(object3d)->
+    null
+
+  doTraverse:(object3d)->
+    true
+
+  # override.
+  # Determines if the
+  doTraverse:(object3d)->
+    throw new Error 'BlockExporter subclasses must override this method.'
+
+  exportBlock:()->
     result = ''
-    if enabled
-      result
+
+    result += 'image {\n'
+    result += '  resolution ' + @imageSettings.resolutionX + ' ' + @imageSettings.resolutionY + '\n'
+    result += '  aa ' + @imageSettings.antialiasMin + ' ' + @imageSettings.antialiasMax + '\n'
+    result += '  samples ' + @imageSettings.samples + '\n'
+    result += '  contrast ' + @imageSettings.contrast + '\n'
+    result += '  filter ' + @imageSettings.filter + '\n'
+    result += '  jitter ' + @imageSettings.jitter + '\n'
+
+    # format bucket options.
+    bucket = @imageSettings.bucketSize + ' '
+    if @imageSettings.bucketOrderReverse
+      bucket += '"reverse ' + @imageSettings.bucketOrder + '"'
+    else
+      bucket += @imageSettings.bucketOrder
+
+    result += '  bucket ' + bucket + '\n'
+    result += '}\n\n'
 
     return result
+
 
 
 

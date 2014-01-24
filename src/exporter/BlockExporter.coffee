@@ -20,7 +20,7 @@ class BlockExporter
 
   # override
   # Exports the final sunflow code block for the supplied object.
-  export:()->
+  exportBlock:()->
     throw new Error 'BlockExporter subclasses must override this method.'
 
 

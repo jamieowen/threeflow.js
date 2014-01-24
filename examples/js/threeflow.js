@@ -100,16 +100,12 @@
     };
 
     SunflowRenderer.prototype.render = function(scene, camera, width, height) {
-      var scContents;
       if (!this.connected) {
         throw new Error("[SunflowRenderer] Call connect() before rendering.");
       } else if (!this.rendering) {
         console.log("RENDER");
-        scContents = ScExporter["export"](scene, camera, width, height);
-        console.log(scContents);
-        this.socket.emit("render", {
-          scFile: scContents
-        });
+        this.exporter.indexScene(scene);
+        console.log(this.exporter.exportCode());
       } else {
         console.log("QUEUE?");
       }
@@ -156,7 +152,7 @@
       throw new Error('BlockExporter subclasses must override this method.');
     };
 
-    BlockExporter.prototype["export"] = function() {
+    BlockExporter.prototype.exportBlock = function() {
       throw new Error('BlockExporter subclasses must override this method.');
     };
 
@@ -192,7 +188,7 @@
           _ref1 = this.blockExporters;
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             blockExporter = _ref1[_j];
-            blockExporter.index(child);
+            blockExporter.addToIndex(child);
             doTraverse = doTraverse && blockExporter.doTraverse(child);
           }
           if (doTraverse) {
@@ -203,12 +199,32 @@
       return null;
     };
 
-    Exporter.prototype.exportSc = function() {
-      var blockExporter, result, _i, _len;
+    Exporter.prototype.render = function() {
+      var matrix;
+      matrix = new Matrix();
+      matrix.identity();
+      return traverse(scene, matrix);
+    };
+
+    Exporter.prototype.traverse = function(object3d) {
+      var child, _i, _len, _ref;
+      _ref = object3d.children;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        child = _ref[_i];
+        if (child.children.length) {
+          traverse(child);
+        }
+      }
+      return null;
+    };
+
+    Exporter.prototype.exportCode = function() {
+      var blockExporter, result, _i, _len, _ref;
       result = '';
-      for (_i = 0, _len = blockExporter.length; _i < _len; _i++) {
-        blockExporter = blockExporter[_i];
-        result += blockExporter["export"]();
+      _ref = this.blockExporters;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        blockExporter = _ref[_i];
+        result += blockExporter.exportBlock();
       }
       return result;
     };
@@ -227,7 +243,6 @@
     function ImageSettingsExporter() {
       ImageSettingsExporter.__super__.constructor.call(this);
       this.imageSettings = {
-        enabled: true,
         resolutionX: 800,
         resolutionY: 600,
         antialiasMin: 0,
@@ -242,20 +257,40 @@
       };
     }
 
-    ImageSettingsExporter.prototype.handles = function(object3d) {
-      return null;
-    };
-
     ImageSettingsExporter.prototype.settings = function() {
       return this.imageSettings;
     };
 
-    ImageSettingsExporter.prototype["export"] = function(object3d) {
-      var result;
+    ImageSettingsExporter.prototype.addToIndex = function(object3d) {
+      return null;
+    };
+
+    ImageSettingsExporter.prototype.doTraverse = function(object3d) {
+      return true;
+    };
+
+    ImageSettingsExporter.prototype.doTraverse = function(object3d) {
+      throw new Error('BlockExporter subclasses must override this method.');
+    };
+
+    ImageSettingsExporter.prototype.exportBlock = function() {
+      var bucket, result;
       result = '';
-      if (enabled) {
-        result;
+      result += 'image {\n';
+      result += '  resolution ' + this.imageSettings.resolutionX + ' ' + this.imageSettings.resolutionY + '\n';
+      result += '  aa ' + this.imageSettings.antialiasMin + ' ' + this.imageSettings.antialiasMax + '\n';
+      result += '  samples ' + this.imageSettings.samples + '\n';
+      result += '  contrast ' + this.imageSettings.contrast + '\n';
+      result += '  filter ' + this.imageSettings.filter + '\n';
+      result += '  jitter ' + this.imageSettings.jitter + '\n';
+      bucket = this.imageSettings.bucketSize + ' ';
+      if (this.imageSettings.bucketOrderReverse) {
+        bucket += '"reverse ' + this.imageSettings.bucketOrder + '"';
+      } else {
+        bucket += this.imageSettings.bucketOrder;
       }
+      result += '  bucket ' + bucket + '\n';
+      result += '}\n\n';
       return result;
     };
 

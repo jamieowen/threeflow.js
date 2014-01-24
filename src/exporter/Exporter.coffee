@@ -41,7 +41,7 @@ class Exporter
         doTraverse = true
 
         for blockExporter in @blockExporters
-          blockExporter.index( child )
+          blockExporter.addToIndex( child )
           doTraverse = doTraverse and blockExporter.doTraverse( child )
 
         if doTraverse
@@ -49,12 +49,29 @@ class Exporter
 
     null
 
+  render:()->
 
-  exportSc:()->
+    matrix = new Matrix()
+    matrix.identity()
+
+    traverse( scene, matrix )
+
+
+
+  traverse:(object3d)->
+    for child in object3d.children
+      # do something.
+
+      if child.children.length
+        traverse child
+
+    null
+
+  exportCode:()->
     result = ''
 
-    for blockExporter in blockExporter
-      result += blockExporter.export()
+    for blockExporter in @blockExporters
+      result += blockExporter.exportBlock()
 
     return result
 

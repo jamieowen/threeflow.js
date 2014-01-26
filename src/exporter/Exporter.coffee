@@ -2,9 +2,6 @@
 class Exporter
 
   constructor:()->
-
-    console.log "New Exporter"
-
     # global exporter settings
     @exporterSettings =
       convertPrimitives: false
@@ -13,16 +10,16 @@ class Exporter
     @blockExporters = []
 
     # register block exporters.
-    @addBlockExporter new ImageSettingsExporter()
-    #@addBlockExporter new CausticsSettingsExporter()
-    #@addBlockExporter new GiSettingsExporter()
-    #@addBlockExporter new TraceDepthsExporter()
+    @addBlockExporter new ImageExporter()
+    @addBlockExporter new TraceDepthsExporter()
+    @addBlockExporter new CausticsExporter()
+    @addBlockExporter new GiExporter()
 
-    #@addBlockExporter new CamerasExporter()
-    #@addBlockExporter new LightsExporter()
-    #@addBlockExporter new MaterialsExporter()
-    #@addBlockExporter new GeometryExporter()
-    #@addBlockExporter new MeshExporter()
+    @addBlockExporter new CameraExporter()
+    @addBlockExporter new LightsExporter()
+    @addBlockExporter new MaterialsExporter()
+    @addBlockExporter new GeometryExporter()
+    @addBlockExporter new MeshExporter()
 
 
   addBlockExporter:(exporter)->
@@ -46,24 +43,6 @@ class Exporter
 
         if doTraverse
           @indexScene child
-
-    null
-
-  render:()->
-
-    matrix = new Matrix()
-    matrix.identity()
-
-    traverse( scene, matrix )
-
-
-
-  traverse:(object3d)->
-    for child in object3d.children
-      # do something.
-
-      if child.children.length
-        traverse child
 
     null
 

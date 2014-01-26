@@ -4,6 +4,33 @@ class DatGUI
 
   create:()->
     @gui = new dat.GUI()
+
+    @folderNameMap =
+      ImageExporter: "Image Settings"
+      TraceDepthsExporter: "Trace Depths"
+      CausticsExporter: "Caustics"
+      GiExporter: "Global Illumination"
+      CameraExporter: "Camera"
+      LightsExporter: "Lights"
+      MaterialsExporter: "Materials"
+      GeometryExporter: "Geometry"
+      MeshExporter:"Mesh"
+
+
+    for exporter in @renderer.exporter.blockExporters
+      if exporter instanceof GiExporter
+        folder = @gui.addFolder @folderNameMap[exporter.constructor.name]
+        folder.add exporter,'enabled'
+        folder.add exporter,'type',GiExporter.TYPES
+
+      else
+        folder = @gui.addFolder @folderNameMap[exporter.constructor.name]
+        for prop of exporter.settings
+          folder.add exporter.settings, prop
+
+
+
+    ###
     @imageFolder = @gui.addFolder "Image Settings"
     @imageFolder.add(@renderer.imageSettings,'resolutionX')
     @imageFolder.add @renderer.imageSettings,'resolutionY'
@@ -14,23 +41,8 @@ class DatGUI
     @imageFolder.add @renderer.imageSettings,'filter', THREE.SunflowRenderer.IMAGE_FILTERS
     @imageFolder.add @renderer.imageSettings,'jitter'
 
-    @traceDepthsFolder = @gui.addFolder "Trace Depths"
-    @traceDepthsFolder.add @renderer.traceDepthsSettings,'enabled'
-    @traceDepthsFolder.add @renderer.traceDepthsSettings,'diffusion'
-    @traceDepthsFolder.add @renderer.traceDepthsSettings,'reflection'
-    @traceDepthsFolder.add @renderer.traceDepthsSettings,'refraction'
+    ###
 
-    @causticsFolder = @gui.addFolder "Caustics"
-    @causticsFolder.add @renderer.causticsSettings,'enabled'
-    @causticsFolder.add @renderer.causticsSettings,'photons'
-    @causticsFolder.add @renderer.causticsSettings,'kdEstimate'
-    @causticsFolder.add @renderer.causticsSettings,'kdRadius'
-
-    #@giFolder = @gui.addFolder "Global Illumination"
-    #@giFolder.add @renderer.giSettings,'enabled'
-    #@giFolder.add @renderer.giSettings,'type',THREE.SunflowRenderer.GI_TYPES
-    #@giFolder.add @renderer.giSettings,'samples'
-    #@giFolder.add @renderer.giSettings,'sets'
 
     null
 

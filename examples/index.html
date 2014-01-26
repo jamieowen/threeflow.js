@@ -81,7 +81,9 @@
         for( ix = 0; ix<size;ix++)
         {
             for(iz = 0; iz<size; iz++){
-                material = new THREE.MeshLambertMaterial( {color:0xaa9900,ambient:0x000000,shading:THREE.FlatShading} );
+                //material = new THREE.MeshLambertMaterial( {color:0xaa9900,ambient:0x000000,shading:THREE.FlatShading} );
+                //material = new THREE.MeshBasicMaterial( {color:0xaa9900} );
+                material = new THREE.SF.ConstantMaterial( {color:0xaa9900} );
                 mesh = new THREE.Mesh( geom, material );
                 mesh.position.x = ( ix*spacing ) - ((spacing*(size-1))/2);
                 mesh.position.z = ( iz*spacing ) - ((spacing*(size-1))/2);

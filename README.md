@@ -43,7 +43,8 @@ Roadmap
 
 ### Shaders
 
-**Note:** Needs testing and examples created.
+**Note** Needs testing and examples created.
+
 1. Constant Shader **done**
 2. Diffuse Shader **done**
 3. Phong Shader **done**

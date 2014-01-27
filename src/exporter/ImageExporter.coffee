@@ -13,13 +13,7 @@ class ImageExporter extends BlockExporter
     'lanczos'
     'ospline' ]
 
-  @BUCKET_ORDERS = [
-    'hilbert'
-    'spiral'
-    'column'
-    'row'
-    'diagonal'
-    'random' ]
+
 
   constructor:()->
     super()
@@ -33,10 +27,6 @@ class ImageExporter extends BlockExporter
       contrast: 0.1
       filter: ImageExporter.FILTERS[0]
       jitter: false
-      bucketSize: 48
-      bucketOrder: ImageExporter.BUCKET_ORDERS[0]
-      bucketOrderReverse: false
-
 
   addToIndex:(object3d)->
     null
@@ -54,15 +44,6 @@ class ImageExporter extends BlockExporter
     result += '  contrast ' + @settings.contrast + '\n'
     result += '  filter ' + @settings.filter + '\n'
     result += '  jitter ' + @settings.jitter + '\n'
-
-    # format bucket options.
-    bucket = @settings.bucketSize + ' '
-    if @settings.bucketOrderReverse
-      bucket += '"reverse ' + @settings.bucketOrder + '"'
-    else
-      bucket += @settings.bucketOrder
-
-    result += '  bucket ' + bucket + '\n'
     result += '}\n\n'
 
     return result

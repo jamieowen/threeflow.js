@@ -18,8 +18,6 @@ class BlockExporter
   exportBlock:()->
     throw new Error 'BlockExporter subclasses must override this method.'
 
-
-
   # helper methods
 
   exportColorTHREE:(color)->
@@ -33,6 +31,20 @@ class BlockExporter
     b = ( hex & 0xff ) / 255
 
     '{ "sRGB nonlinear" ' + r + ' ' + g + ' ' + b + ' }'
+
+  exportVector:(vector)->
+    vector.x + " " + vector.y + " " + vector.z
+
+  exportFace:(face)->
+    face.a + " " + face.b + " " + face.c
+
+  exportTransform:(object3d)->
+    result = ''
+
+    for element in object3d.matrixWorld.elements
+      result += ' ' + element
+
+    result    
 
 
 

@@ -6,7 +6,7 @@ class GiExporter extends BlockExporter
 
   constructor:()->
     @type = GiExporter.TYPES[0]
-    @enabled = true
+    @enabled = false
 
     @irrCacheSettings =
       samples: 512

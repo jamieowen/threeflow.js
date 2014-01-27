@@ -5,7 +5,7 @@ class CausticsExporter extends BlockExporter
     super()
 
     @settings =
-      enabled: true
+      enabled: false
       photons: 10000
       kdEstimate: 100
       kdRadius: 0.5

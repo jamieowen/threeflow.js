@@ -39,15 +39,15 @@ THREE.SunflowRenderer = class SunflowRenderer
     else if not @rendering
 
       console.log "RENDER"
-
       #scContents = document.getElementById("scCornellBox").innerHTML
       #scContents = ScExporter.export scene,camera,width,height
-      #console.log scContents
-      #@socket.emit "render",
-      #   scFile:scContents
-
       @exporter.indexScene scene
-      console.log @exporter.exportCode()
+      scContents = @exporter.exportCode()
+      #console.log scContents
+      @socket.emit "render",
+         scFile:scContents
+
+
 
     else
       console.log "QUEUE?"

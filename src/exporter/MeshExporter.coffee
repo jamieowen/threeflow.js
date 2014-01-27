@@ -7,7 +7,12 @@ class MeshExporter extends BlockExporter
     @settings =
       enabled: true
 
+    @meshIndex = {}
+
   addToIndex:(object3d)->
+    if object3d instanceof THREE.Mesh and not @meshIndex[object3d.uuid]
+      @meshIndex[object3d.uuid] = object3d
+
     null
 
   doTraverse:(object3d)->
@@ -19,7 +24,13 @@ class MeshExporter extends BlockExporter
     if not @settings.enabled
       return result
 
-    result += 'object{\n'
-    result += '}\n\n'
+    for uuid of @meshIndex
+      mesh = @meshIndex[uuid]
+      result += 'instance {\n'
+      result += '  name ' + mesh.uuid + '\n'
+      result += '  geometry ' + mesh.geometry.uuid + '\n'
+      result += '  transform col' + @exportTransform(mesh) + '\n'
+      result += '  shader ' + mesh.material.uuid + '\n'
+      result += '}\n\n'
 
     return result

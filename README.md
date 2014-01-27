@@ -38,7 +38,6 @@ Roadmap
 3. Sets **done**
 4. Bias **done**
 5. Bias Samples **done**
-
 6. Need to rewrite to include all GI types.
 
 ### Shaders

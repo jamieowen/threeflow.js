@@ -18,10 +18,13 @@
         sunflowRenderer.connect();
 
         var renderer = new THREE.WebGLRenderer({antialias:true});
-        renderer.setSize(window.innerWidth,window.innerHeight);
+        var width = 400;
+        var height = 400;
+        renderer.setSize(width,height);
         document.body.appendChild(renderer.domElement);
 
-        var camera = new THREE.PerspectiveCamera(35,window.innerWidth/window.innerHeight,1,10000);
+        var camera = new THREE.PerspectiveCamera(35,width/height,1,10000);
+
         camera.position.set(0,500,500);
         camera.lookAt( new THREE.Vector3(0,0,0) );
 
@@ -42,7 +45,7 @@
 
         var onRenderClick = function( event ){
             event.preventDefault();
-            sunflowRenderer.render(currentScene,camera,window.innerWidth,window.innerHeight);
+            sunflowRenderer.render(currentScene,camera,width,height);
         }
 
         document.getElementById("renderButton").addEventListener( "click", onRenderClick );
@@ -58,7 +61,7 @@
 
         var scene = new THREE.Scene();
         var ix,iz;
-        var size = 5;
+        var size = 3;
         var radius = 50;
         var spacing = radius*3;
 

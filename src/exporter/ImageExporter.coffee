@@ -19,12 +19,12 @@ class ImageExporter extends BlockExporter
     @settings =
       resolutionX: 800
       resolutionY: 600
-      antialiasMin: 0
-      antialiasMax: 2
-      samples: 4
+      antialiasMin: -1
+      antialiasMax: 1
+      samples: 2
       contrast: 0.1
       filter: ImageExporter.FILTERS[0]
-      jitter: false
+      jitter: true
 
   addToIndex:(object3d)->
     null

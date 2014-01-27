@@ -6,7 +6,6 @@ class GeometryExporter extends BlockExporter
 
     @settings =
       enabled: true
-      convertPrimitives: true
 
     @geometryIndex = {}
 

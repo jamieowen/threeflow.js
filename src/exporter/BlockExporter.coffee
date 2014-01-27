@@ -44,8 +44,14 @@ class BlockExporter
     for element in object3d.matrixWorld.elements
       result += ' ' + element
 
-    result    
+    result
 
+  exportTransformPosition:(object3d)->
+    result = ''
+    elements = object3d.matrixWorld.elements
+
+    result += elements[12] + ' ' + elements[13] + ' ' + elements[14]
+    result
 
 
 

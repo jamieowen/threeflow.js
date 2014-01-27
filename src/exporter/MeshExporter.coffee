@@ -6,6 +6,7 @@ class MeshExporter extends BlockExporter
 
     @settings =
       enabled: true
+      convertPrimitives: true
 
     @meshIndex = {}
 
@@ -26,11 +27,21 @@ class MeshExporter extends BlockExporter
 
     for uuid of @meshIndex
       mesh = @meshIndex[uuid]
-      result += 'instance {\n'
-      result += '  name ' + mesh.uuid + '\n'
-      result += '  geometry ' + mesh.geometry.uuid + '\n'
-      result += '  transform col' + @exportTransform(mesh) + '\n'
-      result += '  shader ' + mesh.material.uuid + '\n'
+      if @settings.convertPrimitives and mesh.geometry instanceof THREE.SphereGeometry
+        result += 'object {\n'
+        result += '  shader ' + mesh.material.uuid + '\n'
+        result += '  type sphere\n'
+        result += '  name ' + mesh.uuid + '\n'
+        result += '  c ' + @exportTransformPosition(mesh) + '\n'
+        result += '  r ' + mesh.geometry.radius + '\n'
+        #result += '  transform col' + @exportTransform(mesh) + '\n'
+      else
+        result += 'instance {\n'
+        result += '  name ' + mesh.uuid + '\n'
+        result += '  geometry ' + mesh.geometry.uuid + '\n'
+        result += '  transform col' + @exportTransform(mesh) + '\n'
+        result += '  shader ' + mesh.material.uuid + '\n'
+
       result += '}\n\n'
 
     return result

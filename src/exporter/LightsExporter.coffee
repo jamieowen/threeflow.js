@@ -8,16 +8,16 @@ class LightsExporter extends BlockExporter
       enabled: true
       sunskyEnabled: true
       sunskyUpX: 0
-      sunskyUpY: 0
-      sunskyUpZ: 1
+      sunskyUpY: 1
+      sunskyUpZ: 0
       sunskyEastX: 0
-      sunskyEastY: 1
-      sunskyEastZ: 0
-      sunskyDirX: 0.5
-      sunskyDirY: 0.2
-      sunskyDirZ: 0.8
-      sunskyTurbidity: 0.6
-      sunskySamples: 128
+      sunskyEastY: 0
+      sunskyEastZ: 1
+      sunskyDirX: 1
+      sunskyDirY: 1
+      sunskyDirZ: 1
+      sunskyTurbidity: 6
+      sunskySamples: 64
 
     @lightIndex = {}
 
@@ -42,7 +42,7 @@ class LightsExporter extends BlockExporter
       result += 'light {\n'
       result += '  type sunsky\n'
       result += '  up ' + @settings.sunskyUpX + ' ' + @settings.sunskyUpY + ' ' + @settings.sunskyUpZ + '\n'
-      result += '  east ' + @settings.sunskyUpX + ' ' + @settings.sunskyUpY + ' ' + @settings.sunskyUpZ + '\n'
+      result += '  east ' + @settings.sunskyEastX + ' ' + @settings.sunskyEastY + ' ' + @settings.sunskyEastZ + '\n'
       result += '  sundir ' + @settings.sunskyDirX + ' ' + @settings.sunskyDirY + ' ' + @settings.sunskyDirZ + '\n'
       result += '  turbidity ' + @settings.sunskyTurbidity + '\n'
       result += '  samples ' + @settings.sunskySamples + '\n'

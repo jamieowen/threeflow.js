@@ -512,16 +512,16 @@
         enabled: true,
         sunskyEnabled: true,
         sunskyUpX: 0,
-        sunskyUpY: 0,
-        sunskyUpZ: 1,
+        sunskyUpY: 1,
+        sunskyUpZ: 0,
         sunskyEastX: 0,
-        sunskyEastY: 1,
-        sunskyEastZ: 0,
-        sunskyDirX: 0.5,
-        sunskyDirY: 0.2,
-        sunskyDirZ: 0.8,
-        sunskyTurbidity: 0.6,
-        sunskySamples: 128
+        sunskyEastY: 0,
+        sunskyEastZ: 1,
+        sunskyDirX: 1,
+        sunskyDirY: 1,
+        sunskyDirZ: 1,
+        sunskyTurbidity: 6,
+        sunskySamples: 64
       };
       this.lightIndex = {};
     }
@@ -547,7 +547,7 @@
         result += 'light {\n';
         result += '  type sunsky\n';
         result += '  up ' + this.settings.sunskyUpX + ' ' + this.settings.sunskyUpY + ' ' + this.settings.sunskyUpZ + '\n';
-        result += '  east ' + this.settings.sunskyUpX + ' ' + this.settings.sunskyUpY + ' ' + this.settings.sunskyUpZ + '\n';
+        result += '  east ' + this.settings.sunskyEastX + ' ' + this.settings.sunskyEastY + ' ' + this.settings.sunskyEastZ + '\n';
         result += '  sundir ' + this.settings.sunskyDirX + ' ' + this.settings.sunskyDirY + ' ' + this.settings.sunskyDirZ + '\n';
         result += '  turbidity ' + this.settings.sunskyTurbidity + '\n';
         result += '  samples ' + this.settings.sunskySamples + '\n';
@@ -604,11 +604,6 @@
         } else if (material instanceof THREE.SF.DiffuseMaterial || material instanceof THREE.MeshLambertMaterial) {
           result += '  type diffuse\n';
           result += '  diff ' + this.exportColorTHREE(material.color) + '\n';
-        } else if (material instanceof THREE.SF.PhongMaterial || material instanceof THREE.MeshPhongMaterial) {
-          result += '  type phong\n';
-          result += '  diff ' + this.exportColorTHREE(material.color) + '\n';
-          result += '  spec ' + this.exportColorTHREE(material.specular) + ' ' + material.shininess + '\n';
-          result += '  samples ' + (material.samples || 4);
         } else if (material instanceof THREE.SF.ShinyMaterial) {
           result += '  type shiny\n';
           result += '  diff ' + this.exportColorTHREE(material.color) + '\n';
@@ -617,11 +612,16 @@
           result += '  type glass\n';
           result += '  eta ' + material.eta + '\n';
           result += '  color ' + this.exportColorTHREE(material.color) + '\n';
-          result += '  absorption.distance ' + material.absorptionDistance;
-          result += '  absorption.color ' + this.exportColorTHREE(material.absorptionColor);
+          result += '  absorption.distance ' + material.absorptionDistance + '\n';
+          result += '  absorption.color ' + this.exportColorTHREE(material.absorptionColor) + '\n';
         } else if (material instanceof THREE.SF.MirrorMaterial) {
-          result += '  type glass\n';
-          result += '  refl ' + material.reflection + '\n';
+          result += '  type mirror\n';
+          result += '  refl ' + this.exportColorTHREE(material.reflection) + '\n';
+        } else if (material instanceof THREE.SF.PhongMaterial || material instanceof THREE.MeshPhongMaterial) {
+          result += '  type phong\n';
+          result += '  diff ' + this.exportColorTHREE(material.color) + '\n';
+          result += '  spec ' + this.exportColorTHREE(material.specular) + ' ' + material.shininess + '\n';
+          result += '  samples ' + (material.samples || 4) + '\n';
         }
         result += '}\n\n';
       }
@@ -940,17 +940,8 @@
 
     __extends(GlassMaterial, _super);
 
-    function GlassMaterial() {
-      GlassMaterial.__super__.constructor.apply(this, arguments);
-    }
-
-    return GlassMaterial;
-
-  })(THREE.MeshPhongMaterial);
-
-  ({
-    constructor: function(parameters) {
-      constructor.__super__.constructor.call(this);
+    function GlassMaterial(parameters) {
+      GlassMaterial.__super__.constructor.call(this);
       parameters = parameters || {};
       this.eta = parameters.eta || 1.0;
       this.absorptionDistance = parameters.absorptionDistance || 5.0;
@@ -962,25 +953,19 @@
         this.absorptionColor = new THREE.Color(0xffffff);
       }
       THREE.MeshPhongMaterial.call(this);
-      return this.setValues(parameters);
+      this.setValues(parameters);
     }
-  });
+
+    return GlassMaterial;
+
+  })(THREE.MeshPhongMaterial);
 
   THREE.SF.MirrorMaterial = MirrorMaterial = (function(_super) {
 
     __extends(MirrorMaterial, _super);
 
-    function MirrorMaterial() {
-      MirrorMaterial.__super__.constructor.apply(this, arguments);
-    }
-
-    return MirrorMaterial;
-
-  })(THREE.MeshPhongMaterial);
-
-  ({
-    constructor: function(parameters) {
-      constructor.__super__.constructor.call(this);
+    function MirrorMaterial(parameters) {
+      MirrorMaterial.__super__.constructor.call(this);
       parameters = parameters || {};
       if (typeof parameters.reflection === THREE.Color) {
         this.reflection = parameters.reflection;
@@ -990,53 +975,44 @@
         this.reflection = new THREE.Color(0xffffff);
       }
       THREE.MeshPhongMaterial.call(this);
-      return this.setValues(parameters);
+      this.setValues(parameters);
     }
-  });
+
+    return MirrorMaterial;
+
+  })(THREE.MeshPhongMaterial);
 
   THREE.SF.PhongMaterial = PhongMaterial = (function(_super) {
 
     __extends(PhongMaterial, _super);
 
-    function PhongMaterial() {
-      PhongMaterial.__super__.constructor.apply(this, arguments);
+    function PhongMaterial(parameters) {
+      PhongMaterial.__super__.constructor.call(this);
+      parameters = parameters || {};
+      this.samples = parameters.samples || 4;
+      THREE.MeshPhongMaterial.call(this);
+      this.setValues(parameters);
     }
 
     return PhongMaterial;
 
   })(THREE.MeshPhongMaterial);
 
-  ({
-    constructor: function(parameters) {
-      constructor.__super__.constructor.call(this);
-      parameters = parameters || {};
-      this.samples = parameters.samples || 4;
-      THREE.MeshPhongMaterial.call(this);
-      return this.setValues(parameters);
-    }
-  });
-
   THREE.SF.ShinyMaterial = ShinyMaterial = (function(_super) {
 
     __extends(ShinyMaterial, _super);
 
-    function ShinyMaterial() {
-      ShinyMaterial.__super__.constructor.apply(this, arguments);
+    function ShinyMaterial(parameters) {
+      ShinyMaterial.__super__.constructor.call(this);
+      parameters = parameters || {};
+      this.reflection = parameters.reflection || 0.5;
+      THREE.MeshPhongMaterial.call(this);
+      this.setValues(parameters);
     }
 
     return ShinyMaterial;
 
   })(THREE.MeshPhongMaterial);
-
-  ({
-    constructor: function(parameters) {
-      constructor.__super__.constructor.call(this);
-      parameters = parameters || {};
-      this.reflection = parameters.reflection || 0.5;
-      THREE.MeshPhongMaterial.call(this);
-      return this.setValues(parameters);
-    }
-  });
 
   DatGUI = (function() {
 

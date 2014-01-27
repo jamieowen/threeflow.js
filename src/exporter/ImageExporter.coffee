@@ -13,8 +13,6 @@ class ImageExporter extends BlockExporter
     'lanczos'
     'ospline' ]
 
-
-
   constructor:()->
     super()
 

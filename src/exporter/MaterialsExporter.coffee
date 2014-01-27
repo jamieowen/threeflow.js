@@ -42,13 +42,6 @@ class MaterialsExporter extends BlockExporter
         result += '  type diffuse\n'
         result += '  diff ' + @exportColorTHREE(material.color) + '\n'
 
-      else if material instanceof THREE.SF.PhongMaterial or material instanceof THREE.MeshPhongMaterial
-        result += '  type phong\n'
-        result += '  diff ' + @exportColorTHREE(material.color) + '\n'
-        result += '  spec ' + @exportColorTHREE(material.specular) + ' ' + material.shininess + '\n'
-        # default to 4 for handling THREE.MeshPhongMaterial
-        result += '  samples ' + ( material.samples || 4 )
-
       else if material instanceof THREE.SF.ShinyMaterial
         result += '  type shiny\n'
         result += '  diff ' + @exportColorTHREE(material.color) + '\n'
@@ -58,11 +51,20 @@ class MaterialsExporter extends BlockExporter
         result += '  type glass\n'
         result += '  eta ' + material.eta + '\n'
         result += '  color ' + @exportColorTHREE(material.color) + '\n'
-        result += '  absorption.distance ' + material.absorptionDistance
-        result += '  absorption.color ' + @exportColorTHREE(material.absorptionColor)
+        result += '  absorption.distance ' + material.absorptionDistance + '\n'
+        result += '  absorption.color ' + @exportColorTHREE(material.absorptionColor) + '\n'
       else if material instanceof THREE.SF.MirrorMaterial
-        result += '  type glass\n'
-        result += '  refl ' + material.reflection + '\n'
+        result += '  type mirror\n'
+        result += '  refl ' + @exportColorTHREE(material.reflection) + '\n'
+
+      # Keep PhongMaterial last as currently the above sunflow materials extend from THREE.MeshPhongMaterial
+      # This should probably change.
+      else if material instanceof THREE.SF.PhongMaterial or material instanceof THREE.MeshPhongMaterial
+        result += '  type phong\n'
+        result += '  diff ' + @exportColorTHREE(material.color) + '\n'
+        result += '  spec ' + @exportColorTHREE(material.specular) + ' ' + material.shininess + '\n'
+        # default to 4 for handling THREE.MeshPhongMaterial
+        result += '  samples ' + ( material.samples || 4 ) + '\n'
 
       result += '}\n\n'
 

@@ -11,18 +11,18 @@ Roadmap
 
 1. Basic Scene File Export **done**
 2. Local Transforms **done**
-3. World Transforms
+3. World Transforms **done**
 4. Object Instancing **done**
-5. Sunflow Primitives
+5. Sunflow Primitives ( Sphere done )
 6. Color Spaces?
 
 ### Image Settings
 
-1. Antialiasing
-2. Samples
-3. Contrast Threshold
-4. Filters
-5. Jitter
+1. Antialiasing **done**
+2. Samples **done**
+3. Contrast Threshold **done**
+4. Filters **done**
+5. Jitter **done**
 6. Bucket Size/Order
 7. Alpha Channels
 8. Predefined Settings.
@@ -33,20 +33,23 @@ Roadmap
 
 
 ### Global Illumination
-1. Types ( see doc )
-2. Samples
-3. Sets
-4. Bias
-5. Bias Samples
+1. Types **done**
+2. Samples **done**
+3. Sets **done**
+4. Bias **done**
+5. Bias Samples **done**
+
+6. Need to rewrite to include all GI types.
 
 ### Shaders
 
-1. Constant Shader
-2. Diffuse Shader
-3. Phong Shader
-4. Shiny Shader
-5. Glass Shader
-6. Mirror Shader
+**Note:** Needs testing and examples created.
+1. Constant Shader **done**
+2. Diffuse Shader **done**
+3. Phong Shader **done**
+4. Shiny Shader **done**
+5. Glass Shader **done**
+6. Mirror Shader **done**
 7. Ward Shader
 8. Ambient Occlusion Shader
 9. Uber Shader
@@ -59,6 +62,7 @@ Roadmap
 1. Pinhole
 2. Thinlens ( Bokeh/DOF )
 3. Fisheye
+4. FOV / Aspect Match problems http://forum.processing.org/one/topic/coding-opengl-sunflow.html
 
 ### Lights
 
@@ -76,10 +80,10 @@ Roadmap
 4. Bezier Patches
 5. File Meshes ( OBJ,STL,RA3 )
 
-### Primitives
+### Primitive Mapping.
 1. Background
 2. Plane
-3. Sphere
+3. Sphere **done**
 4. Particle
 5. Torus
 6. Box

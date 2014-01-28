@@ -40,15 +40,13 @@ THREE.SunflowRenderer = class SunflowRenderer
 
       console.log "RENDER"
       scale = 1;
-      #scContents = document.getElementById("scCornellBox").innerHTML
-      #scContents = ScExporter.export scene,camera,width,height
+
       @exporter.blockExporters[0].settings.resolutionX = width*scale
       @exporter.blockExporters[0].settings.resolutionY = height*scale
-      #@exporter.blockExporters[0].settings.aspectRatio = width/height
 
       @exporter.indexScene scene
       scContents = @exporter.exportCode()
-      #console.log scContents
+
       @socket.emit "render",
          scFile:scContents
 

@@ -14,13 +14,10 @@ server.listen 3000
 
 # http
 
-app.get '/',(request, response)->
-  response.send 'hello world'
-
 app.post '/render',(request,response)->
   response.send "render"
 
-app.use '/examples', express.static( path.join( process.cwd(),'examples') )
+app.use '/', express.static( path.join( process.cwd(),'examples') )
 
 # sockets
 io.sockets.on 'connection', (socket)->

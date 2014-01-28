@@ -38,8 +38,11 @@ class CameraExporter extends BlockExporter
     result += '  type pinhole\n'
     result += '  eye ' + @exportVector(@camera.position) + '\n'
     result += '  target ' + @exportVector(@camera.rotation) + '\n'
-    result += '  up ' + @exportVector(@camera.up) + "\n"
-    result += '  fov ' + @camera.fov + '\n'
+    result += '  up ' + @exportVector(@camera.up) + '\n'
+    # TODO: multiplying the fov by the aspect ratio seems to correct
+    # the sunflow renderer problems.
+    # but not perfect.
+    result += '  fov ' + @camera.fov*@camera.aspect + '\n'
     result += '  aspect ' + @camera.aspect + '\n'
     result += '}\n\n'
 

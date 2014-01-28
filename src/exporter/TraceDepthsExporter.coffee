@@ -22,7 +22,7 @@ class TraceDepthsExporter extends BlockExporter
     if not @settings.enabled
       return result
 
-    result += 'trace-depths{\n'
+    result += 'trace-depths {\n'
     result += '  diff ' + @settings.diffusion + '\n'
     result += '  refl ' + @settings.reflection + '\n'
     result += '  refr ' + @settings.refraction + '\n'

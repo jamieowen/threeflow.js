@@ -1,8 +1,7 @@
 
-THREE.SF.ConstantMaterial = class ConstantMaterial extends THREE.MeshBasicMaterial
+THREE.SF.ConstantMaterial = class ConstantMaterial extends THREE.MeshPhongMaterial
 
   constructor:(parameters)->
     super()
-
-    THREE.MeshBasicMaterial.call @
+    THREE.MeshPhongMaterial.call @
     @setValues parameters

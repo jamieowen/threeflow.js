@@ -51,8 +51,9 @@ class MaterialsExporter extends BlockExporter
         result += '  type glass\n'
         result += '  eta ' + material.eta + '\n'
         result += '  color ' + @exportColorTHREE(material.color) + '\n'
-        result += '  absorption.distance ' + material.absorptionDistance + '\n'
-        result += '  absorption.color ' + @exportColorTHREE(material.absorptionColor) + '\n'
+        # TODO : Look into these properties.
+        #result += '  absorption.distance ' + material.absorptionDistance + '\n'
+        #result += '  absorption.color ' + @exportColorTHREE(material.absorptionColor) + '\n'
       else if material instanceof THREE.SF.MirrorMaterial
         result += '  type mirror\n'
         result += '  refl ' + @exportColorTHREE(material.reflection) + '\n'

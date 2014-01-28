@@ -17,13 +17,13 @@
         sunflowRenderer.connect();
 
         var renderer = new THREE.WebGLRenderer({antialias:true});
-        var width = 800;
-        var height = 800;
+        var width = 600;
+        var height = 400;
         renderer.setSize(width,height);
         document.body.appendChild(renderer.domElement);
 
         var camera = new THREE.PerspectiveCamera(35,width/height,1,10000);
-
+        console.log("Aspect",width/height);
         camera.position.set(0,0,500);
         camera.lookAt( new THREE.Vector3(0,0,0) );
         scene.add(camera);

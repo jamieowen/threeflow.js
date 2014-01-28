@@ -59,6 +59,12 @@ Roadmap
 
 ### Cameras
 
+**Note**
+Will create specific camera objects that extend three.js classes.
+Target camera will have to be passed into the render() method, the same as three.js renderers.
+Include camera geometry model to show camera direction.
+Exporter will have to prevent traversing into that mesh.
+
 1. Pinhole
 2. Thinlens ( Bokeh/DOF )
 3. Fisheye
@@ -66,6 +72,8 @@ Roadmap
 
 ### Lights
 
+Lights should be implemented in a similar way to cameras.
+Add some
 1. Point Light
 2. Meshlight/Area Light
 3. Spherical Light

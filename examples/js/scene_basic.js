@@ -4,11 +4,16 @@ var SceneBasic = function( materials )
 
   var defaultMaterials = [
     // https://kuler.adobe.com/Sunrise-Picnic-color-theme-3339949/
-    { materialClass: THREE.SF.DiffuseMaterial, parameters:{color:0x52ADCC,wireframe:true} },
+    { materialClass: THREE.SF.ConstantMaterial, parameters:{color:0x52ADCC,wireframe:true} },
     { materialClass: THREE.SF.DiffuseMaterial, parameters:{color:0xADD982,wireframe:true} },
-    { materialClass: THREE.SF.DiffuseMaterial, parameters:{color:0xE6F2C2,wireframe:true} },
-    { materialClass: THREE.SF.DiffuseMaterial, parameters:{color:0xF1E56C,wireframe:true} },
-    { materialClass: THREE.SF.DiffuseMaterial, parameters:{color:0xF37A61,wireframe:true} },
+    { materialClass: THREE.SF.PhongMaterial, parameters:{color:0xE6F2C2,wireframe:true} },
+    { materialClass: THREE.SF.PhongMaterial, parameters:{color:0xF1E56C,wireframe:true} },
+    { materialClass: THREE.SF.ShinyMaterial, parameters:{color:0xF37A61,wireframe:true} },
+    { materialClass: THREE.SF.ShinyMaterial, parameters:{color:0x52ADCC,wireframe:true} },
+    { materialClass: THREE.SF.GlassMaterial, parameters:{color:0xADD982,wireframe:true} },
+    { materialClass: THREE.SF.GlassMaterial, parameters:{color:0xE6F2C2,wireframe:true} },
+    { materialClass: THREE.SF.MirrorMaterial, parameters:{color:0xF1E56C,wireframe:true} },
+    { materialClass: THREE.SF.MirrorMaterial, parameters:{color:0xF37A61,wireframe:true} },
   ];
 
   materials = materials || defaultMaterials;
@@ -26,8 +31,9 @@ var SceneBasic = function( materials )
   {
     material = new materials[i].materialClass( materials[i].parameters );
     mesh = new THREE.Mesh(geometry,material);
-    mesh.position.x = -offset + r + ( ((r*2)+s)*i );
-    console.log(mesh.position.x);
+    mesh.position.x = Math.cos(((Math.PI*2)/l)*i)*100;
+    mesh.position.z = Math.sin(((Math.PI*2)/l)*i)*100;
+
     scene.add( mesh );
   }
 

@@ -26,7 +26,10 @@ class DatGUI
       else
         folder = @gui.addFolder @folderNameMap[exporter.constructor.name]
         for prop of exporter.settings
-          folder.add exporter.settings, prop
+          if exporter instanceof ImageExporter and prop is "filter"
+            folder.add exporter.settings, prop, ImageExporter.FILTERS
+          else
+            folder.add exporter.settings, prop
 
 
 

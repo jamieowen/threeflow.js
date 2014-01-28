@@ -8,25 +8,41 @@
     <script src="js/vendor/dat.gui.js"></script>
     <script src="js/vendor/TrackballControls.js"></script>
     <script src="js/threeflow.js"></script>
+    <script src="js/scene_basic.js"></script>
     <script>
       var initialise = function()
       {
-        var scenes          = createScenes();
-        var currentScene    = null;
-
+        var scene = SceneBasic();
         var sunflowRenderer = new THREE.SunflowRenderer();
         sunflowRenderer.connect();
 
         var renderer = new THREE.WebGLRenderer({antialias:true});
-        var width = 400;
-        var height = 400;
+        var width = 800;
+        var height = 800;
         renderer.setSize(width,height);
         document.body.appendChild(renderer.domElement);
 
         var camera = new THREE.PerspectiveCamera(35,width/height,1,10000);
 
-        camera.position.set(0,500,500);
+        camera.position.set(0,0,500);
         camera.lookAt( new THREE.Vector3(0,0,0) );
+        scene.add(camera);
+
+        var hemLight = new THREE.HemisphereLight(0xeeeeff,0xefefef,1);
+        scene.add(hemLight);
+
+        var light = new THREE.PointLight(0xffffff,100,400);
+        //scene.add(light);
+        light.position.x = light.position.y = light.position.z = 200;
+
+        var ambient = new THREE.AmbientLight(0x555555);
+        //scene.add(ambient);
+
+        var plane = new THREE.Mesh( new THREE.PlaneGeometry(1000000,1000000,5,5), new THREE.MeshLambertMaterial({color:0xffffff,ambient:0xffffff,side:THREE.DoubleSide}) );
+        plane.rotation.x = Math.PI/2;
+        plane.position.y = -20;
+        scene.add(plane);
+
 
         var controls = new THREE.TrackballControls(camera,renderer.domElement);
 
@@ -34,73 +50,17 @@
         {
             requestAnimationFrame(render);
             controls.update();
-            renderer.render(currentScene,camera);
-        }
-
-        var setScene = function(index)
-        {
-            currentScene = scenes[index];
-            currentScene.add(camera);
+            renderer.render(scene,camera);
         }
 
         var onRenderClick = function( event ){
             event.preventDefault();
-            sunflowRenderer.render(currentScene,camera,width,height);
+            sunflowRenderer.render(scene,camera,width,height);
         }
 
         document.getElementById("renderButton").addEventListener( "click", onRenderClick );
 
-        setScene(0);
         render();
-      }
-
-
-      var createScenes = function()
-      {
-        var scenes = [];
-
-        var scene = new THREE.Scene();
-        var ix,iz;
-        var size = 3;
-        var radius = 50;
-        var spacing = radius*3;
-
-        // Material Spheres Scene.
-        var material = new THREE.MeshLambertMaterial({color:0x112299,ambient:0xffffff,side:THREE.DoubleSide,shading:THREE.FlatShading});
-        var geom = new THREE.PlaneGeometry(size*spacing*2,size*spacing*2);
-        var mesh = new THREE.Mesh(geom,material);
-        mesh.rotation.x = Math.PI/2;
-        mesh.position.y = -radius;
-        scene.add(mesh);
-
-        //var ambient = new THREE.AmbientLight(0x333333);
-        //scene.add(ambient);
-        var light = new THREE.PointLight(0xffffff, 1, 10000);
-        light.position.set(500,500,500);
-        scene.add(light);
-
-        geom = new THREE.SphereGeometry(radius);
-
-        material = new THREE.SF.ShinyMaterial( {color:0xaa9900, reflection:1} );
-        //material = new THREE.SF.MirrorMaterial( {color:0xaa9900, reflection:0xffffff} );
-        //material = new THREE.SF.DiffuseMaterial( {color:0xaa9900} );
-
-        for( ix = 0; ix<size;ix++)
-        {
-            for(iz = 0; iz<size; iz++){
-                //material = new THREE.MeshLambertMaterial( {color:0xaa9900,ambient:0x000000,shading:THREE.FlatShading} );
-                //material = new THREE.MeshBasicMaterial( {color:0xaa9900} );
-                //material = new THREE.SF.ConstantMaterial( {color:0xaa9900} );
-
-                mesh = new THREE.Mesh( geom, material );
-                mesh.position.x = ( ix*spacing ) - ((spacing*(size-1))/2);
-                mesh.position.z = ( iz*spacing ) - ((spacing*(size-1))/2);
-                scene.add( mesh );
-            }
-        }
-        scenes.push(scene);
-
-        return scenes;
       }
 
     </script>

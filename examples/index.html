@@ -31,9 +31,9 @@
         var hemLight = new THREE.HemisphereLight(0xeeeeff,0xefefef,1);
         scene.add(hemLight);
 
-        var light = new THREE.PointLight(0xffffff,100,400);
-        //scene.add(light);
-        light.position.x = light.position.y = light.position.z = 200;
+        var light = new THREE.SF.PointLight(0xffffff,100,400);
+        scene.add(light);
+        light.position.y = 50;
 
         var ambient = new THREE.AmbientLight(0x555555);
         //scene.add(ambient);

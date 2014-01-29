@@ -30,7 +30,7 @@ class LightsExporter extends BlockExporter
     null
 
   doTraverse:(object3d)->
-    true
+    not (object3d instanceof THREE.SF.PointLight)
 
   exportBlock:()->
     result = ''
@@ -50,6 +50,14 @@ class LightsExporter extends BlockExporter
 
     for uuid of @lightIndex
       light = @lightIndex[ uuid ]
-      # TODO handle lights.
+      if light instanceof THREE.SF.PointLight
+        result += 'light {\n'
+        result += '  type point\n'
+        result += '  color ' + @exportColorTHREE(light.color) + '\n'
+        result += '  power ' + light.intensity*200 + ' \n'
+        result += '  p ' + @exportVector(light.position)+ '\n'
+      result += '}\n\n'
+
+
 
     return result

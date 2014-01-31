@@ -38,10 +38,60 @@
         var ambient = new THREE.AmbientLight(0x555555);
         //scene.add(ambient);
 
+        var morphs = [];
+
         var plane = new THREE.Mesh( new THREE.PlaneGeometry(1000000,1000000,5,5), new THREE.MeshLambertMaterial({color:0xffffff,ambient:0xffffff,side:THREE.DoubleSide}) );
         plane.rotation.x = Math.PI/2;
         plane.position.y = -20;
         scene.add(plane);
+
+          console.log(plane);
+
+          var morphColorsToFaceColors = function ( geometry ) {
+
+              console.log( "Morph normals to ");
+              console.log( geometry );
+              if ( geometry.morphColors && geometry.morphColors.length ) {
+
+                  var colorMap = geometry.morphColors[ 0 ];
+
+                  for ( var i = 0; i < colorMap.colors.length; i ++ ) {
+
+                      geometry.faces[ i ].color = colorMap.colors[ i ];
+
+                  }
+
+              }
+
+          }
+
+          var loader = new THREE.JSONLoader();
+
+          loader.load( "models/flamingo.json", function( geometry ) {
+
+              morphColorsToFaceColors( geometry );
+              geometry.computeMorphNormals();
+
+              var material = new THREE.MeshPhongMaterial( { color: 0x6f6f6f, specular: 0xffffff, shininess: 20, morphTargets: true, morphNormals: true, vertexColors: THREE.FaceColors, shading: THREE.FlatShading } );
+              var meshAnim = new THREE.MorphAnimMesh( geometry, material );
+
+              meshAnim.duration = 1000;
+
+              var s = 0.35;
+              meshAnim.scale.set( s, s, s );
+              meshAnim.position.y = 15;
+              meshAnim.rotation.y = -1;
+
+              //meshAnim.castShadow = true;
+              //meshAnim.receiveShadow = true;
+
+              scene.add( meshAnim );
+              morphs.push( meshAnim );
+
+          } );
+
+
+
 
 
         var controls = new THREE.TrackballControls(camera,renderer.domElement);

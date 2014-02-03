@@ -13,7 +13,6 @@ Roadmap
 2. Local Transforms **done**
 3. World Transforms **done**
 4. Object Instancing **done**
-5. Sunflow Primitives ( Sphere done )
 6. Color Spaces?
 
 ### Image Settings

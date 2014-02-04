@@ -20,20 +20,26 @@ class Main
 
     @renderer.setSize @width,@height
 
+    # default camera
+    @camera = new THREE.PerspectiveCamera(35,@width/@height,100,10000)
+    @camera.position.set 0,1000,-1000
+    @camera.lookAt new THREE.Vector3()
+
+    @controls = new THREE.TrackballControls @camera, @renderer.domElement
+
     # set these properties to null
     # so we can interchange the scene objects,lighting and camera setups
-
     @objectsSetup    = null
     @lightingSetup = null
     @cameraSetup  = null
 
+    # add render click temp for ui.
     document.getElementById("renderButton").addEventListener( "click", @onRenderClick );
 
     @render()
 
   onRenderClick:(event)=>
     event.preventDefault()
-    console.log "RENDER"
     @sunflowRenderer.render( @scene, @cameraSetup.getActiveCamera(),@width,@height)
 
 
@@ -71,6 +77,9 @@ class Main
 
 
   render:()=>
+
+    @controls.update()
+
     if @objectsSetup
       @objectsSetup.update()
 
@@ -81,9 +90,11 @@ class Main
       @cameraSetup.update()
       camera = @cameraSetup.getActiveCamera()
 
-    if camera
-      camera.aspect = @width/@height
-      @renderer.render @scene,camera
+    #if camera
+    #  camera.aspect = @width/@height
+    #  camera.updateProjectionMatrix()
+
+    @renderer.render @scene,@camera
 
 
     requestAnimationFrame @render

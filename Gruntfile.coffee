@@ -32,7 +32,7 @@ module.exports = (grunt)->
     watch:
       main:
         files:[ "src/**/*.coffee","server/**/*.coffee", "examples/src/**/*.coffee" ]
-        tasks:["dev"]
+        tasks:["coffee","copy"]
 
 
   grunt.loadNpmTasks "grunt-contrib-coffee"
@@ -42,11 +42,5 @@ module.exports = (grunt)->
 
   grunt.registerTask "default",["deploy"]
   grunt.registerTask "deploy",["coffee","uglify","copy"]
-  grunt.registerTask "dev",["coffee","copy","watch"]
-
-
-
-
-
-
+  grunt.registerTask "dev",["watch"]
 

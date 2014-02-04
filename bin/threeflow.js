@@ -471,9 +471,9 @@
         resolutionY: 600,
         antialiasMin: -1,
         antialiasMax: 1,
-        samples: 2,
+        samples: 8,
         contrast: 0.1,
-        filter: ImageExporter.FILTERS[0],
+        filter: ImageExporter.FILTERS[1],
         jitter: true
       };
     }

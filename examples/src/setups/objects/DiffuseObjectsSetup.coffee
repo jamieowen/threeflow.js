@@ -33,7 +33,7 @@ class DiffuseObjectsSetup
 
       mesh.position.x = Math.cos( spacing*i ) * radius
       mesh.position.z = Math.sin( spacing*i ) * radius
-      mesh.position.y = 50
+      mesh.position.y = @sphereGeometry.radius
 
       @meshes.push mesh
       @materials.push material
@@ -45,9 +45,19 @@ class DiffuseObjectsSetup
       wireframe: true
 
     center = new THREE.Mesh(@sphereCenterGeometry,material)
-    center.position.set 0,250,0
-
+    center.position.set 0,@sphereCenterGeometry.radius,0
     @meshes.push center
+
+
+    # floor plane ( may move this out )
+    material = new THREE.SF.ShinyMaterial
+      color: 0xafafaf
+      reflection: 1
+      wireframe: true
+
+    floor = new THREE.Mesh new THREE.PlaneGeometry(10000,10000,100,100),material
+    floor.rotation.x = -(Math.PI/2)
+    @meshes.push floor
 
     null
 

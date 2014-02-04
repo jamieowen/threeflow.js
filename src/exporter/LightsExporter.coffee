@@ -50,6 +50,7 @@ class LightsExporter extends BlockExporter
 
     for uuid of @lightIndex
       light = @lightIndex[ uuid ]
+
       if light instanceof THREE.SF.PointLight
         result += 'light {\n'
         result += '  type point\n'

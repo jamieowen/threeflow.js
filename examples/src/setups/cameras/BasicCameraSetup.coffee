@@ -14,9 +14,6 @@ class BasicCameraSetup
     @camera.position.y = 1000
     @camera.lookAt new THREE.Vector3()
 
-    @controls = new THREE.TrackballControls @camera
-    #,renderer.domElement
-
     null
 
 
@@ -37,5 +34,4 @@ class BasicCameraSetup
 
 
   update:()->
-    @controls.update()
     null

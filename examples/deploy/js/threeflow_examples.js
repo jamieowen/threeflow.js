@@ -15,6 +15,10 @@ Main = (function() {
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.renderer.setSize(this.width, this.height);
+    this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, 100, 10000);
+    this.camera.position.set(0, 1000, -1000);
+    this.camera.lookAt(new THREE.Vector3());
+    this.controls = new THREE.TrackballControls(this.camera, this.renderer.domElement);
     this.objectsSetup = null;
     this.lightingSetup = null;
     this.cameraSetup = null;
@@ -24,7 +28,6 @@ Main = (function() {
 
   Main.prototype.onRenderClick = function(event) {
     event.preventDefault();
-    console.log("RENDER");
     return this.sunflowRenderer.render(this.scene, this.cameraSetup.getActiveCamera(), this.width, this.height);
   };
 
@@ -63,6 +66,7 @@ Main = (function() {
 
   Main.prototype.render = function() {
     var camera;
+    this.controls.update();
     if (this.objectsSetup) {
       this.objectsSetup.update();
     }
@@ -73,10 +77,7 @@ Main = (function() {
       this.cameraSetup.update();
       camera = this.cameraSetup.getActiveCamera();
     }
-    if (camera) {
-      camera.aspect = this.width / this.height;
-      this.renderer.render(this.scene, camera);
-    }
+    this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render);
     return null;
   };
@@ -99,7 +100,6 @@ BasicCameraSetup = (function() {
     this.camera.position.z = -1000;
     this.camera.position.y = 1000;
     this.camera.lookAt(new THREE.Vector3());
-    this.controls = new THREE.TrackballControls(this.camera);
     return null;
   };
 
@@ -119,7 +119,6 @@ BasicCameraSetup = (function() {
   };
 
   BasicCameraSetup.prototype.update = function() {
-    this.controls.update();
     return null;
   };
 
@@ -166,7 +165,7 @@ DiffuseObjectsSetup = (function() {
   }
 
   DiffuseObjectsSetup.prototype.init = function() {
-    var center, color, i, material, mesh, params, radius, spacing, _i, _j, _len, _len1, _ref, _ref1;
+    var center, color, floor, i, material, mesh, params, radius, spacing, _i, _j, _len, _len1, _ref, _ref1;
     if (this.inited) {
       return;
     }
@@ -194,7 +193,7 @@ DiffuseObjectsSetup = (function() {
       mesh = new THREE.Mesh(this.sphereGeometry, material);
       mesh.position.x = Math.cos(spacing * i) * radius;
       mesh.position.z = Math.sin(spacing * i) * radius;
-      mesh.position.y = 50;
+      mesh.position.y = this.sphereGeometry.radius;
       this.meshes.push(mesh);
       this.materials.push(material);
     }
@@ -204,8 +203,16 @@ DiffuseObjectsSetup = (function() {
       wireframe: true
     });
     center = new THREE.Mesh(this.sphereCenterGeometry, material);
-    center.position.set(0, 250, 0);
+    center.position.set(0, this.sphereCenterGeometry.radius, 0);
     this.meshes.push(center);
+    material = new THREE.SF.ShinyMaterial({
+      color: 0xafafaf,
+      reflection: 1,
+      wireframe: true
+    });
+    floor = new THREE.Mesh(new THREE.PlaneGeometry(10000, 10000, 100, 100), material);
+    floor.rotation.x = -(Math.PI / 2);
+    this.meshes.push(floor);
     return null;
   };
 

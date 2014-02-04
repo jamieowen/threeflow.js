@@ -27,7 +27,14 @@ class MeshExporter extends BlockExporter
 
     for uuid of @meshIndex
       mesh = @meshIndex[uuid]
-      if @settings.convertPrimitives and mesh.geometry instanceof THREE.SphereGeometry
+      if mesh.geometry instanceof THREE.SF.InfinitePlaneGeometry
+        result += 'object {\n'
+        result += '  shader ' + mesh.material.uuid + '\n'
+        result += '  type plane\n'
+        result += '  p ' + @exportTransformPosition(mesh) + '\n'
+        result += '  n ' + @exportVector( mesh.rotation ) + '\n'
+
+      else if @settings.convertPrimitives and mesh.geometry instanceof THREE.SphereGeometry
         result += 'object {\n'
         result += '  shader ' + mesh.material.uuid + '\n'
         result += '  type sphere\n'

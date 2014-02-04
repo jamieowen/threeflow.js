@@ -55,8 +55,11 @@ class DiffuseObjectsSetup
       reflection: 1
       wireframe: true
 
-    floor = new THREE.Mesh new THREE.PlaneGeometry(10000,10000,100,100),material
+    floor = new THREE.Mesh new THREE.SF.InfinitePlaneGeometry(),material
+    #floor = new THREE.Mesh new THREE.PlaneGeometry(1000,1000),material
     floor.rotation.x = -(Math.PI/2)
+
+    console.log "FLOOR ROTATION:", floor.up
     @meshes.push floor
 
     null

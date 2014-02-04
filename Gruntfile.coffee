@@ -1,3 +1,4 @@
+child_process = require "child_process"
 
 module.exports = (grunt)->
   grunt.initConfig
@@ -43,4 +44,8 @@ module.exports = (grunt)->
   grunt.registerTask "default",["deploy"]
   grunt.registerTask "deploy",["coffee","uglify","copy"]
   grunt.registerTask "dev",["watch"]
+
+  grunt.registerTask "server",()->
+    done = @async()
+    child_process.exec "coffee server/server.coffee",done
 

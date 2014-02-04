@@ -669,7 +669,13 @@
       }
       for (uuid in this.meshIndex) {
         mesh = this.meshIndex[uuid];
-        if (this.settings.convertPrimitives && mesh.geometry instanceof THREE.SphereGeometry) {
+        if (mesh.geometry instanceof THREE.SF.InfinitePlaneGeometry) {
+          result += 'object {\n';
+          result += '  shader ' + mesh.material.uuid + '\n';
+          result += '  type plane\n';
+          result += '  p ' + this.exportTransformPosition(mesh) + '\n';
+          result += '  n ' + this.exportVector(mesh.rotation) + '\n';
+        } else if (this.settings.convertPrimitives && mesh.geometry instanceof THREE.SphereGeometry) {
           result += 'object {\n';
           result += '  shader ' + mesh.material.uuid + '\n';
           result += '  type sphere\n';
@@ -920,6 +926,17 @@
     return TraceDepthsExporter;
 
   })(BlockExporter);
+
+  THREE.SF.InfinitePlaneGeometry = function(width, height, widthSegments, heightSegments) {
+    width = width || 10000;
+    height = height || 10000;
+    widthSegments = widthSegments || 100;
+    heightSegments = heightSegments || 100;
+    console.log(width, height, widthSegments, heightSegments);
+    return THREE.PlaneGeometry.call(this);
+  };
+
+  THREE.SF.InfinitePlaneGeometry.prototype = Object.create(THREE.PlaneGeometry.prototype);
 
   THREE.SF.PointLight = PointLight = (function(_super) {
     __extends(PointLight, _super);

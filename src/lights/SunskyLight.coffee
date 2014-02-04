@@ -20,3 +20,4 @@ THREE.SF.SunskyLight = class SunskyLight extends THREE.Object3D
 
     @add @directionalLight
     @add @hemisphereLight
+

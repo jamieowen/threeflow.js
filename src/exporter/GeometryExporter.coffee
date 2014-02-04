@@ -10,6 +10,7 @@ class GeometryExporter extends BlockExporter
     @geometryIndex = {}
 
   addToIndex:(object3d)->
+    # TODO : Skip Primitives Geometry when converting to sunflow primitives.
     if object3d instanceof THREE.Mesh
       if object3d.geometry and not @geometryIndex[object3d.geometry.uuid]
         @geometryIndex[object3d.geometry.uuid] = object3d.geometry

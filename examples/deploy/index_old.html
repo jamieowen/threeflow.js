@@ -1,0 +1,121 @@
+<!doctype html>
+
+<html>
+  <head>
+    <title>example</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/vendor/three.js"></script>
+    <script src="js/vendor/dat.gui.js"></script>
+    <script src="js/vendor/TrackballControls.js"></script>
+    <script src="js/threeflow.js"></script>
+    <script src="js/scene_basic.js"></script>
+    <script>
+      var initialise = function()
+      {
+        var scene = SceneBasic();
+        var sunflowRenderer = new THREE.SunflowRenderer();
+        sunflowRenderer.connect();
+
+        var renderer = new THREE.WebGLRenderer({antialias:true});
+        var width = 600;
+        var height = 400;
+        renderer.setSize(width,height);
+        document.body.appendChild(renderer.domElement);
+
+        var camera = new THREE.PerspectiveCamera(35,width/height,1,10000);
+        console.log("Aspect",width/height);
+        camera.position.set(0,0,500);
+        camera.lookAt( new THREE.Vector3(0,0,0) );
+        scene.add(camera);
+
+        var hemLight = new THREE.HemisphereLight(0xeeeeff,0xefefef,1);
+        scene.add(hemLight);
+
+        var light = new THREE.SF.PointLight(0xffffff,100,400);
+        scene.add(light);
+        light.position.y = 50;
+
+        var ambient = new THREE.AmbientLight(0x555555);
+        //scene.add(ambient);
+
+        var morphs = [];
+
+        var plane = new THREE.Mesh( new THREE.PlaneGeometry(1000000,1000000,5,5), new THREE.MeshLambertMaterial({color:0xffffff,ambient:0xffffff,side:THREE.DoubleSide}) );
+        plane.rotation.x = Math.PI/2;
+        plane.position.y = -20;
+        scene.add(plane);
+
+          console.log(plane);
+
+          var morphColorsToFaceColors = function ( geometry ) {
+
+              console.log( "Morph normals to ");
+              console.log( geometry );
+              if ( geometry.morphColors && geometry.morphColors.length ) {
+
+                  var colorMap = geometry.morphColors[ 0 ];
+
+                  for ( var i = 0; i < colorMap.colors.length; i ++ ) {
+
+                      geometry.faces[ i ].color = colorMap.colors[ i ];
+
+                  }
+
+              }
+
+          }
+
+          var loader = new THREE.JSONLoader();
+
+          loader.load( "models/flamingo.json", function( geometry ) {
+
+              morphColorsToFaceColors( geometry );
+              geometry.computeMorphNormals();
+
+              var material = new THREE.MeshPhongMaterial( { color: 0x6f6f6f, specular: 0xffffff, shininess: 20, morphTargets: true, morphNormals: true, vertexColors: THREE.FaceColors, shading: THREE.FlatShading } );
+              var meshAnim = new THREE.MorphAnimMesh( geometry, material );
+
+              meshAnim.duration = 1000;
+
+              var s = 0.35;
+              meshAnim.scale.set( s, s, s );
+              meshAnim.position.y = 15;
+              meshAnim.rotation.y = -1;
+
+              //meshAnim.castShadow = true;
+              //meshAnim.receiveShadow = true;
+
+              scene.add( meshAnim );
+              morphs.push( meshAnim );
+
+          } );
+
+
+
+
+
+        var controls = new THREE.TrackballControls(camera,renderer.domElement);
+
+        var render = function()
+        {
+            requestAnimationFrame(render);
+            controls.update();
+            renderer.render(scene,camera);
+        }
+
+        var onRenderClick = function( event ){
+            event.preventDefault();
+            sunflowRenderer.render(scene,camera,width,height);
+        }
+
+        document.getElementById("renderButton").addEventListener( "click", onRenderClick );
+
+        render();
+      }
+
+    </script>
+  </head>
+  <body onload="initialise();">
+    <button id="renderButton" style="position:absolute;z-index:100;">Render</button>
+  </body>
+</html>

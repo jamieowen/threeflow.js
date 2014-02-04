@@ -9,7 +9,6 @@ app     = express()
 server  = http.createServer app
 io      = io.listen server
 
-
 server.listen 3000
 
 # http
@@ -17,7 +16,7 @@ server.listen 3000
 app.post '/render',(request,response)->
   response.send "render"
 
-app.use '/', express.static( path.join( process.cwd(),'examples') )
+app.use '/', express.static( path.join( process.cwd(),'examples/deploy') )
 
 # sockets
 io.sockets.on 'connection', (socket)->

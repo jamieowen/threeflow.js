@@ -1,6 +1,8 @@
 (function() {
-  var SunflowRenderer, THREE,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var BlockExporter, CameraExporter, CausticsExporter, ConstantMaterial, DatGUI, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ScExporter, ShinyMaterial, SunflowRenderer, SunskyLight, THREE, TraceDepthsExporter,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   THREE = window.THREE || {};
 
@@ -78,11 +80,6 @@
 
   })();
 
-}).call(this);
-
-(function() {
-  var BlockExporter;
-
   BlockExporter = (function() {
     function BlockExporter() {}
 
@@ -141,13 +138,6 @@
 
   })();
 
-}).call(this);
-
-(function() {
-  var CameraExporter,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   CameraExporter = (function(_super) {
     __extends(CameraExporter, _super);
 
@@ -196,13 +186,6 @@
 
   })(BlockExporter);
 
-}).call(this);
-
-(function() {
-  var CausticsExporter,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   CausticsExporter = (function(_super) {
     __extends(CausticsExporter, _super);
 
@@ -239,11 +222,6 @@
     return CausticsExporter;
 
   })(BlockExporter);
-
-}).call(this);
-
-(function() {
-  var Exporter;
 
   Exporter = (function() {
     Exporter.BUCKET_ORDERS = ['hilbert', 'spiral', 'column', 'row', 'diagonal', 'random'];
@@ -324,13 +302,6 @@
 
   })();
 
-}).call(this);
-
-(function() {
-  var GeometryExporter,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   GeometryExporter = (function(_super) {
     __extends(GeometryExporter, _super);
 
@@ -389,13 +360,6 @@
     return GeometryExporter;
 
   })(BlockExporter);
-
-}).call(this);
-
-(function() {
-  var GiExporter,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   GiExporter = (function(_super) {
     __extends(GiExporter, _super);
@@ -495,13 +459,6 @@
 
   })(BlockExporter);
 
-}).call(this);
-
-(function() {
-  var ImageExporter,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   ImageExporter = (function(_super) {
     __extends(ImageExporter, _super);
 
@@ -546,13 +503,6 @@
     return ImageExporter;
 
   })(BlockExporter);
-
-}).call(this);
-
-(function() {
-  var LightsExporter,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   LightsExporter = (function(_super) {
     __extends(LightsExporter, _super);
@@ -622,13 +572,6 @@
 
   })(BlockExporter);
 
-}).call(this);
-
-(function() {
-  var MaterialsExporter,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   MaterialsExporter = (function(_super) {
     __extends(MaterialsExporter, _super);
 
@@ -695,13 +638,6 @@
 
   })(BlockExporter);
 
-}).call(this);
-
-(function() {
-  var MeshExporter,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   MeshExporter = (function(_super) {
     __extends(MeshExporter, _super);
 
@@ -755,11 +691,6 @@
     return MeshExporter;
 
   })(BlockExporter);
-
-}).call(this);
-
-(function() {
-  var ScExporter;
 
   ScExporter = (function() {
     function ScExporter() {}
@@ -951,13 +882,6 @@
 
   })();
 
-}).call(this);
-
-(function() {
-  var TraceDepthsExporter,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   TraceDepthsExporter = (function(_super) {
     __extends(TraceDepthsExporter, _super);
 
@@ -997,13 +921,6 @@
 
   })(BlockExporter);
 
-}).call(this);
-
-(function() {
-  var PointLight,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   THREE.SF.PointLight = PointLight = (function(_super) {
     __extends(PointLight, _super);
 
@@ -1024,12 +941,26 @@
 
   })(THREE.PointLight);
 
-}).call(this);
+  THREE.SF.SunskyLight = SunskyLight = (function(_super) {
+    __extends(SunskyLight, _super);
 
-(function() {
-  var ConstantMaterial,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+    function SunskyLight(params) {
+      SunskyLight.__super__.constructor.call(this);
+      params = params || {};
+      this.up = params.up || new THREE.Vector3(0, 1, 0);
+      this.east = params.east || new THREE.Vector3(0, 0, 1);
+      this.direction = params.direction || new THREE.Vector3(1, 1, 1);
+      this.turbidity = params.turbidity || 6;
+      this.samples = params.samples || 64;
+      this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x333333, 1);
+      this.add(this.directionalLight);
+      this.add(this.hemisphereLight);
+    }
+
+    return SunskyLight;
+
+  })(THREE.Object3D);
 
   THREE.SF.ConstantMaterial = ConstantMaterial = (function(_super) {
     __extends(ConstantMaterial, _super);
@@ -1044,13 +975,6 @@
 
   })(THREE.MeshPhongMaterial);
 
-}).call(this);
-
-(function() {
-  var DiffuseMaterial,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   THREE.SF.DiffuseMaterial = DiffuseMaterial = (function(_super) {
     __extends(DiffuseMaterial, _super);
 
@@ -1063,13 +987,6 @@
     return DiffuseMaterial;
 
   })(THREE.MeshLambertMaterial);
-
-}).call(this);
-
-(function() {
-  var GlassMaterial,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   THREE.SF.GlassMaterial = GlassMaterial = (function(_super) {
     __extends(GlassMaterial, _super);
@@ -1094,13 +1011,6 @@
 
   })(THREE.MeshPhongMaterial);
 
-}).call(this);
-
-(function() {
-  var MirrorMaterial,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   THREE.SF.MirrorMaterial = MirrorMaterial = (function(_super) {
     __extends(MirrorMaterial, _super);
 
@@ -1122,13 +1032,6 @@
 
   })(THREE.MeshPhongMaterial);
 
-}).call(this);
-
-(function() {
-  var PhongMaterial,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   THREE.SF.PhongMaterial = PhongMaterial = (function(_super) {
     __extends(PhongMaterial, _super);
 
@@ -1144,13 +1047,6 @@
 
   })(THREE.MeshPhongMaterial);
 
-}).call(this);
-
-(function() {
-  var ShinyMaterial,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
   THREE.SF.ShinyMaterial = ShinyMaterial = (function(_super) {
     __extends(ShinyMaterial, _super);
 
@@ -1165,11 +1061,6 @@
     return ShinyMaterial;
 
   })(THREE.MeshPhongMaterial);
-
-}).call(this);
-
-(function() {
-  var DatGUI;
 
   DatGUI = (function() {
     function DatGUI(renderer) {

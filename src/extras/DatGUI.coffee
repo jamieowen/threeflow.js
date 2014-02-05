@@ -1,4 +1,9 @@
-class DatGUI
+window.THREEFLOW = window.THREEFLOW || {}
+
+THREEFLOW = window.THREEFLOW
+
+THREEFLOW.DatGui = class DatGUI
+
   constructor:(@renderer)->
     @create()
 

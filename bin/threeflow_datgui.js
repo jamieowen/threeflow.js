@@ -1,7 +1,11 @@
 (function() {
-  var DatGUI;
+  var DatGUI, THREEFLOW;
 
-  DatGUI = (function() {
+  window.THREEFLOW = window.THREEFLOW || {};
+
+  THREEFLOW = window.THREEFLOW;
+
+  THREEFLOW.DatGui = DatGUI = (function() {
     function DatGUI(renderer) {
       this.renderer = renderer;
       this.create();

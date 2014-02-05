@@ -20,7 +20,6 @@
       this.exporter = new Exporter();
       this.connected = false;
       this.rendering = false;
-      this.gui = new DatGUI(this);
     }
 
     SunflowRenderer.prototype.connect = function() {

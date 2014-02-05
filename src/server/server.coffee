@@ -16,7 +16,7 @@ server.listen 3000
 app.post '/render',(request,response)->
   response.send "render"
 
-app.use '/', express.static( path.join( process.cwd(),'examples/deploy') )
+app.use '/', express.static( path.join( process.cwd(),'examples') )
 
 # sockets
 io.sockets.on 'connection', (socket)->

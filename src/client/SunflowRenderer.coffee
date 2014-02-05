@@ -17,9 +17,6 @@ THREE.SunflowRenderer = class SunflowRenderer
     @connected = false
     @rendering = false
 
-    @gui = new DatGUI @
-
-
 
   connect:()->
     if @connected

@@ -6,33 +6,37 @@ module.exports = (grunt)->
 
     # coffee
     coffee:
-      bin:
+      client:
         options:
           join:true
         files:
-          "bin/threeflow.js":"src/**/*.coffee"
+          "bin/threeflow.js":"src/client/**/*.coffee"
       examples:
         options:
           join:true
           bare:true
         files:
-          "examples/deploy/js/threeflow_examples.js":"examples/src/**/*.coffee"
+          "examples/js/threeflow_examples.js":"src/examples/**/*.coffee"
+      extras:
+        files:
+          "bin/threeflow_datgui.js":"src/extras/DatGui.coffee"
 
     uglify:
       main:
         files:
           "bin/threeflow.min.js":"bin/threeflow.js"
+          "bin/threeflow_datgui.min.js":"bin/threeflow_datgui.js"
 
     copy:
-      main:
+      examples:
         expand:true
         flatten:true
         src:"bin/*.*"
-        dest: "examples/deploy/js/"
+        dest: "examples/js/"
 
     watch:
       main:
-        files:[ "src/**/*.coffee","server/**/*.coffee", "examples/src/**/*.coffee" ]
+        files:[ "src/client/**/*.coffee","src/server/**/*.coffee", "src/examples/**/*.coffee" ]
         tasks:["coffee","copy"]
 
 
@@ -47,5 +51,5 @@ module.exports = (grunt)->
 
   grunt.registerTask "server",()->
     done = @async()
-    child_process.exec "coffee server/server.coffee",done
+    child_process.exec "coffee src/server/server.coffee",done
 

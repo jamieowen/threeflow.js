@@ -1,4 +1,4 @@
-var BasicCameraSetup, DiffuseObjectsSetup, Main, SunSkyLightingSetup,
+var BasicCameraSetup, DiffuseObjectsSetup, Main, RecursiveTree, SunSkyLightingSetup,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 Main = (function() {
@@ -243,5 +243,80 @@ DiffuseObjectsSetup = (function() {
   };
 
   return DiffuseObjectsSetup;
+
+})();
+
+RecursiveTree = (function() {
+  function RecursiveTree() {
+    this.inited = false;
+  }
+
+  RecursiveTree.prototype.init = function() {
+    var direction, maxBranch, maxDepth, rotation, start;
+    if (this.inited) {
+      return;
+    }
+    this.inited = true;
+    start = new THREE.Vector3();
+    rotation = new THREE.Vector3();
+    direction = new THREE.Vector3(0, 1, 0);
+    maxBranch = 3;
+    maxDepth = 5;
+    this.nodes = [];
+    this.branch(start, direction, rotation, maxBranch, maxDepth, 0, null, this.nodes);
+    this.meshes;
+    return this.plot(this.nodes);
+  };
+
+  RecursiveTree.prototype.branch = function(start, direction, rotation, maxBranch, maxDepth, currentDepth, parent, results) {
+    var branchCount, i, node, _i;
+    if (currentDepth === maxDepth) {
+      return;
+    }
+    if (currentDepth === 0) {
+      branchCount = 1;
+    } else {
+      branchCount = maxBranch;
+    }
+    for (i = _i = 0; 0 <= branchCount ? _i < branchCount : _i > branchCount; i = 0 <= branchCount ? ++_i : --_i) {
+      node = {
+        start: start.clone(),
+        end: start.clone().add(direction).multiplyScalar(40),
+        direction: direction.clone(),
+        parent: parent
+      };
+      results.push(node);
+    }
+    return null;
+  };
+
+  RecursiveTree.prototype.plot = function(nodes) {};
+
+  RecursiveTree.prototype.add = function(scene) {
+    var mesh, _i, _len, _ref;
+    this.init();
+    _ref = this.meshes;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      mesh = _ref[_i];
+      scene.add(mesh);
+    }
+    return null;
+  };
+
+  RecursiveTree.prototype.remove = function(scene) {
+    var mesh, _i, _len, _ref;
+    _ref = this.meshes;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      mesh = _ref[_i];
+      scene.remove(mesh);
+    }
+    return null;
+  };
+
+  RecursiveTree.prototype.update = function() {
+    return null;
+  };
+
+  return RecursiveTree;
 
 })();

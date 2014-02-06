@@ -742,10 +742,16 @@
       this.direction = params.direction || new THREE.Vector3(1, 1, 1);
       this.turbidity = params.turbidity || 2;
       this.samples = params.samples || 32;
-      this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-      this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x333333, 1);
-      this.add(this.directionalLight);
-      this.add(this.hemisphereLight);
+      params.directionalLight = params.directionalLight || true;
+      params.hemisphereLight = params.hemisphereLight || true;
+      if (params.directionalLight) {
+        this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        this.add(this.directionalLight);
+      }
+      if (params.hemisphereLight) {
+        this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x333333, 1);
+        this.add(this.hemisphereLight);
+      }
     }
 
     return SunskyLight;

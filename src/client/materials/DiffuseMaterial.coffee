@@ -1,4 +1,4 @@
-THREE.SF.DiffuseMaterial = class DiffuseMaterial extends THREE.MeshLambertMaterial
+THREEFLOW.DiffuseMaterial = class DiffuseMaterial extends THREE.MeshLambertMaterial
 
   constructor:(parameters)->
     super()

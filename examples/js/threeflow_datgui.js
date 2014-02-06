@@ -1,19 +1,23 @@
 (function() {
-  var DatGUI, THREEFLOW;
+  var DatGUI,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   window.THREEFLOW = window.THREEFLOW || {};
-
-  THREEFLOW = window.THREEFLOW;
 
   THREEFLOW.DatGui = DatGUI = (function() {
     function DatGUI(renderer) {
       var giSubFolder, property, type, _i, _len, _ref;
       this.renderer = renderer;
+      this._onPreview = __bind(this._onPreview, this);
+      this._onRender = __bind(this._onRender, this);
       if (!window.dat && !window.dat.GUI) {
         throw new Error("No dat.GUI found.");
       }
       this.gui = new dat.GUI();
-      this.gui.domElement.zIndex = 10000;
+      this.onRender = null;
+      this.onPreview = null;
+      this.gui.add(this, "_onRender").name("Render Final");
+      this.gui.add(this, "_onPreview").name("Render Preview");
       this.folderNameMap = {
         ImageExporter: "Image Settings",
         TraceDepthsExporter: "Trace Depths",
@@ -88,36 +92,20 @@
           }
         }
       }
-      /*
-      for exporter in @renderer.exporter.blockExporters
-        if exporter instanceof GiExporter
-          folder = @gui.addFolder @folderNameMap[exporter.constructor.name]
-          folder.add exporter,'enabled'
-          folder.add exporter,'type',GiExporter.TYPES
-      
-        else
-          folder = @gui.addFolder @folderNameMap[exporter.constructor.name]
-          for prop of exporter.settings
-            if exporter instanceof ImageExporter and prop is "filter"
-              folder.add exporter.settings, prop, ImageExporter.FILTERS
-            else
-              folder.add exporter.settings, prop
-      */
-
-      /*
-      @imageFolder = @gui.addFolder "Image Settings"
-      @imageFolder.add(@renderer.imageSettings,'resolutionX')
-      @imageFolder.add @renderer.imageSettings,'resolutionY'
-      @imageFolder.add @renderer.imageSettings,'antialiasMin'
-      @imageFolder.add @renderer.imageSettings,'antialiasMax'
-      @imageFolder.add @renderer.imageSettings,'samples'
-      @imageFolder.add @renderer.imageSettings,'contrast'
-      @imageFolder.add @renderer.imageSettings,'filter', THREE.SunflowRenderer.IMAGE_FILTERS
-      @imageFolder.add @renderer.imageSettings,'jitter'
-      */
-
       null;
     }
+
+    DatGUI.prototype._onRender = function() {
+      if (this.onRender) {
+        return this.onRender();
+      }
+    };
+
+    DatGUI.prototype._onPreview = function() {
+      if (this.onPreview) {
+        return this.onPreview();
+      }
+    };
 
     return DatGUI;
 

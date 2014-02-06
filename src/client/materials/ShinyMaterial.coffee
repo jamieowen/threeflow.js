@@ -1,4 +1,4 @@
-THREE.SF.ShinyMaterial = class ShinyMaterial extends THREE.MeshPhongMaterial
+THREEFLOW.ShinyMaterial = class ShinyMaterial extends THREE.MeshPhongMaterial
 
   constructor:(parameters)->
     super()

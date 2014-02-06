@@ -7,15 +7,15 @@ class LightsExporter extends BlockExporter
     @lightIndex = {}
 
   addToIndex:(object3d)->
-    if object3d instanceof THREE.SF.PointLight and not @lightIndex[object3d.uuid]
+    if object3d instanceof THREEFLOW.PointLight and not @lightIndex[object3d.uuid]
       @lightIndex[object3d.uuid] = object3d
-    else if object3d instanceof THREE.SF.SunskyLight and not @lightIndex[object3d.uuid]
+    else if object3d instanceof THREEFLOW.SunskyLight and not @lightIndex[object3d.uuid]
       @lightIndex[object3d.uuid] = object3d
 
     null
 
   doTraverse:(object3d)->
-    not ( (object3d instanceof THREE.SF.PointLight) or (object3d instanceof THREE.SF.SunskyLight) )
+    not ( (object3d instanceof THREEFLOW.PointLight) or (object3d instanceof THREEFLOW.SunskyLight) )
 
   exportBlock:()->
     result = ''
@@ -23,7 +23,7 @@ class LightsExporter extends BlockExporter
     for uuid of @lightIndex
       light = @lightIndex[ uuid ]
 
-      if light instanceof THREE.SF.SunskyLight
+      if light instanceof THREEFLOW.SunskyLight
         result += 'light {\n'
         result += '  type sunsky\n'
         result += '  up ' + @exportVector(light.up) + '\n'
@@ -32,7 +32,7 @@ class LightsExporter extends BlockExporter
         result += '  turbidity ' + light.turbidity + '\n'
         result += '  samples ' + light.samples + '\n'
         result += '}\n\n'
-      else if light instanceof THREE.SF.PointLight
+      else if light instanceof THREEFLOW.PointLight
         result += 'light {\n'
         result += '  type point\n'
         result += '  color ' + @exportColorTHREE(light.color) + '\n'

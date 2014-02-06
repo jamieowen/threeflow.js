@@ -1,4 +1,4 @@
-THREE.SF.MirrorMaterial = class MirrorMaterial extends THREE.MeshPhongMaterial
+THREEFLOW.MirrorMaterial = class MirrorMaterial extends THREE.MeshPhongMaterial
 
   constructor:(parameters)->
     super()

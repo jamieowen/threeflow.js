@@ -6,17 +6,17 @@
 
 ## Dat GUI
 
-- remove sunsky settings *done*
-- build context GI *done(ish)*
-- add render & preview buttons
+- remove sunsky settings **done**
+- build context GI **done(ish)**
+- add render & preview buttons **done**
 - look into saving settings
 
 ## Exporter
 
-- move settings vars to local *done*
-- handle sunsky from object *done*
-- map block exporters to renderer *done*
-- add accessors to static types *done*
+- move settings vars to local **done**
+- handle sunsky from object **done**
+- map block exporters to renderer **done**
+- add accessors to static types **done**
 
 *Later*
 

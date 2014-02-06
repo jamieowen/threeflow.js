@@ -1,14 +1,12 @@
 (function() {
-  var BlockExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ScExporter, ShinyMaterial, SunflowRenderer, SunskyLight, THREE, TraceDepthsExporter,
+  var BlockExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, SunflowRenderer, SunskyLight, TraceDepthsExporter,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  THREE = window.THREE || {};
+  window.THREEFLOW = window.THREEFLOW || {};
 
-  THREE.SF = {};
-
-  THREE.SunflowRenderer = SunflowRenderer = (function() {
+  THREEFLOW.SunflowRenderer = SunflowRenderer = (function() {
     function SunflowRenderer(options) {
       this.onRenderComplete = __bind(this.onRenderComplete, this);
       this.onRenderProgress = __bind(this.onRenderProgress, this);
@@ -509,16 +507,16 @@
     }
 
     LightsExporter.prototype.addToIndex = function(object3d) {
-      if (object3d instanceof THREE.SF.PointLight && !this.lightIndex[object3d.uuid]) {
+      if (object3d instanceof THREEFLOW.PointLight && !this.lightIndex[object3d.uuid]) {
         this.lightIndex[object3d.uuid] = object3d;
-      } else if (object3d instanceof THREE.SF.SunskyLight && !this.lightIndex[object3d.uuid]) {
+      } else if (object3d instanceof THREEFLOW.SunskyLight && !this.lightIndex[object3d.uuid]) {
         this.lightIndex[object3d.uuid] = object3d;
       }
       return null;
     };
 
     LightsExporter.prototype.doTraverse = function(object3d) {
-      return !((object3d instanceof THREE.SF.PointLight) || (object3d instanceof THREE.SF.SunskyLight));
+      return !((object3d instanceof THREEFLOW.PointLight) || (object3d instanceof THREEFLOW.SunskyLight));
     };
 
     LightsExporter.prototype.exportBlock = function() {
@@ -526,7 +524,7 @@
       result = '';
       for (uuid in this.lightIndex) {
         light = this.lightIndex[uuid];
-        if (light instanceof THREE.SF.SunskyLight) {
+        if (light instanceof THREEFLOW.SunskyLight) {
           result += 'light {\n';
           result += '  type sunsky\n';
           result += '  up ' + this.exportVector(light.up) + '\n';
@@ -535,7 +533,7 @@
           result += '  turbidity ' + light.turbidity + '\n';
           result += '  samples ' + light.samples + '\n';
           result += '}\n\n';
-        } else if (light instanceof THREE.SF.PointLight) {
+        } else if (light instanceof THREEFLOW.PointLight) {
           result += 'light {\n';
           result += '  type point\n';
           result += '  color ' + this.exportColorTHREE(light.color) + '\n';
@@ -579,24 +577,24 @@
         material = this.materialsIndex[uuid];
         result += 'shader {\n';
         result += '  name ' + material.uuid + '\n';
-        if (material instanceof THREE.SF.ConstantMaterial || material instanceof THREE.MeshBasicMaterial) {
+        if (material instanceof THREEFLOW.ConstantMaterial || material instanceof THREE.MeshBasicMaterial) {
           result += '  type constant\n';
           result += '  color ' + this.exportColorTHREE(material.color) + '\n';
-        } else if (material instanceof THREE.SF.DiffuseMaterial || material instanceof THREE.MeshLambertMaterial) {
+        } else if (material instanceof THREEFLOW.DiffuseMaterial || material instanceof THREE.MeshLambertMaterial) {
           result += '  type diffuse\n';
           result += '  diff ' + this.exportColorTHREE(material.color) + '\n';
-        } else if (material instanceof THREE.SF.ShinyMaterial) {
+        } else if (material instanceof THREEFLOW.ShinyMaterial) {
           result += '  type shiny\n';
           result += '  diff ' + this.exportColorTHREE(material.color) + '\n';
           result += '  refl ' + material.reflection + '\n';
-        } else if (material instanceof THREE.SF.GlassMaterial) {
+        } else if (material instanceof THREEFLOW.GlassMaterial) {
           result += '  type glass\n';
           result += '  eta ' + material.eta + '\n';
           result += '  color ' + this.exportColorTHREE(material.color) + '\n';
-        } else if (material instanceof THREE.SF.MirrorMaterial) {
+        } else if (material instanceof THREEFLOW.MirrorMaterial) {
           result += '  type mirror\n';
           result += '  refl ' + this.exportColorTHREE(material.reflection) + '\n';
-        } else if (material instanceof THREE.SF.PhongMaterial || material instanceof THREE.MeshPhongMaterial) {
+        } else if (material instanceof THREEFLOW.PhongMaterial || material instanceof THREE.MeshPhongMaterial) {
           result += '  type phong\n';
           result += '  diff ' + this.exportColorTHREE(material.color) + '\n';
           result += '  spec ' + this.exportColorTHREE(material.specular) + ' ' + material.shininess + '\n';
@@ -636,7 +634,7 @@
       result = '';
       for (uuid in this.meshIndex) {
         mesh = this.meshIndex[uuid];
-        if (mesh.geometry instanceof THREE.SF.InfinitePlaneGeometry) {
+        if (mesh.geometry instanceof THREEFLOW.InfinitePlaneGeometry) {
           result += 'object {\n';
           result += '  shader ' + mesh.material.uuid + '\n';
           result += '  type plane\n';
@@ -664,196 +662,6 @@
     return MeshExporter;
 
   })(BlockExporter);
-
-  ScExporter = (function() {
-    function ScExporter() {}
-
-    ScExporter["export"] = function(scene, camera, width, height) {
-      var index, scContents;
-      index = ScExporter.buildIndex(scene);
-      scContents = "\n% Three.js generated Sunflow scene file.\n";
-      scContents += 'image {\n';
-      scContents += '  resolution ' + width + ' ' + height + '\n';
-      scContents += '  aa 0 1\n';
-      scContents += '  filter triangle\n';
-      scContents += '}\n\n';
-      scContents += 'light {\n';
-      scContents += '  type sunsky\n';
-      scContents += '  up 0 1 0\n';
-      scContents += '  east 0 0 1\n';
-      scContents += '  sundir 1 1 1\n';
-      scContents += '  turbidity 4\n';
-      scContents += '  samples 64\n';
-      scContents += '}\n\n';
-      scContents += this.exportCamera(camera);
-      scContents += this.exportShaders(index);
-      scContents += this.exportObjects(index);
-      ScExporter.disposeIndex(index);
-      return scContents;
-    };
-
-    ScExporter.buildIndex = function(scene) {
-      var geometryMap, index, map, materialMap, meshMap, traverse;
-      materialMap = {};
-      meshMap = {};
-      geometryMap = {};
-      map = function(object3d) {
-        if (object3d instanceof THREE.Mesh) {
-          meshMap[object3d.uuid] = object3d;
-          geometryMap[object3d.geometry.uuid] = object3d.geometry;
-          return materialMap[object3d.material.uuid] = object3d.material;
-        } else if (object3d instanceof THREE.Camera) {
-          return console.log("camera", object3d);
-        }
-      };
-      traverse = function(object3d) {
-        var child, _i, _len, _ref, _results;
-        if (object3d.children.length) {
-          _ref = object3d.children;
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            child = _ref[_i];
-            map(child);
-            _results.push(traverse(child));
-          }
-          return _results;
-        }
-      };
-      traverse(scene);
-      index = {
-        materials: materialMap,
-        geometries: geometryMap,
-        meshes: meshMap
-      };
-      return index;
-    };
-
-    ScExporter.disposeIndex = function(index) {
-      var key;
-      for (key in index.materials) {
-        index.materials[key] = null;
-        delete index.materials[key];
-      }
-      for (key in index.geometries) {
-        index.geometries[key] = null;
-        delete index.geometries[key];
-      }
-      for (key in index.meshes) {
-        index.meshes[key] = null;
-        delete index.meshes[key];
-      }
-      return null;
-    };
-
-    ScExporter.exportCamera = function(camera) {
-      var scContents;
-      scContents = '';
-      if (camera instanceof THREE.PerspectiveCamera) {
-        scContents += 'camera {\n';
-        scContents += '  type pinhole\n';
-        scContents += '  eye ' + ScExporter.exportVector(camera.position) + '\n';
-        scContents += '  target ' + ScExporter.exportVector(camera.rotation) + '\n';
-        scContents += '  up ' + ScExporter.exportVector(camera.up) + "\n";
-        scContents += '  fov ' + 59. + '\n';
-        scContents += '  aspect ' + camera.aspect + '\n';
-        scContents += '}\n\n';
-      } else {
-        console.log("Unsupported camera type");
-      }
-      return scContents;
-    };
-
-    ScExporter.exportShaders = function(index) {
-      var material, scContents;
-      scContents = '';
-      for (material in index.materials) {
-        material = index.materials[material];
-        scContents += 'shader {\n';
-        scContents += '  name ' + material.uuid + '\n';
-        scContents += '  type diffuse\n';
-        scContents += '  diff ' + ScExporter.exportColor(material.color) + '\n';
-        scContents += '}\n\n';
-      }
-      return scContents;
-    };
-
-    ScExporter.exportObjects = function(index) {
-      var face, geometry, mesh, scContents, vertex, _i, _j, _len, _len1, _ref, _ref1;
-      scContents = '';
-      for (geometry in index.geometries) {
-        geometry = index.geometries[geometry];
-        scContents += 'object {\n';
-        scContents += '  noinstance\n';
-        scContents += '  type generic-mesh\n';
-        scContents += '  name ' + geometry.uuid + '\n';
-        scContents += '  points ' + geometry.vertices.length + '\n';
-        _ref = geometry.vertices;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          vertex = _ref[_i];
-          scContents += '    ' + ScExporter.exportVector(vertex) + '\n';
-        }
-        scContents += '  triangles ' + geometry.faces.length + '\n';
-        _ref1 = geometry.faces;
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          face = _ref1[_j];
-          scContents += '    ' + ScExporter.exportFace(face) + '\n';
-        }
-        scContents += '  normals none\n';
-        scContents += '  uvs none\n';
-        scContents += '}\n\n';
-      }
-      for (mesh in index.meshes) {
-        mesh = index.meshes[mesh];
-        /*
-        if mesh.geometry instanceof THREE.SphereGeometry
-          scContents += 'object {\n'
-          scContents += '  shader ' + mesh.material.uuid + '\n'
-          scContents += '  type sphere\n'
-          scContents += '  name ' + mesh.uuid + '\n'
-          scContents += '  c ' + ScExporter.exportVector(mesh.position) + '\n'
-          scContents += '  r ' + mesh.geometry.radius + '\n'
-          scContents += '}\n\n'
-        else
-        */
-
-        scContents += 'instance {\n';
-        scContents += '  name ' + mesh.uuid + '\n';
-        scContents += '  geometry ' + mesh.geometry.uuid + '\n';
-        scContents += ScExporter.exportTransform(mesh);
-        scContents += '  shader ' + mesh.material.uuid + '\n';
-        scContents += '}\n\n';
-      }
-      return scContents;
-    };
-
-    ScExporter.exportVector = function(vector) {
-      return vector.x + " " + vector.y + " " + vector.z;
-    };
-
-    ScExporter.exportFace = function(face) {
-      return face.a + " " + face.b + " " + face.c;
-    };
-
-    ScExporter.exportTransform = function(object3d) {
-      var element, scContents, _i, _len, _ref;
-      scContents = '';
-      scContents += '  transform col';
-      _ref = object3d.matrixWorld.elements;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        element = _ref[_i];
-        scContents += ' ' + element;
-      }
-      scContents += '\n';
-      return scContents;
-    };
-
-    ScExporter.exportColor = function(color) {
-      return '{ "sRGB nonlinear" ' + color.r + ' ' + color.g + ' ' + color.b + ' }';
-    };
-
-    return ScExporter;
-
-  })();
 
   TraceDepthsExporter = (function(_super) {
     __extends(TraceDepthsExporter, _super);
@@ -892,7 +700,7 @@
 
   })(BlockExporter);
 
-  THREE.SF.InfinitePlaneGeometry = function(width, height, widthSegments, heightSegments) {
+  THREEFLOW.InfinitePlaneGeometry = function(width, height, widthSegments, heightSegments) {
     width = width || 10000;
     height = height || 10000;
     widthSegments = widthSegments || 100;
@@ -901,9 +709,9 @@
     return THREE.PlaneGeometry.call(this);
   };
 
-  THREE.SF.InfinitePlaneGeometry.prototype = Object.create(THREE.PlaneGeometry.prototype);
+  THREEFLOW.InfinitePlaneGeometry.prototype = Object.create(THREE.PlaneGeometry.prototype);
 
-  THREE.SF.PointLight = PointLight = (function(_super) {
+  THREEFLOW.PointLight = PointLight = (function(_super) {
     __extends(PointLight, _super);
 
     function PointLight(hex, intensity, distance) {
@@ -923,7 +731,7 @@
 
   })(THREE.PointLight);
 
-  THREE.SF.SunskyLight = SunskyLight = (function(_super) {
+  THREEFLOW.SunskyLight = SunskyLight = (function(_super) {
     __extends(SunskyLight, _super);
 
     function SunskyLight(params) {
@@ -944,7 +752,7 @@
 
   })(THREE.Object3D);
 
-  THREE.SF.ConstantMaterial = ConstantMaterial = (function(_super) {
+  THREEFLOW.ConstantMaterial = ConstantMaterial = (function(_super) {
     __extends(ConstantMaterial, _super);
 
     function ConstantMaterial(parameters) {
@@ -957,7 +765,7 @@
 
   })(THREE.MeshPhongMaterial);
 
-  THREE.SF.DiffuseMaterial = DiffuseMaterial = (function(_super) {
+  THREEFLOW.DiffuseMaterial = DiffuseMaterial = (function(_super) {
     __extends(DiffuseMaterial, _super);
 
     function DiffuseMaterial(parameters) {
@@ -970,7 +778,7 @@
 
   })(THREE.MeshLambertMaterial);
 
-  THREE.SF.GlassMaterial = GlassMaterial = (function(_super) {
+  THREEFLOW.GlassMaterial = GlassMaterial = (function(_super) {
     __extends(GlassMaterial, _super);
 
     function GlassMaterial(parameters) {
@@ -993,7 +801,7 @@
 
   })(THREE.MeshPhongMaterial);
 
-  THREE.SF.MirrorMaterial = MirrorMaterial = (function(_super) {
+  THREEFLOW.MirrorMaterial = MirrorMaterial = (function(_super) {
     __extends(MirrorMaterial, _super);
 
     function MirrorMaterial(parameters) {
@@ -1014,7 +822,7 @@
 
   })(THREE.MeshPhongMaterial);
 
-  THREE.SF.PhongMaterial = PhongMaterial = (function(_super) {
+  THREEFLOW.PhongMaterial = PhongMaterial = (function(_super) {
     __extends(PhongMaterial, _super);
 
     function PhongMaterial(parameters) {
@@ -1029,7 +837,7 @@
 
   })(THREE.MeshPhongMaterial);
 
-  THREE.SF.ShinyMaterial = ShinyMaterial = (function(_super) {
+  THREEFLOW.ShinyMaterial = ShinyMaterial = (function(_super) {
     __extends(ShinyMaterial, _super);
 
     function ShinyMaterial(parameters) {

@@ -1,5 +1,5 @@
 
-THREE.SF.ConstantMaterial = class ConstantMaterial extends THREE.MeshPhongMaterial
+THREEFLOW.ConstantMaterial = class ConstantMaterial extends THREE.MeshPhongMaterial
 
   constructor:(parameters)->
     super()

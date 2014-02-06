@@ -1,4 +1,4 @@
-THREE.SF.PhongMaterial = class PhongMaterial extends THREE.MeshPhongMaterial
+THREEFLOW.PhongMaterial = class PhongMaterial extends THREE.MeshPhongMaterial
 
   constructor:(parameters)->
     super()

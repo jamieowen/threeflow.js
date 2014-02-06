@@ -22,7 +22,7 @@ class MeshExporter extends BlockExporter
 
     for uuid of @meshIndex
       mesh = @meshIndex[uuid]
-      if mesh.geometry instanceof THREE.SF.InfinitePlaneGeometry
+      if mesh.geometry instanceof THREEFLOW.InfinitePlaneGeometry
         result += 'object {\n'
         result += '  shader ' + mesh.material.uuid + '\n'
         result += '  type plane\n'

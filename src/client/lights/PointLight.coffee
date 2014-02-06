@@ -1,5 +1,5 @@
 
-THREE.SF.PointLight = class PointLight extends THREE.PointLight
+THREEFLOW.PointLight = class PointLight extends THREE.PointLight
 
   constructor:( hex, intensity, distance )->
     super( hex, intensity, distance )

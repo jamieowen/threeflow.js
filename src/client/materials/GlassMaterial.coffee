@@ -1,4 +1,4 @@
-THREE.SF.GlassMaterial = class GlassMaterial extends THREE.MeshPhongMaterial
+THREEFLOW.GlassMaterial = class GlassMaterial extends THREE.MeshPhongMaterial
 
   constructor:(parameters)->
     super()

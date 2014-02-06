@@ -1,10 +1,7 @@
 
-THREE = window.THREE || {}
+window.THREEFLOW = window.THREEFLOW || {}
 
-# namespace for sunflow materials.
-THREE.SF = {}
-
-THREE.SunflowRenderer = class SunflowRenderer
+THREEFLOW.SunflowRenderer = class SunflowRenderer
 
   constructor:(options)->
     options = options || {}
@@ -28,7 +25,6 @@ THREE.SunflowRenderer = class SunflowRenderer
 
     @connected = false
     @rendering = false
-
 
   connect:()->
     if @connected

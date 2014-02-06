@@ -1,7 +1,7 @@
 
 
-#= class InfinitePlaneGeometry extends THREE.PlaneGeometry
-THREE.SF.InfinitePlaneGeometry = (width, height, widthSegments, heightSegments)->
+#= class THREEFLOW.InfinitePlaneGeometry extends THREE.PlaneGeometry
+THREEFLOW.InfinitePlaneGeometry = (width, height, widthSegments, heightSegments)->
 
     width  = width || 10000
     height = height || 10000
@@ -14,4 +14,4 @@ THREE.SF.InfinitePlaneGeometry = (width, height, widthSegments, heightSegments)-
     THREE.PlaneGeometry.call @
 
 
-THREE.SF.InfinitePlaneGeometry.prototype = Object.create( THREE.PlaneGeometry.prototype )
+THREEFLOW.InfinitePlaneGeometry.prototype = Object.create( THREE.PlaneGeometry.prototype )

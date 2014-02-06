@@ -1,5 +1,5 @@
 
-THREE.SF.SunskyLight = class SunskyLight extends THREE.Object3D
+THREEFLOW.SunskyLight = class SunskyLight extends THREE.Object3D
   constructor:( params )->
     super()
 

@@ -51,13 +51,12 @@
     <div class="menu">
         <h1 class="type header">+  threeflow examples.</h1>
         <ol>
-        <li class="type"><a target="example_frame" class="link type" href="geometry_cubes.html">geometry cubes</a></li>
-        <li class="type"><a target="example_frame" class="link type" href="geometry_spheres.html">geometry spheres</a></li>
-        
+        <% for example in @examples: %><li class="type"><a target="example_frame" class="link type" href="<%= example.html %>"><%= example.name.replace("_"," ") %></a></li>
+        <% end %>
         </ol>
     </div>
 
-    <iframe class="frame" name="example_frame" src="geometry_cubes.html" seamless>
+    <iframe class="frame" name="example_frame" src="<%= @examples[0].html %>" seamless>
     </iframe>
 </body>
 </html>

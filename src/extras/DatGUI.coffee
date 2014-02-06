@@ -9,6 +9,7 @@ THREEFLOW.DatGui = class DatGUI
       throw new Error "No dat.GUI found."
 
     @gui = new dat.GUI()
+    @gui.domElement.zIndex = 10000
 
     @folderNameMap =
       ImageExporter: "Image Settings"
@@ -51,7 +52,7 @@ THREEFLOW.DatGui = class DatGUI
 
     @giTypes = [
       {type:@renderer.gi.types[0], name:"Instant GI", property:"igi"}
-      {type:@renderer.gi.types[1], name:"Irradiance Caching (FG)", property:"irrCache"}
+      {type:@renderer.gi.types[1], name:"Irradiance Caching / Final Gathering", property:"irrCache"}
       {type:@renderer.gi.types[2], name:"Path Tracing", property:"path"}
       {type:@renderer.gi.types[3], name:"Ambient Occlusion", property:"ambOcc"}
       {type:@renderer.gi.types[4], name:"Fake Ambient Term", property:"fake"}

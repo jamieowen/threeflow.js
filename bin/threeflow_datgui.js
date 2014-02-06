@@ -13,6 +13,7 @@
         throw new Error("No dat.GUI found.");
       }
       this.gui = new dat.GUI();
+      this.gui.domElement.zIndex = 10000;
       this.folderNameMap = {
         ImageExporter: "Image Settings",
         TraceDepthsExporter: "Trace Depths",
@@ -53,7 +54,7 @@
           property: "igi"
         }, {
           type: this.renderer.gi.types[1],
-          name: "Irradiance Caching (FG)",
+          name: "Irradiance Caching / Final Gathering",
           property: "irrCache"
         }, {
           type: this.renderer.gi.types[2],

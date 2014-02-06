@@ -16,8 +16,8 @@ class Main
 
     @scene = new THREE.Scene()
 
-    @width = 600 #window.innerWidth
-    @height = 600 #window.innerHeight
+    @width = window.innerWidth
+    @height = window.innerHeight
 
     @renderer.setSize @width,@height
 

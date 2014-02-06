@@ -31,20 +31,18 @@ class Exporter
     @exporterSettings =
       convertPrimitives: false
 
-    # register code block exporters.
     @blockExporters = []
 
-    # register block exporters.
-    @addBlockExporter new ImageExporter()
-    @addBlockExporter new TraceDepthsExporter()
-    @addBlockExporter new CausticsExporter()
-    @addBlockExporter new GiExporter()
+    @image        = @addBlockExporter new ImageExporter()
+    @traceDepths  = @addBlockExporter new TraceDepthsExporter()
+    @caustics     = @addBlockExporter new CausticsExporter()
+    @gi           = @addBlockExporter new GiExporter()
 
-    @addBlockExporter new CameraExporter()
-    @addBlockExporter new LightsExporter()
-    @addBlockExporter new MaterialsExporter()
-    @addBlockExporter new GeometryExporter()
-    @addBlockExporter new MeshExporter()
+    @cameras      = @addBlockExporter new CameraExporter()
+    @lights       = @addBlockExporter new LightsExporter()
+    @materials    = @addBlockExporter new MaterialsExporter()
+    @geometry     = @addBlockExporter new GeometryExporter()
+    @meshes       = @addBlockExporter new MeshExporter()
 
 
   addBlockExporter:(exporter)->
@@ -52,6 +50,8 @@ class Exporter
       throw new Error 'Extend BlockExporter'
     else
       @blockExporters.push( exporter )
+
+    exporter
 
   # index the three js scene and
   indexScene:(object3d)->

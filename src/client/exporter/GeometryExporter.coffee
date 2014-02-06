@@ -4,9 +4,6 @@ class GeometryExporter extends BlockExporter
   constructor:()->
     super()
 
-    @settings =
-      enabled: true
-
     @geometryIndex = {}
 
   addToIndex:(object3d)->
@@ -23,9 +20,6 @@ class GeometryExporter extends BlockExporter
 
   exportBlock:()->
     result = ''
-
-    if not @settings.enabled
-      return result
         
     for uuid of @geometryIndex
       geometry = @geometryIndex[uuid]

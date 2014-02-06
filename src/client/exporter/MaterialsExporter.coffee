@@ -4,10 +4,6 @@ class MaterialsExporter extends BlockExporter
   constructor:()->
     super()
 
-    @settings =
-      enabled: true
-
-    # map all materials by THREE.js uuid
     @materialsIndex = {}
 
   addToIndex:(object3d)->
@@ -24,9 +20,6 @@ class MaterialsExporter extends BlockExporter
 
   exportBlock:()->
     result = ''
-
-    if not @settings.enabled
-      return result
 
     for uuid of @materialsIndex
       material = @materialsIndex[ uuid ]

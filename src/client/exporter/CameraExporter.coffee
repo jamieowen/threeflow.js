@@ -4,13 +4,7 @@ class CameraExporter extends BlockExporter
   constructor:()->
     super()
 
-    @settings =
-      enabled: true
-
-    # for now, index the first camera we come across
     @camera = null
-
-    console.log @
 
   addToIndex:(object3d)->
     if @camera
@@ -31,7 +25,7 @@ class CameraExporter extends BlockExporter
   exportBlock:()->
     result = ''
 
-    if not @settings.enabled or not @camera
+    if not @camera
       return result
 
     result += 'camera {\n'
@@ -39,6 +33,7 @@ class CameraExporter extends BlockExporter
     result += '  eye ' + @exportVector(@camera.position) + '\n'
     result += '  target ' + @exportVector(@camera.rotation) + '\n'
     result += '  up ' + @exportVector(@camera.up) + '\n'
+
     # TODO: multiplying the fov by the aspect ratio seems to correct
     # the sunflow renderer problems.
     # but not perfect.

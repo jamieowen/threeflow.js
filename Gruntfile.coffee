@@ -36,7 +36,7 @@ module.exports = (grunt)->
 
     watch:
       main:
-        files:[ "src/client/**/*.coffee","src/server/**/*.coffee", "src/examples/**/*.coffee" ]
+        files:[ "src/client/**/*.coffee","src/server/**/*.coffee", "src/examples/**/*.coffee","src/extras/**/*.coffee" ]
         tasks:["coffee","copy"]
 
 

@@ -7,17 +7,19 @@ Main = (function() {
     this.onRenderClick = __bind(this.onRenderClick, this);
     this.sunflowRenderer = new THREE.SunflowRenderer();
     this.sunflowRenderer.connect();
+    this.gui = new THREEFLOW.DatGui(this.sunflowRenderer);
     this.renderer = new THREE.WebGLRenderer({
       antialias: true
     });
     document.body.appendChild(this.renderer.domElement);
     this.scene = new THREE.Scene();
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
+    this.width = 600;
+    this.height = 600;
     this.renderer.setSize(this.width, this.height);
     this.camera = new THREE.PerspectiveCamera(35, this.width / this.height, 100, 10000);
     this.camera.position.set(0, 1000, -1000);
     this.camera.lookAt(new THREE.Vector3());
+    this.scene.add(this.camera);
     this.controls = new THREE.TrackballControls(this.camera, this.renderer.domElement);
     this.objectsSetup = null;
     this.lightingSetup = null;
@@ -65,17 +67,12 @@ Main = (function() {
   };
 
   Main.prototype.render = function() {
-    var camera;
     this.controls.update();
     if (this.objectsSetup) {
       this.objectsSetup.update();
     }
     if (this.lightingSetup) {
       this.lightingSetup.update();
-    }
-    if (this.cameraSetup) {
-      this.cameraSetup.update();
-      camera = this.cameraSetup.getActiveCamera();
     }
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render);
@@ -105,12 +102,10 @@ BasicCameraSetup = (function() {
 
   BasicCameraSetup.prototype.add = function(scene) {
     this.init();
-    scene.add(this.camera);
     return null;
   };
 
   BasicCameraSetup.prototype.remove = function(scene) {
-    scene.remove(this.camera);
     return null;
   };
 
@@ -210,9 +205,8 @@ DiffuseObjectsSetup = (function() {
       reflection: 1,
       wireframe: true
     });
-    floor = new THREE.Mesh(new THREE.SF.InfinitePlaneGeometry(), material);
+    floor = new THREE.Mesh(new THREE.PlaneGeometry(10000, 10000, 10, 10), material);
     floor.rotation.x = -(Math.PI / 2);
-    console.log("FLOOR ROTATION:", floor.up);
     this.meshes.push(floor);
     return null;
   };

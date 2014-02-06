@@ -20,12 +20,12 @@ class BasicCameraSetup
   add:(scene)->
     @init()
 
-    scene.add @camera
+    #scene.add @camera
 
     null
 
   remove:(scene)->
-    scene.remove @camera
+    #scene.remove @camera
 
     null
 

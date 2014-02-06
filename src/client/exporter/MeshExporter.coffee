@@ -4,9 +4,7 @@ class MeshExporter extends BlockExporter
   constructor:()->
     super()
 
-    @settings =
-      enabled: true
-      convertPrimitives: true
+    @convertPrimitives = true
 
     @meshIndex = {}
 
@@ -22,9 +20,6 @@ class MeshExporter extends BlockExporter
   exportBlock:()->
     result = ''
 
-    if not @settings.enabled
-      return result
-
     for uuid of @meshIndex
       mesh = @meshIndex[uuid]
       if mesh.geometry instanceof THREE.SF.InfinitePlaneGeometry
@@ -34,7 +29,7 @@ class MeshExporter extends BlockExporter
         result += '  p ' + @exportTransformPosition(mesh) + '\n'
         result += '  n ' + @exportVector( mesh.rotation ) + '\n'
 
-      else if @settings.convertPrimitives and mesh.geometry instanceof THREE.SphereGeometry
+      else if @convertPrimitives and mesh.geometry instanceof THREE.SphereGeometry
         result += 'object {\n'
         result += '  shader ' + mesh.material.uuid + '\n'
         result += '  type sphere\n'

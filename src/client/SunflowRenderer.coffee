@@ -14,6 +14,18 @@ THREE.SunflowRenderer = class SunflowRenderer
 
     @exporter = new Exporter()
 
+    # map block exporters for shorthand access
+    @image        = @exporter.image
+    @traceDepths  = @exporter.traceDepths
+    @caustics     = @exporter.caustics
+    @gi           = @exporter.gi
+
+    @cameras      = @exporter.cameras
+    @lights       = @exporter.lights
+    @materials    = @exporter.materials
+    @geometry     = @exporter.geometry
+    @meshes       = @exporter.meshes
+
     @connected = false
     @rendering = false
 
@@ -36,10 +48,11 @@ THREE.SunflowRenderer = class SunflowRenderer
     else if not @rendering
 
       console.log "RENDER"
+
       scale = 1;
 
-      @exporter.blockExporters[0].settings.resolutionX = width*scale
-      @exporter.blockExporters[0].settings.resolutionY = height*scale
+      @exporter.image.resolutionX = width*scale
+      @exporter.image.resolutionY = height*scale
 
       @exporter.indexScene scene
       scContents = @exporter.exportCode()

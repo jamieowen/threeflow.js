@@ -6,6 +6,7 @@ class Main
     # three sunflow renderer.
     @sunflowRenderer = new THREE.SunflowRenderer()
     @sunflowRenderer.connect()
+    @gui = new THREEFLOW.DatGui(@sunflowRenderer)
 
     # standard three.js setup
     @renderer = new THREE.WebGLRenderer
@@ -15,8 +16,8 @@ class Main
 
     @scene = new THREE.Scene()
 
-    @width = window.innerWidth
-    @height = window.innerHeight
+    @width = 600 #window.innerWidth
+    @height = 600 #window.innerHeight
 
     @renderer.setSize @width,@height
 
@@ -24,6 +25,7 @@ class Main
     @camera = new THREE.PerspectiveCamera(35,@width/@height,100,10000)
     @camera.position.set 0,1000,-1000
     @camera.lookAt new THREE.Vector3()
+    @scene.add @camera
 
     @controls = new THREE.TrackballControls @camera, @renderer.domElement
 
@@ -32,6 +34,7 @@ class Main
     @objectsSetup    = null
     @lightingSetup = null
     @cameraSetup  = null
+
 
     # add render click temp for ui.
     document.getElementById("renderButton").addEventListener( "click", @onRenderClick );
@@ -86,9 +89,9 @@ class Main
     if @lightingSetup
       @lightingSetup.update()
 
-    if @cameraSetup
-      @cameraSetup.update()
-      camera = @cameraSetup.getActiveCamera()
+    #if @cameraSetup
+    #  @cameraSetup.update()
+    #  camera = @cameraSetup.getActiveCamera()
 
     #if camera
     #  camera.aspect = @width/@height

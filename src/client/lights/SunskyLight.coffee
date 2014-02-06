@@ -9,8 +9,8 @@ THREE.SF.SunskyLight = class SunskyLight extends THREE.Object3D
     @east = params.east || new THREE.Vector3 0,0,1
     @direction = params.direction || new THREE.Vector3 1,1,1
 
-    @turbidity = params.turbidity || 6
-    @samples = params.samples || 64
+    @turbidity = params.turbidity || 2
+    @samples = params.samples || 32
 
     # create the three.js objects that attempt to mimic the
     # sunsky light.

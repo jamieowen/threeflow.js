@@ -16,15 +16,17 @@ class ImageExporter extends BlockExporter
   constructor:()->
     super()
 
-    @settings =
-      resolutionX: 800
-      resolutionY: 600
-      antialiasMin: -1
-      antialiasMax: 1
-      samples: 8
-      contrast: 0.1
-      filter: ImageExporter.FILTERS[1]
-      jitter: true
+    @resolutionX    = 800
+    @resolutionY    = 600
+    @antialiasMin   = -1
+    @antialiasMax   = 1
+    @samples        = 32
+    @contrast       = 0.1
+    @filter         = ImageExporter.FILTERS[0]
+    @jitter         = true
+
+    @filterTypes    = ImageExporter.FILTERS
+
 
   addToIndex:(object3d)->
     null
@@ -36,12 +38,12 @@ class ImageExporter extends BlockExporter
     result = ''
 
     result += 'image {\n'
-    result += '  resolution ' + @settings.resolutionX + ' ' + @settings.resolutionY + '\n'
-    result += '  aa ' + @settings.antialiasMin + ' ' + @settings.antialiasMax + '\n'
-    result += '  samples ' + @settings.samples + '\n'
-    result += '  contrast ' + @settings.contrast + '\n'
-    result += '  filter ' + @settings.filter + '\n'
-    result += '  jitter ' + @settings.jitter + '\n'
+    result += '  resolution ' + @resolutionX + ' ' + @resolutionY + '\n'
+    result += '  aa ' + @antialiasMin + ' ' + @antialiasMax + '\n'
+    result += '  samples ' + @samples + '\n'
+    result += '  contrast ' + @contrast + '\n'
+    result += '  filter ' + @filter + '\n'
+    result += '  jitter ' + @jitter + '\n'
     result += '}\n\n'
 
     return result

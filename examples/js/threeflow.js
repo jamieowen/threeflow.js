@@ -18,6 +18,15 @@
       this.port = options.port || 3000;
       this.host = options.host || "http://localhost";
       this.exporter = new Exporter();
+      this.image = this.exporter.image;
+      this.traceDepths = this.exporter.traceDepths;
+      this.caustics = this.exporter.caustics;
+      this.gi = this.exporter.gi;
+      this.cameras = this.exporter.cameras;
+      this.lights = this.exporter.lights;
+      this.materials = this.exporter.materials;
+      this.geometry = this.exporter.geometry;
+      this.meshes = this.exporter.meshes;
       this.connected = false;
       this.rendering = false;
     }
@@ -41,8 +50,8 @@
       } else if (!this.rendering) {
         console.log("RENDER");
         scale = 1;
-        this.exporter.blockExporters[0].settings.resolutionX = width * scale;
-        this.exporter.blockExporters[0].settings.resolutionY = height * scale;
+        this.exporter.image.resolutionX = width * scale;
+        this.exporter.image.resolutionY = height * scale;
         this.exporter.indexScene(scene);
         scContents = this.exporter.exportCode();
         this.socket.emit("render", {
@@ -142,11 +151,7 @@
 
     function CameraExporter() {
       CameraExporter.__super__.constructor.call(this);
-      this.settings = {
-        enabled: true
-      };
       this.camera = null;
-      console.log(this);
     }
 
     CameraExporter.prototype.addToIndex = function(object3d) {
@@ -167,7 +172,7 @@
     CameraExporter.prototype.exportBlock = function() {
       var result;
       result = '';
-      if (!this.settings.enabled || !this.camera) {
+      if (!this.camera) {
         return result;
       }
       result += 'camera {\n';
@@ -190,12 +195,10 @@
 
     function CausticsExporter() {
       CausticsExporter.__super__.constructor.call(this);
-      this.settings = {
-        enabled: false,
-        photons: 10000,
-        kdEstimate: 100,
-        kdRadius: 0.5
-      };
+      this.enabled = false;
+      this.photons = 10000;
+      this.kdEstimate = 100;
+      this.kdRadius = 0.5;
     }
 
     CausticsExporter.prototype.addToIndex = function(object3d) {
@@ -209,11 +212,11 @@
     CausticsExporter.prototype.exportBlock = function() {
       var result;
       result = '';
-      if (!this.settings.enabled) {
+      if (!this.enabled) {
         return result;
       }
       result += 'photons {\n';
-      result += '  caustics ' + this.settings.photons + ' kd ' + this.settings.kdEstimate + ' ' + this.settings.kdRadius + '\n';
+      result += '  caustics ' + this.photons + ' kd ' + this.kdEstimate + ' ' + this.kdRadius + '\n';
       result += '}\n\n';
       return result;
     };
@@ -246,23 +249,24 @@
         convertPrimitives: false
       };
       this.blockExporters = [];
-      this.addBlockExporter(new ImageExporter());
-      this.addBlockExporter(new TraceDepthsExporter());
-      this.addBlockExporter(new CausticsExporter());
-      this.addBlockExporter(new GiExporter());
-      this.addBlockExporter(new CameraExporter());
-      this.addBlockExporter(new LightsExporter());
-      this.addBlockExporter(new MaterialsExporter());
-      this.addBlockExporter(new GeometryExporter());
-      this.addBlockExporter(new MeshExporter());
+      this.image = this.addBlockExporter(new ImageExporter());
+      this.traceDepths = this.addBlockExporter(new TraceDepthsExporter());
+      this.caustics = this.addBlockExporter(new CausticsExporter());
+      this.gi = this.addBlockExporter(new GiExporter());
+      this.cameras = this.addBlockExporter(new CameraExporter());
+      this.lights = this.addBlockExporter(new LightsExporter());
+      this.materials = this.addBlockExporter(new MaterialsExporter());
+      this.geometry = this.addBlockExporter(new GeometryExporter());
+      this.meshes = this.addBlockExporter(new MeshExporter());
     }
 
     Exporter.prototype.addBlockExporter = function(exporter) {
       if (!exporter instanceof BlockExporter) {
         throw new Error('Extend BlockExporter');
       } else {
-        return this.blockExporters.push(exporter);
+        this.blockExporters.push(exporter);
       }
+      return exporter;
     };
 
     Exporter.prototype.indexScene = function(object3d) {
@@ -306,9 +310,6 @@
 
     function GeometryExporter() {
       GeometryExporter.__super__.constructor.call(this);
-      this.settings = {
-        enabled: true
-      };
       this.geometryIndex = {};
     }
 
@@ -328,9 +329,6 @@
     GeometryExporter.prototype.exportBlock = function() {
       var face, geometry, result, uuid, vertex, _i, _j, _len, _len1, _ref, _ref1;
       result = '';
-      if (!this.settings.enabled) {
-        return result;
-      }
       for (uuid in this.geometryIndex) {
         geometry = this.geometryIndex[uuid];
         result += 'object {\n';
@@ -370,7 +368,9 @@
     function GiExporter() {
       this.type = GiExporter.TYPES[0];
       this.enabled = false;
-      this.irrCacheSettings = {
+      this.globalMapTypes = GiExporter.GLOBAL_MAP_TYPES;
+      this.types = GiExporter.TYPES;
+      this.irrCache = {
         samples: 512,
         tolerance: 0.01,
         spacingMin: 0.05,
@@ -381,25 +381,23 @@
         globalEstimate: 100,
         globalRadius: 0.75
       };
-      this.igiSettings = {
+      this.igi = {
         samples: 64,
         sets: 1,
         bias: 0.01,
         biasSamples: 0
       };
-      this.pathSettings = {
+      this.path = {
         samples: 32
       };
-      this.ambOccSettings = {
+      this.ambOcc = {
         samples: 32,
         bright: 0xffffff,
         dark: 0x000000,
         maxDistance: 3.0
       };
-      this.fakeSettings = {
-        upX: 0,
-        upY: 1,
-        upZ: 0,
+      this.fake = {
+        up: new THREE.Vector3(0, 1, 0),
         sky: 0x000000,
         ground: 0xffffff
       };
@@ -422,33 +420,33 @@
       result += 'gi {\n';
       result += '  type ' + this.type + '\n';
       if (this.type === 'igi') {
-        result += '  samples ' + this.igiSettings.samples + '\n';
-        result += '  sets ' + this.igiSettings.sets + '\n';
-        result += '  b ' + this.igiSettings.bias + '\n';
-        result += '  bias-samples ' + this.igiSettings.biasSamples + '\n';
+        result += '  samples ' + this.igi.samples + '\n';
+        result += '  sets ' + this.igi.sets + '\n';
+        result += '  b ' + this.igi.bias + '\n';
+        result += '  bias-samples ' + this.igi.biasSamples + '\n';
       } else if (this.type === 'irr-cache') {
-        result += '  samples ' + this.irrCacheSettings.samples + '\n';
-        result += '  tolerance ' + this.irrCacheSettings.tolerance + '\n';
-        result += '  spacing ' + this.irrCacheSettings.spacingMin + ' ' + this.irrCacheSettings.spacingMax + '\n';
-        if (this.irrCacheSettings.globalEnabled) {
+        result += '  samples ' + this.irrCache.samples + '\n';
+        result += '  tolerance ' + this.irrCache.tolerance + '\n';
+        result += '  spacing ' + this.irrCache.spacingMin + ' ' + this.irrCache.spacingMax + '\n';
+        if (this.irrCache.globalEnabled) {
           global = 'global ';
-          global += this.irrCacheSettings.globalPhotons + ' ';
-          global += this.irrCacheSettings.globalMap + ' ';
-          global += this.irrCacheSettings.globalEstimate + ' ';
-          global += this.irrCacheSettings.globalRadius + '\n';
+          global += this.irrCache.globalPhotons + ' ';
+          global += this.irrCache.globalMap + ' ';
+          global += this.irrCache.globalEstimate + ' ';
+          global += this.irrCache.globalRadius + '\n';
           result += global;
         }
       } else if (this.type === 'path') {
-        result += 'samples ' + this.pathSettings.samples + '\n';
+        result += 'samples ' + this.path.samples + '\n';
       } else if (this.type === 'ambocc') {
-        result += 'bright { "sRGB nonlinear" 1 1 1 }' + '\n';
-        result += 'dark { "sRGB nonlinear" 0 0 0 }' + '\n';
-        result += 'samples ' + this.ambOccSettings.samples + '\n';
-        result += 'maxdist ' + this.ambOccSettings.maxDistance + '\n';
+        result += '  bright { "sRGB nonlinear" 1 1 1 }' + '\n';
+        result += '  dark { "sRGB nonlinear" 0 0 0 }' + '\n';
+        result += '  samples ' + this.ambOcc.samples + '\n';
+        result += '  maxdist ' + this.ambOcc.maxDistance + '\n';
       } else if (this.type === 'fake') {
-        result += 'up ' + this.ambOccSettings.upX + ' ' + this.ambOccSettings.upY + ' ' + this.ambOccSettings.upZ;
-        result += 'sky { "sRGB nonlinear" 0 0 0 }';
-        result += 'ground { "sRGB nonlinear" 1 1 1 }';
+        result += '  up ' + this.exportVector(this.fake.up + '\n');
+        result += '  sky { "sRGB nonlinear" 0 0 0 }' + '\n';
+        result += '  ground { "sRGB nonlinear" 1 1 1 }' + '\n';
       }
       result += '}\n\n';
       return result;
@@ -465,16 +463,15 @@
 
     function ImageExporter() {
       ImageExporter.__super__.constructor.call(this);
-      this.settings = {
-        resolutionX: 800,
-        resolutionY: 600,
-        antialiasMin: -1,
-        antialiasMax: 1,
-        samples: 8,
-        contrast: 0.1,
-        filter: ImageExporter.FILTERS[1],
-        jitter: true
-      };
+      this.resolutionX = 800;
+      this.resolutionY = 600;
+      this.antialiasMin = -1;
+      this.antialiasMax = 1;
+      this.samples = 32;
+      this.contrast = 0.1;
+      this.filter = ImageExporter.FILTERS[0];
+      this.jitter = true;
+      this.filterTypes = ImageExporter.FILTERS;
     }
 
     ImageExporter.prototype.addToIndex = function(object3d) {
@@ -489,12 +486,12 @@
       var result;
       result = '';
       result += 'image {\n';
-      result += '  resolution ' + this.settings.resolutionX + ' ' + this.settings.resolutionY + '\n';
-      result += '  aa ' + this.settings.antialiasMin + ' ' + this.settings.antialiasMax + '\n';
-      result += '  samples ' + this.settings.samples + '\n';
-      result += '  contrast ' + this.settings.contrast + '\n';
-      result += '  filter ' + this.settings.filter + '\n';
-      result += '  jitter ' + this.settings.jitter + '\n';
+      result += '  resolution ' + this.resolutionX + ' ' + this.resolutionY + '\n';
+      result += '  aa ' + this.antialiasMin + ' ' + this.antialiasMax + '\n';
+      result += '  samples ' + this.samples + '\n';
+      result += '  contrast ' + this.contrast + '\n';
+      result += '  filter ' + this.filter + '\n';
+      result += '  jitter ' + this.jitter + '\n';
       result += '}\n\n';
       return result;
     };
@@ -508,61 +505,44 @@
 
     function LightsExporter() {
       LightsExporter.__super__.constructor.call(this);
-      this.settings = {
-        enabled: true,
-        sunskyEnabled: true,
-        sunskyUpX: 0,
-        sunskyUpY: 1,
-        sunskyUpZ: 0,
-        sunskyEastX: 0,
-        sunskyEastY: 0,
-        sunskyEastZ: 1,
-        sunskyDirX: 1,
-        sunskyDirY: 1,
-        sunskyDirZ: 1,
-        sunskyTurbidity: 6,
-        sunskySamples: 64
-      };
       this.lightIndex = {};
     }
 
     LightsExporter.prototype.addToIndex = function(object3d) {
-      if (object3d instanceof THREE.Light && !this.lightIndex[object3d.uuid]) {
+      if (object3d instanceof THREE.SF.PointLight && !this.lightIndex[object3d.uuid]) {
+        this.lightIndex[object3d.uuid] = object3d;
+      } else if (object3d instanceof THREE.SF.SunskyLight && !this.lightIndex[object3d.uuid]) {
         this.lightIndex[object3d.uuid] = object3d;
       }
       return null;
     };
 
     LightsExporter.prototype.doTraverse = function(object3d) {
-      return !(object3d instanceof THREE.SF.PointLight);
+      return !((object3d instanceof THREE.SF.PointLight) || (object3d instanceof THREE.SF.SunskyLight));
     };
 
     LightsExporter.prototype.exportBlock = function() {
       var light, result, uuid;
       result = '';
-      if (!this.settings.enabled) {
-        return result;
-      }
-      if (this.settings.sunskyEnabled) {
-        result += 'light {\n';
-        result += '  type sunsky\n';
-        result += '  up ' + this.settings.sunskyUpX + ' ' + this.settings.sunskyUpY + ' ' + this.settings.sunskyUpZ + '\n';
-        result += '  east ' + this.settings.sunskyEastX + ' ' + this.settings.sunskyEastY + ' ' + this.settings.sunskyEastZ + '\n';
-        result += '  sundir ' + this.settings.sunskyDirX + ' ' + this.settings.sunskyDirY + ' ' + this.settings.sunskyDirZ + '\n';
-        result += '  turbidity ' + this.settings.sunskyTurbidity + '\n';
-        result += '  samples ' + this.settings.sunskySamples + '\n';
-        result += '}\n\n';
-      }
       for (uuid in this.lightIndex) {
         light = this.lightIndex[uuid];
-        if (light instanceof THREE.SF.PointLight) {
+        if (light instanceof THREE.SF.SunskyLight) {
+          result += 'light {\n';
+          result += '  type sunsky\n';
+          result += '  up ' + this.exportVector(light.up) + '\n';
+          result += '  east ' + this.exportVector(light.east) + '\n';
+          result += '  sundir ' + this.exportVector(light.direction) + '\n';
+          result += '  turbidity ' + light.turbidity + '\n';
+          result += '  samples ' + light.samples + '\n';
+          result += '}\n\n';
+        } else if (light instanceof THREE.SF.PointLight) {
           result += 'light {\n';
           result += '  type point\n';
           result += '  color ' + this.exportColorTHREE(light.color) + '\n';
           result += '  power ' + light.intensity * 200 + ' \n';
           result += '  p ' + this.exportVector(light.position) + '\n';
+          result += '}\n\n';
         }
-        result += '}\n\n';
       }
       return result;
     };
@@ -576,9 +556,6 @@
 
     function MaterialsExporter() {
       MaterialsExporter.__super__.constructor.call(this);
-      this.settings = {
-        enabled: true
-      };
       this.materialsIndex = {};
     }
 
@@ -598,9 +575,6 @@
     MaterialsExporter.prototype.exportBlock = function() {
       var material, result, uuid;
       result = '';
-      if (!this.settings.enabled) {
-        return result;
-      }
       for (uuid in this.materialsIndex) {
         material = this.materialsIndex[uuid];
         result += 'shader {\n';
@@ -642,10 +616,7 @@
 
     function MeshExporter() {
       MeshExporter.__super__.constructor.call(this);
-      this.settings = {
-        enabled: true,
-        convertPrimitives: true
-      };
+      this.convertPrimitives = true;
       this.meshIndex = {};
     }
 
@@ -663,9 +634,6 @@
     MeshExporter.prototype.exportBlock = function() {
       var mesh, result, uuid;
       result = '';
-      if (!this.settings.enabled) {
-        return result;
-      }
       for (uuid in this.meshIndex) {
         mesh = this.meshIndex[uuid];
         if (mesh.geometry instanceof THREE.SF.InfinitePlaneGeometry) {
@@ -674,7 +642,7 @@
           result += '  type plane\n';
           result += '  p ' + this.exportTransformPosition(mesh) + '\n';
           result += '  n ' + this.exportVector(mesh.rotation) + '\n';
-        } else if (this.settings.convertPrimitives && mesh.geometry instanceof THREE.SphereGeometry) {
+        } else if (this.convertPrimitives && mesh.geometry instanceof THREE.SphereGeometry) {
           result += 'object {\n';
           result += '  shader ' + mesh.material.uuid + '\n';
           result += '  type sphere\n';
@@ -892,12 +860,10 @@
 
     function TraceDepthsExporter() {
       TraceDepthsExporter.__super__.constructor.call(this);
-      this.settings = {
-        enabled: true,
-        diffusion: 1,
-        reflection: 4,
-        refraction: 4
-      };
+      this.enabled = false;
+      this.diffusion = 1;
+      this.reflection = 4;
+      this.refraction = 4;
     }
 
     TraceDepthsExporter.prototype.addToIndex = function(object3d) {
@@ -911,13 +877,13 @@
     TraceDepthsExporter.prototype.exportBlock = function() {
       var result;
       result = '';
-      if (!this.settings.enabled) {
+      if (!this.enabled) {
         return result;
       }
       result += 'trace-depths {\n';
-      result += '  diff ' + this.settings.diffusion + '\n';
-      result += '  refl ' + this.settings.reflection + '\n';
-      result += '  refr ' + this.settings.refraction + '\n';
+      result += '  diff ' + this.diffusion + '\n';
+      result += '  refl ' + this.reflection + '\n';
+      result += '  refr ' + this.refraction + '\n';
       result += '}\n\n';
       return result;
     };
@@ -966,8 +932,8 @@
       this.up = params.up || new THREE.Vector3(0, 1, 0);
       this.east = params.east || new THREE.Vector3(0, 0, 1);
       this.direction = params.direction || new THREE.Vector3(1, 1, 1);
-      this.turbidity = params.turbidity || 6;
-      this.samples = params.samples || 64;
+      this.turbidity = params.turbidity || 2;
+      this.samples = params.samples || 32;
       this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
       this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x333333, 1);
       this.add(this.directionalLight);

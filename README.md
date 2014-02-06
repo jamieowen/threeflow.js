@@ -72,7 +72,7 @@ Exporter will have to prevent traversing into that mesh.
 ### Lights
 
 Lights should be implemented in a similar way to cameras.
-Add some
+
 1. Point Light
 2. Meshlight/Area Light
 3. Spherical Light

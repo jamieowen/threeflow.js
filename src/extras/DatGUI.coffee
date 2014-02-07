@@ -16,7 +16,7 @@ THREEFLOW.DatGui = class DatGUI
       @onResize()
 
     @gui = new dat.GUI()
-    @gui.remember @renderer.image
+    #@gui.remember @renderer.image
     #@gui.remember @renderer.traceDepths
     #@gui.remember @renderer.caustics
 
@@ -55,6 +55,8 @@ THREEFLOW.DatGui = class DatGUI
 
     @giFolder.add @renderer.gi,"enabled"
 
+
+
     # change the sub folder when the type changes.
     @giFolder.add(@renderer.gi,"type",@renderer.gi.types).onChange (value)=>
       updateType value
@@ -69,13 +71,17 @@ THREEFLOW.DatGui = class DatGUI
 
     @giSubFolder = null
 
-    addGiTypeFolder =(type)=>
-      console.log "ADD FOLDER. CURRENT:",@giSubFolder
-      if @giSubFolder
-        #@giFol.destroy()
-        @giFolder.removeFolder @giSubFolder.name
-
-      @giSubFolder = @giFolder.addFolder(type.name)
+    updateFolder =(type)=>
+      if not @giSubFolder
+        @giSubFolder = @giFolder.addFolder(type.name)
+        THREEFLOW.SUB = @giSubFolder
+      else
+        controllers = @giSubFolder.__controllers.slice(0)
+        for controller in controllers
+          @giSubFolder.remove controller
+        # hack here - this version of dat gui slices the array.. ( rather than splice )
+        @giSubFolder.__controllers.splice(0)
+        @giSubFolder.__ul.firstChild.innerHTML = type.name
 
       for property of @renderer.gi[type.property]
         if type.type is "irr-cache" and property is "globalMap"
@@ -83,14 +89,18 @@ THREEFLOW.DatGui = class DatGUI
         else if type.type is "ambocc" and ( property is "bright" or property is "dark" )
           @giSubFolder.addColor @renderer.gi[type.property],property
         else if type.type is "fake"
+
+          # TODO Fake Ambient - THREE.Vector3 Controller for Dat.GUI??
           console.log "SKIPPED FAKE AMBIENT TERM GI(TODO)"
+
         else
           @giSubFolder.add @renderer.gi[type.property],property
 
       null
 
     updateType = (type)=>
-      addGiTypeFolder @giTypes[@renderer.gi.types.indexOf(type)]
+      @renderer.gi.type = type
+      updateFolder @giTypes[@renderer.gi.types.indexOf(type)]
       null
 
     updateType @renderer.gi.type

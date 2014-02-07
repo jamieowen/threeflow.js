@@ -72,7 +72,7 @@ class GiExporter extends BlockExporter
       result += '  spacing ' + @irrCache.spacingMin + ' ' + @irrCache.spacingMax + '\n'
 
       if @irrCache.globalEnabled
-        global = 'global '
+        global = '  global '
         global += @irrCache.globalPhotons + ' '
         global += @irrCache.globalMap + ' '
         global += @irrCache.globalEstimate + ' '

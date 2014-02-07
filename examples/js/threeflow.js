@@ -427,7 +427,7 @@
         result += '  tolerance ' + this.irrCache.tolerance + '\n';
         result += '  spacing ' + this.irrCache.spacingMin + ' ' + this.irrCache.spacingMax + '\n';
         if (this.irrCache.globalEnabled) {
-          global = 'global ';
+          global = '  global ';
           global += this.irrCache.globalPhotons + ' ';
           global += this.irrCache.globalMap + ' ';
           global += this.irrCache.globalEstimate + ' ';

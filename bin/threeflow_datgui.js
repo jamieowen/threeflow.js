@@ -6,7 +6,7 @@
 
   THREEFLOW.DatGui = DatGUI = (function() {
     function DatGUI(renderer) {
-      var addGiTypeFolder, updateType,
+      var updateFolder, updateType,
         _this = this;
       this.renderer = renderer;
       this._onPreview = __bind(this._onPreview, this);
@@ -23,7 +23,6 @@
         return this.onResize();
       };
       this.gui = new dat.GUI();
-      this.gui.remember(this.renderer.image);
       this.onRender = null;
       this.onPreview = null;
       this.gui.add(this, "_onRender").name("Render Final");
@@ -76,13 +75,20 @@
         }
       ];
       this.giSubFolder = null;
-      addGiTypeFolder = function(type) {
-        var property;
-        console.log("ADD FOLDER. CURRENT:", _this.giSubFolder);
-        if (_this.giSubFolder) {
-          _this.giFolder.removeFolder(_this.giSubFolder.name);
+      updateFolder = function(type) {
+        var controller, controllers, property, _i, _len;
+        if (!_this.giSubFolder) {
+          _this.giSubFolder = _this.giFolder.addFolder(type.name);
+          THREEFLOW.SUB = _this.giSubFolder;
+        } else {
+          controllers = _this.giSubFolder.__controllers.slice(0);
+          for (_i = 0, _len = controllers.length; _i < _len; _i++) {
+            controller = controllers[_i];
+            _this.giSubFolder.remove(controller);
+          }
+          _this.giSubFolder.__controllers.splice(0);
+          _this.giSubFolder.__ul.firstChild.innerHTML = type.name;
         }
-        _this.giSubFolder = _this.giFolder.addFolder(type.name);
         for (property in _this.renderer.gi[type.property]) {
           if (type.type === "irr-cache" && property === "globalMap") {
             _this.giSubFolder.add(_this.renderer.gi.irrCache, "globalMap", _this.renderer.gi.globalMapTypes);
@@ -97,7 +103,8 @@
         return null;
       };
       updateType = function(type) {
-        addGiTypeFolder(_this.giTypes[_this.renderer.gi.types.indexOf(type)]);
+        _this.renderer.gi.type = type;
+        updateFolder(_this.giTypes[_this.renderer.gi.types.indexOf(type)]);
         return null;
       };
       updateType(this.renderer.gi.type);

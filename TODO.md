@@ -24,9 +24,11 @@
 
 ## Lights
 
+All Lights should extend Object3D and give the option of adding markers & real three.js lights.
 - Area/Mesh Light
 - On/off THREE lights (for many lights)
 - Directional Lights
+- SkyLight - ( Match Three )
 
 ## Geometry / Mesh
 - Infinite Plane ( finish )
@@ -44,4 +46,11 @@
 - geometry_spheres_primitive
 - geometry_spheres_gen
 - geometry_platonics
+
+- materials_constant
+- materials_diffuse
+- materials_phong
+- materials_shiny
+- materials_glass
+- materials_mirror
 

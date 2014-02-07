@@ -11,7 +11,7 @@ window.onload = function() {
   camera = new THREE.PerspectiveCamera(35, width / height, 100, 100000);
   controls = new THREE.TrackballControls(camera, webgl.domElement);
   sunsky = new THREEFLOW.SunskyLight({
-    directionalLight: true
+    directionalLight: false
   });
   scene.add(camera);
   scene.add(sunsky);

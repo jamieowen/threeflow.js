@@ -15,13 +15,17 @@ THREEFLOW.SunskyLight = class SunskyLight extends THREE.Object3D
     # create the three.js objects that attempt to mimic the
     # sunsky light.
 
-    params.directionalLight   = params.directionalLight || true
-    params.hemisphereLight    = params.hemisphereLight || true
+    params.previewLights      = true if params.previewLights isnt false
+    params.directionalLight   = true if params.directionalLight isnt false
+    params.hemisphereLight    = true if params.hemisphereLight isnt false
 
-    if params.directionalLight
-      @directionalLight = new THREE.DirectionalLight 0xffffff,1
-      @add @directionalLight
+    if params.previewLights
+      # TODO: Match up with Sunsky as best as possible.
+      if params.directionalLight
+        @directionalLight = new THREE.DirectionalLight 0xffffff,1
+        @directionalLight.position.set 10,50,0
+        @add @directionalLight
 
-    if params.hemisphereLight
-      @hemisphereLight  = new THREE.HemisphereLight 0xffffff,0x333333,1
-      @add @hemisphereLight
+      if params.hemisphereLight
+        @hemisphereLight  = new THREE.HemisphereLight 0xffffff,0x000000,.8
+        @add @hemisphereLight

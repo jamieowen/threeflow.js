@@ -20,7 +20,7 @@ class ImageExporter extends BlockExporter
     @resolutionY    = 600
     @antialiasMin   = -1
     @antialiasMax   = 1
-    @samples        = 32
+    @samples        = 2
     @contrast       = 0.1
     @filter         = ImageExporter.FILTERS[0]
     @jitter         = true

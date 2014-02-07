@@ -14,7 +14,7 @@ window.onload = ()->
   camera      = new THREE.PerspectiveCamera(35,width/height,100,100000)
   controls    = new THREE.TrackballControls(camera,webgl.domElement)
   sunsky      = new THREEFLOW.SunskyLight
-    directionalLight: false
+    directionalLight: true
 
   # add to scene
   scene.add camera
@@ -24,28 +24,9 @@ window.onload = ()->
   camera.position.set 0,0,-1000
   camera.lookAt new THREE.Vector3(0,0,0)
 
-  # create cubes
-  simplex = new SimplexNoise()
-  simplexSmooth = .05
-  size = 10
-  gridX = 60
-  gridZ = 40
-  scale = 5
-  offset = new THREE.Vector3 -(gridX*size)/2,0,-(gridZ*size)/2
+  # create materials.
 
-  geometry = new THREE.CubeGeometry(size,size,size)
-  material = new THREE.MeshLambertMaterial
-    color: 0xffffff
-
-  for ix in [0...gridX]
-    for iz in [0...gridZ]
-      cube = new THREE.Mesh geometry,material
-      cubeScale = ((simplex.noise(ix*simplexSmooth,iz*simplexSmooth)+1)/2)*scale
-      cube.scale.set 1,cubeScale,1
-      cube.position.set ix*size,(cubeScale*size)/2,iz*size
-      cube.position.add offset
-
-      scene.add cube
+  # sub div cubish geometry..
 
   # create the sunflow renderer and connect.
   threeflow = new THREEFLOW.SunflowRenderer()

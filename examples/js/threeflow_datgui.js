@@ -6,29 +6,28 @@
 
   THREEFLOW.DatGui = DatGUI = (function() {
     function DatGUI(renderer) {
-      var giSubFolder, property, type, _i, _len, _ref;
+      var addGiTypeFolder, updateType,
+        _this = this;
       this.renderer = renderer;
       this._onPreview = __bind(this._onPreview, this);
       this._onRender = __bind(this._onRender, this);
       if (!window.dat && !window.dat.GUI) {
         throw new Error("No dat.GUI found.");
       }
+      dat.GUI.prototype.removeFolder = function(name) {
+        console.log("REMOVE", this, name);
+        this.__folders[name].close();
+        this.__ul.removeChild(this.__folders[name].li);
+        dom.removeClass(this.__folders[name].li, 'folder');
+        this.__folders[name] = void 0;
+        return this.onResize();
+      };
       this.gui = new dat.GUI();
+      this.gui.remember(this.renderer.image);
       this.onRender = null;
       this.onPreview = null;
       this.gui.add(this, "_onRender").name("Render Final");
       this.gui.add(this, "_onPreview").name("Render Preview");
-      this.folderNameMap = {
-        ImageExporter: "Image Settings",
-        TraceDepthsExporter: "Trace Depths",
-        CausticsExporter: "Caustics",
-        GiExporter: "Global Illumination",
-        CameraExporter: "Camera",
-        LightsExporter: "Lights",
-        MaterialsExporter: "Materials",
-        GeometryExporter: "Geometry",
-        MeshExporter: "Mesh"
-      };
       this.imageFolder = this.gui.addFolder("Image");
       this.traceDepthsFolder = this.gui.addFolder("Trace Depths");
       this.causticsFolder = this.gui.addFolder("Caustics");
@@ -50,7 +49,9 @@
       this.causticsFolder.add(this.renderer.caustics, "kdRadius");
       this.meshFolder.add(this.renderer.meshes, "convertPrimitives");
       this.giFolder.add(this.renderer.gi, "enabled");
-      this.giFolder.add(this.renderer.gi, "type", this.renderer.gi.types);
+      this.giFolder.add(this.renderer.gi, "type", this.renderer.gi.types).onChange(function(value) {
+        return updateType(value);
+      });
       this.giTypes = [
         {
           type: this.renderer.gi.types[0],
@@ -74,24 +75,32 @@
           property: "fake"
         }
       ];
-      this.giSubFolders = [];
-      _ref = this.giTypes;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        type = _ref[_i];
-        giSubFolder = this.giFolder.addFolder(type.name);
-        this.giSubFolders.push(giSubFolder);
-        for (property in this.renderer.gi[type.property]) {
+      this.giSubFolder = null;
+      addGiTypeFolder = function(type) {
+        var property;
+        console.log("ADD FOLDER. CURRENT:", _this.giSubFolder);
+        if (_this.giSubFolder) {
+          _this.giFolder.removeFolder(_this.giSubFolder.name);
+        }
+        _this.giSubFolder = _this.giFolder.addFolder(type.name);
+        for (property in _this.renderer.gi[type.property]) {
           if (type.type === "irr-cache" && property === "globalMap") {
-            this.giFolder.add(this.renderer.gi.irrCache, "globalMap", this.renderer.gi.globalMapTypes);
-          } else if (type === "ambocc" && (property === "bright" || property === "dark")) {
-            this.giFolder.addColor(this.renderer.gi[type.property], property);
+            _this.giSubFolder.add(_this.renderer.gi.irrCache, "globalMap", _this.renderer.gi.globalMapTypes);
+          } else if (type.type === "ambocc" && (property === "bright" || property === "dark")) {
+            _this.giSubFolder.addColor(_this.renderer.gi[type.property], property);
           } else if (type.type === "fake") {
             console.log("SKIPPED FAKE AMBIENT TERM GI(TODO)");
           } else {
-            this.giFolder.add(this.renderer.gi[type.property], property);
+            _this.giSubFolder.add(_this.renderer.gi[type.property], property);
           }
         }
-      }
+        return null;
+      };
+      updateType = function(type) {
+        addGiTypeFolder(_this.giTypes[_this.renderer.gi.types.indexOf(type)]);
+        return null;
+      };
+      updateType(this.renderer.gi.type);
       null;
     }
 

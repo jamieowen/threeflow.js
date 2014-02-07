@@ -465,7 +465,7 @@
       this.resolutionY = 600;
       this.antialiasMin = -1;
       this.antialiasMax = 1;
-      this.samples = 32;
+      this.samples = 2;
       this.contrast = 0.1;
       this.filter = ImageExporter.FILTERS[0];
       this.jitter = true;
@@ -742,15 +742,25 @@
       this.direction = params.direction || new THREE.Vector3(1, 1, 1);
       this.turbidity = params.turbidity || 2;
       this.samples = params.samples || 32;
-      params.directionalLight = params.directionalLight || true;
-      params.hemisphereLight = params.hemisphereLight || true;
-      if (params.directionalLight) {
-        this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        this.add(this.directionalLight);
+      if (params.previewLights !== false) {
+        params.previewLights = true;
       }
-      if (params.hemisphereLight) {
-        this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x333333, 1);
-        this.add(this.hemisphereLight);
+      if (params.directionalLight !== false) {
+        params.directionalLight = true;
+      }
+      if (params.hemisphereLight !== false) {
+        params.hemisphereLight = true;
+      }
+      if (params.previewLights) {
+        if (params.directionalLight) {
+          this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+          this.directionalLight.position.set(10, 50, 0);
+          this.add(this.directionalLight);
+        }
+        if (params.hemisphereLight) {
+          this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000, .8);
+          this.add(this.hemisphereLight);
+        }
       }
     }
 

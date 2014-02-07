@@ -7,27 +7,26 @@ THREEFLOW.DatGui = class DatGUI
     if not window.dat and not window.dat.GUI
       throw new Error "No dat.GUI found."
 
+    dat.GUI.prototype.removeFolder =(name)->
+      console.log "REMOVE", @, name
+      @__folders[name].close()
+      @__ul.removeChild this.__folders[name].li
+      dom.removeClass this.__folders[name].li,'folder'
+      @__folders[name] = undefined
+      @onResize()
+
     @gui = new dat.GUI()
+    @gui.remember @renderer.image
+    #@gui.remember @renderer.traceDepths
+    #@gui.remember @renderer.caustics
 
     # user can add custom handlers by setting these properties.
-
     @onRender = null
     @onPreview = null
 
     # add render and preview buttons.
     @gui.add(@,"_onRender").name("Render Final")
     @gui.add(@,"_onPreview").name("Render Preview")
-
-    @folderNameMap =
-      ImageExporter: "Image Settings"
-      TraceDepthsExporter: "Trace Depths"
-      CausticsExporter: "Caustics"
-      GiExporter: "Global Illumination"
-      CameraExporter: "Camera"
-      LightsExporter: "Lights"
-      MaterialsExporter: "Materials"
-      GeometryExporter: "Geometry"
-      MeshExporter:"Mesh"
 
     @imageFolder        = @gui.addFolder "Image"
     @traceDepthsFolder  = @gui.addFolder "Trace Depths"
@@ -55,7 +54,10 @@ THREEFLOW.DatGui = class DatGUI
     @meshFolder.add @renderer.meshes,"convertPrimitives"
 
     @giFolder.add @renderer.gi,"enabled"
-    @giFolder.add @renderer.gi,"type",@renderer.gi.types
+
+    # change the sub folder when the type changes.
+    @giFolder.add(@renderer.gi,"type",@renderer.gi.types).onChange (value)=>
+      updateType value
 
     @giTypes = [
       {type:@renderer.gi.types[0], name:"Instant GI", property:"igi"}
@@ -65,21 +67,33 @@ THREEFLOW.DatGui = class DatGUI
       {type:@renderer.gi.types[4], name:"Fake Ambient Term", property:"fake"}
     ]
 
-    @giSubFolders = []
+    @giSubFolder = null
 
-    for type in @giTypes
-      giSubFolder = @giFolder.addFolder type.name
-      @giSubFolders.push giSubFolder
+    addGiTypeFolder =(type)=>
+      console.log "ADD FOLDER. CURRENT:",@giSubFolder
+      if @giSubFolder
+        #@giFol.destroy()
+        @giFolder.removeFolder @giSubFolder.name
+
+      @giSubFolder = @giFolder.addFolder(type.name)
 
       for property of @renderer.gi[type.property]
         if type.type is "irr-cache" and property is "globalMap"
-          @giFolder.add @renderer.gi.irrCache,"globalMap",@renderer.gi.globalMapTypes
-        else if type is "ambocc" and ( property is "bright" or property is "dark" )
-          @giFolder.addColor @renderer.gi[type.property],property
+          @giSubFolder.add @renderer.gi.irrCache,"globalMap",@renderer.gi.globalMapTypes
+        else if type.type is "ambocc" and ( property is "bright" or property is "dark" )
+          @giSubFolder.addColor @renderer.gi[type.property],property
         else if type.type is "fake"
           console.log "SKIPPED FAKE AMBIENT TERM GI(TODO)"
         else
-          @giFolder.add @renderer.gi[type.property],property
+          @giSubFolder.add @renderer.gi[type.property],property
+
+      null
+
+    updateType = (type)=>
+      addGiTypeFolder @giTypes[@renderer.gi.types.indexOf(type)]
+      null
+
+    updateType @renderer.gi.type
 
     null
 

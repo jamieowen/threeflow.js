@@ -79,7 +79,6 @@
         var controller, controllers, property, _i, _len;
         if (!_this.giSubFolder) {
           _this.giSubFolder = _this.giFolder.addFolder(type.name);
-          THREEFLOW.SUB = _this.giSubFolder;
         } else {
           controllers = _this.giSubFolder.__controllers.slice(0);
           for (_i = 0, _len = controllers.length; _i < _len; _i++) {

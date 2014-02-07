@@ -1,5 +1,5 @@
 window.onload = function() {
-  var camera, controls, cube, cubeScale, geometry, gridX, gridZ, gui, height, ix, iz, material, offset, render, scale, scene, simplex, simplexSmooth, size, sunsky, threeflow, webgl, width, _i, _j,
+  var camera, controls, cube, cubeScale, geometry, gridX, gridZ, gui, height, ix, iz, material, offset, plane, render, scale, scene, simplex, simplexSmooth, size, sunsky, threeflow, webgl, width, _i, _j,
     _this = this;
   webgl = new THREE.WebGLRenderer({
     antialias: true,
@@ -11,8 +11,15 @@ window.onload = function() {
   camera = new THREE.PerspectiveCamera(35, width / height, 100, 100000);
   controls = new THREE.TrackballControls(camera, webgl.domElement);
   sunsky = new THREEFLOW.SunskyLight({
-    directionalLight: false
+    dirLight: false,
+    hemLight: true
   });
+  plane = new THREE.Mesh(new THREEFLOW.InfinitePlaneGeometry(50, 50, 10, 10), new THREE.MeshLambertMaterial({
+    color: 0xffffff,
+    wireframe: true
+  }));
+  scene.add(plane);
+  window.GEOM = plane.geometry;
   scene.add(camera);
   scene.add(sunsky);
   camera.position.set(0, 0, -1000);

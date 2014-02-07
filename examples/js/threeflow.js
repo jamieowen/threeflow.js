@@ -701,13 +701,12 @@
   })(BlockExporter);
 
   THREEFLOW.InfinitePlaneGeometry = function(width, height, widthSegments, heightSegments) {
-    width = width || 10000;
-    height = height || 10000;
-    widthSegments = widthSegments || 100;
-    heightSegments = heightSegments || 100;
-    console.log(width, height, widthSegments, heightSegments);
-    return THREE.PlaneGeometry.call(this);
+    console.log("widh", arguments);
+    THREE.PlaneGeometry.call(this, arguments);
+    return console.log("widhaf", this.width);
   };
+
+  console.log("LOG SHIT");
 
   THREEFLOW.InfinitePlaneGeometry.prototype = Object.create(THREE.PlaneGeometry.prototype);
 
@@ -745,21 +744,21 @@
       if (params.previewLights !== false) {
         params.previewLights = true;
       }
-      if (params.directionalLight !== false) {
-        params.directionalLight = true;
+      if (params.dirLight !== false) {
+        params.dirLight = true;
       }
-      if (params.hemisphereLight !== false) {
-        params.hemisphereLight = true;
+      if (params.hemLight !== false) {
+        params.hemLight = true;
       }
       if (params.previewLights) {
-        if (params.directionalLight) {
-          this.directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-          this.directionalLight.position.set(10, 50, 0);
-          this.add(this.directionalLight);
+        if (params.dirLight) {
+          this.dirLight = new THREE.DirectionalLight(0xffffff, 1);
+          this.dirLight.position.set(10, 50, 0);
+          this.add(this.dirLight);
         }
-        if (params.hemisphereLight) {
-          this.hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x000000, .8);
-          this.add(this.hemisphereLight);
+        if (params.hemLight) {
+          this.hemLight = new THREE.HemisphereLight(0xffffff, 0x000000, .8);
+          this.add(this.hemLight);
         }
       }
     }

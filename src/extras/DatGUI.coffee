@@ -55,8 +55,6 @@ THREEFLOW.DatGui = class DatGUI
 
     @giFolder.add @renderer.gi,"enabled"
 
-
-
     # change the sub folder when the type changes.
     @giFolder.add(@renderer.gi,"type",@renderer.gi.types).onChange (value)=>
       updateType value
@@ -74,7 +72,6 @@ THREEFLOW.DatGui = class DatGUI
     updateFolder =(type)=>
       if not @giSubFolder
         @giSubFolder = @giFolder.addFolder(type.name)
-        THREEFLOW.SUB = @giSubFolder
       else
         controllers = @giSubFolder.__controllers.slice(0)
         for controller in controllers

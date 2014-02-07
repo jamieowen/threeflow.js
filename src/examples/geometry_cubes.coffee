@@ -14,7 +14,16 @@ window.onload = ()->
   camera      = new THREE.PerspectiveCamera(35,width/height,100,100000)
   controls    = new THREE.TrackballControls(camera,webgl.domElement)
   sunsky      = new THREEFLOW.SunskyLight
-    directionalLight: false
+    dirLight: false
+    hemLight: true
+
+  plane       = new THREE.Mesh new THREEFLOW.InfinitePlaneGeometry(50,50,10,10),new THREE.MeshLambertMaterial
+    color:0xffffff
+    wireframe:true
+
+  scene.add plane
+
+  window.GEOM = plane.geometry
 
   # add to scene
   scene.add camera

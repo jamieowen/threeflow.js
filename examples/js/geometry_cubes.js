@@ -12,13 +12,15 @@ window.onload = function() {
   controls = new THREE.TrackballControls(camera, webgl.domElement);
   sunsky = new THREEFLOW.SunskyLight({
     dirLight: false,
-    hemLight: true
+    hemLight: true,
+    direction: new THREE.Vector3(0.01, 0.02, 0)
   });
   plane = new THREE.Mesh(new THREEFLOW.InfinitePlaneGeometry(), new THREE.MeshLambertMaterial({
     color: 0xffffff,
+    side: THREE.DoubleSide,
     wireframe: true
   }));
-  window.GEOM = plane.geometry;
+  scene.add(plane);
   scene.add(camera);
   scene.add(sunsky);
   camera.position.set(0, 0, -1000);

@@ -27,7 +27,7 @@ class MeshExporter extends BlockExporter
         result += '  shader ' + mesh.material.uuid + '\n'
         result += '  type plane\n'
         result += '  p ' + @exportTransformPosition(mesh) + '\n'
-        result += '  n ' + @exportVector( mesh.rotation ) + '\n'
+        result += '  n ' + @exportVector( mesh.up ) + '\n'
 
       else if @convertPrimitives and mesh.geometry instanceof THREE.SphereGeometry
         result += 'object {\n'

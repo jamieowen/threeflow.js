@@ -22,10 +22,10 @@ THREEFLOW.SunskyLight = class SunskyLight extends THREE.Object3D
     if params.previewLights
       # TODO: Match up with Sunsky as best as possible.
       if params.dirLight
+        console.log "ADD DIR LIGHT"
         @dirLight = new THREE.DirectionalLight 0xffffff,1
-        @dirLight.position.set 10,50,0
         @add @dirLight
 
       if params.hemLight
-        @hemLight  = new THREE.HemisphereLight 0xffffff,0x000000,.8
+        @hemLight  = new THREE.HemisphereLight 0xffffff,0x333333,.8
         @add @hemLight

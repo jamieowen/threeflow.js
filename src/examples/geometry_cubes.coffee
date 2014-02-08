@@ -16,14 +16,14 @@ window.onload = ()->
   sunsky      = new THREEFLOW.SunskyLight
     dirLight: false
     hemLight: true
+    direction: new THREE.Vector3 0.01,0.02,0
 
   plane       = new THREE.Mesh new THREEFLOW.InfinitePlaneGeometry(),new THREE.MeshLambertMaterial
     color:0xffffff
+    side: THREE.DoubleSide
     wireframe:true
 
-  #scene.add plane
-
-  window.GEOM = plane.geometry
+  scene.add plane
 
   # add to scene
   scene.add camera

@@ -639,7 +639,7 @@
           result += '  shader ' + mesh.material.uuid + '\n';
           result += '  type plane\n';
           result += '  p ' + this.exportTransformPosition(mesh) + '\n';
-          result += '  n ' + this.exportVector(mesh.rotation) + '\n';
+          result += '  n ' + this.exportVector(mesh.up) + '\n';
         } else if (this.convertPrimitives && mesh.geometry instanceof THREE.SphereGeometry) {
           result += 'object {\n';
           result += '  shader ' + mesh.material.uuid + '\n';
@@ -701,11 +701,25 @@
   })(BlockExporter);
 
   THREEFLOW.InfinitePlaneGeometry = function(width, height, widthSegments, heightSegments) {
-    width = width || 10000;
-    height = height || 10000;
-    widthSegments = widthSegments || 100;
-    heightSegments = heightSegments || 100;
-    return THREE.PlaneGeometry.call(this, width, height, widthSegments, heightSegments);
+    var face, matrix, normal, _i, _len, _ref;
+    width = width || 1000;
+    height = height || 1000;
+    widthSegments = widthSegments || 10;
+    heightSegments = heightSegments || 10;
+    THREE.PlaneGeometry.call(this, width, height, widthSegments, heightSegments);
+    matrix = new THREE.Matrix4();
+    matrix.makeRotationX(Math.PI / 2);
+    this.applyMatrix(matrix);
+    normal = new THREE.Vector3(0, 1, 0);
+    _ref = this.faces;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      face = _ref[_i];
+      face.normal.copy(normal);
+      face.vertexNormals[0].copy(normal);
+      face.vertexNormals[1].copy(normal);
+      face.vertexNormals[2].copy(normal);
+    }
+    return this.computeCentroids();
   };
 
   THREEFLOW.InfinitePlaneGeometry.prototype = Object.create(THREE.PlaneGeometry.prototype);
@@ -752,12 +766,12 @@
       }
       if (params.previewLights) {
         if (params.dirLight) {
+          console.log("ADD DIR LIGHT");
           this.dirLight = new THREE.DirectionalLight(0xffffff, 1);
-          this.dirLight.position.set(10, 50, 0);
           this.add(this.dirLight);
         }
         if (params.hemLight) {
-          this.hemLight = new THREE.HemisphereLight(0xffffff, 0x000000, .8);
+          this.hemLight = new THREE.HemisphereLight(0xffffff, 0x333333, .8);
           this.add(this.hemLight);
         }
       }

@@ -739,7 +739,7 @@
     THREE.Object3D.call(this);
     this.power = 500;
     this.color = new THREE.Color(0xffffff);
-    geometry = new THREE.SphereGeometry(6, 3, 3);
+    geometry = new THREE.SphereGeometry(2, 3, 3);
     material = new THREE.MeshBasicMaterial({
       color: 0x0000ff,
       wireframe: true

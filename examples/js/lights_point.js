@@ -22,7 +22,8 @@ window.onload = function() {
   scene.add(camera);
   scene.add(ambient);
   scene.add(plane);
-  camera.position.set(0, 0, -300);
+  scene.add(plane2);
+  camera.position.set(15, 0, -200);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
   plane.position.set(0, -20, 0);
   plane2.position.set(0, 20, 0);
@@ -41,14 +42,14 @@ window.onload = function() {
   for (ix = _i = 0; 0 <= gridX ? _i < gridX : _i > gridX; ix = 0 <= gridX ? ++_i : --_i) {
     for (iz = _j = 0; 0 <= gridZ ? _j < gridZ : _j > gridZ; iz = 0 <= gridZ ? ++_j : --_j) {
       light = new THREEFLOW.PointLight();
-      lightPower = ((simplex.noise(ix * simplexSmooth, iz * simplexSmooth) + 1) / 2) * 500;
+      lightPower = 700;
       light.position.set(ix * size, simplex.noise(ix * simplexSmooth, iz * simplexSmooth) * 15, iz * size);
       light.position.add(offset);
       sphere = new THREE.Mesh(geometry, material);
       sphere.position.copy(light.position);
       light.power = lightPower;
       light.color.setHSL(count++ / (gridX * gridZ), 1, .5);
-      light.position.y += 7;
+      light.position.y -= 7;
       scene.add(sphere);
       scene.add(light);
     }

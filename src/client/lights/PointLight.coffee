@@ -7,7 +7,7 @@ THREEFLOW.PointLight = ( hex, intensity, distance )->
   @power = 500 #params.power || 10
   @color = new THREE.Color 0xffffff
 
-  geometry = new THREE.SphereGeometry 6,3,3
+  geometry = new THREE.SphereGeometry 2,3,3
   material = new THREE.MeshBasicMaterial
     color: 0x0000ff
     wireframe: true
@@ -16,7 +16,6 @@ THREEFLOW.PointLight = ( hex, intensity, distance )->
   @add @mesh
 
   #@light = new THREE.PointLight()
-
 
 THREEFLOW.PointLight:: = Object.create THREE.Object3D::
 

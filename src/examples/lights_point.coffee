@@ -28,10 +28,10 @@ window.onload = ()->
   scene.add camera
   scene.add ambient
   scene.add plane
-  #scene.add plane2
+  scene.add plane2
 
   # position objects
-  camera.position.set 0,0,-300
+  camera.position.set 15,0,-200
   camera.lookAt new THREE.Vector3(0,0,0)
   plane.position.set 0,-20,0
   plane2.position.set 0,20,0
@@ -53,7 +53,7 @@ window.onload = ()->
   for ix in [0...gridX]
     for iz in [0...gridZ]
       light = new THREEFLOW.PointLight()
-      lightPower = ((simplex.noise(ix*simplexSmooth,iz*simplexSmooth)+1)/2)*500
+      lightPower = 700 #((simplex.noise(ix*simplexSmooth,iz*simplexSmooth)+1)/2)*500
       light.position.set ix*size,simplex.noise(ix*simplexSmooth,iz*simplexSmooth)*15,iz*size
       light.position.add offset
 
@@ -63,7 +63,7 @@ window.onload = ()->
 
       light.color.setHSL( count++/(gridX*gridZ),1,.5 )
 
-      light.position.y += 7
+      light.position.y -= 7
       scene.add sphere
       scene.add light
 

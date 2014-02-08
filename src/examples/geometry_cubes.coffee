@@ -17,11 +17,11 @@ window.onload = ()->
     dirLight: false
     hemLight: true
 
-  plane       = new THREE.Mesh new THREEFLOW.InfinitePlaneGeometry(50,50,10,10),new THREE.MeshLambertMaterial
+  plane       = new THREE.Mesh new THREEFLOW.InfinitePlaneGeometry(),new THREE.MeshLambertMaterial
     color:0xffffff
     wireframe:true
 
-  scene.add plane
+  #scene.add plane
 
   window.GEOM = plane.geometry
 

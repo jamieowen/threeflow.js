@@ -14,11 +14,10 @@ window.onload = function() {
     dirLight: false,
     hemLight: true
   });
-  plane = new THREE.Mesh(new THREEFLOW.InfinitePlaneGeometry(50, 50, 10, 10), new THREE.MeshLambertMaterial({
+  plane = new THREE.Mesh(new THREEFLOW.InfinitePlaneGeometry(), new THREE.MeshLambertMaterial({
     color: 0xffffff,
     wireframe: true
   }));
-  scene.add(plane);
   window.GEOM = plane.geometry;
   scene.add(camera);
   scene.add(sunsky);

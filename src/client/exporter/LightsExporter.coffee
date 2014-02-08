@@ -36,7 +36,7 @@ class LightsExporter extends BlockExporter
         result += 'light {\n'
         result += '  type point\n'
         result += '  color ' + @exportColorTHREE(light.color) + '\n'
-        result += '  power ' + light.intensity*200 + ' \n'
+        result += '  power ' + light.power + ' \n'
         result += '  p ' + @exportVector(light.position)+ '\n'
         result += '}\n\n'
 

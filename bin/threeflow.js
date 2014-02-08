@@ -1,10 +1,16 @@
 (function() {
-  var BlockExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, SunflowRenderer, SunskyLight, TraceDepthsExporter,
+  var BlockExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, ShinyMaterial, SunflowRenderer, SunskyLight, TraceDepthsExporter,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   window.THREEFLOW = window.THREEFLOW || {};
+
+  if (!Function.prototype.property) {
+    Function.prototype.property = function(prop, desc) {
+      return Object.defineProperty(this.prototype, prop, desc);
+    };
+  }
 
   THREEFLOW.SunflowRenderer = SunflowRenderer = (function() {
     function SunflowRenderer(options) {
@@ -13,8 +19,9 @@
       this.onRenderStart = __bind(this.onRenderStart, this);
       this.onConnected = __bind(this.onConnected, this);
       options = options || {};
-      this.port = options.port || 3000;
-      this.host = options.host || "http://localhost";
+      this.pngPath = options.pngPath || null;
+      this.scPath = options.scPath || null;
+      this.scSave = options.scSave || false;
       this.exporter = new Exporter();
       this.image = this.exporter.image;
       this.traceDepths = this.exporter.traceDepths;
@@ -53,7 +60,10 @@
         this.exporter.indexScene(scene);
         scContents = this.exporter.exportCode();
         this.socket.emit("render", {
-          scFile: scContents
+          scContents: scContents,
+          scPath: this.scPath,
+          scSave: this.scSave,
+          pngPath: this.pngPath
         });
       } else {
         console.log("QUEUE?");
@@ -62,7 +72,7 @@
     };
 
     SunflowRenderer.prototype.onConnected = function(data) {
-      console.log("Sunflow conected.");
+      console.log("Threeflow conected.");
       this.connected = true;
       return null;
     };
@@ -537,7 +547,7 @@
           result += 'light {\n';
           result += '  type point\n';
           result += '  color ' + this.exportColorTHREE(light.color) + '\n';
-          result += '  power ' + light.intensity * 200 + ' \n';
+          result += '  power ' + light.power + ' \n';
           result += '  p ' + this.exportVector(light.position) + '\n';
           result += '}\n\n';
         }
@@ -724,25 +734,21 @@
 
   THREEFLOW.InfinitePlaneGeometry.prototype = Object.create(THREE.PlaneGeometry.prototype);
 
-  THREEFLOW.PointLight = PointLight = (function(_super) {
-    __extends(PointLight, _super);
+  THREEFLOW.PointLight = function(hex, intensity, distance) {
+    var geometry, material;
+    THREE.Object3D.call(this);
+    this.power = 500;
+    this.color = new THREE.Color(0xffffff);
+    geometry = new THREE.SphereGeometry(6, 3, 3);
+    material = new THREE.MeshBasicMaterial({
+      color: 0x0000ff,
+      wireframe: true
+    });
+    this.mesh = new THREE.Mesh(geometry, material);
+    return this.add(this.mesh);
+  };
 
-    function PointLight(hex, intensity, distance) {
-      var geometry, material;
-      PointLight.__super__.constructor.call(this, hex, intensity, distance);
-      THREE.PointLight.call(this);
-      geometry = new THREE.SphereGeometry(6, 3, 3);
-      material = new THREE.MeshBasicMaterial({
-        color: 0x0000ff,
-        wireframe: true
-      });
-      this.mesh = new THREE.Mesh(geometry, material);
-      this.add(this.mesh);
-    }
-
-    return PointLight;
-
-  })(THREE.PointLight);
+  THREEFLOW.PointLight.prototype = Object.create(THREE.Object3D.prototype);
 
   THREEFLOW.SunskyLight = SunskyLight = (function(_super) {
     __extends(SunskyLight, _super);
@@ -755,8 +761,8 @@
       this.direction = params.direction || new THREE.Vector3(1, 1, 1);
       this.turbidity = params.turbidity || 2;
       this.samples = params.samples || 32;
-      if (params.previewLights !== false) {
-        params.previewLights = true;
+      if (params.simulate !== false) {
+        params.simulate = true;
       }
       if (params.dirLight !== false) {
         params.dirLight = true;
@@ -764,7 +770,7 @@
       if (params.hemLight !== false) {
         params.hemLight = true;
       }
-      if (params.previewLights) {
+      if (params.simulate) {
         if (params.dirLight) {
           console.log("ADD DIR LIGHT");
           this.dirLight = new THREE.DirectionalLight(0xffffff, 1);

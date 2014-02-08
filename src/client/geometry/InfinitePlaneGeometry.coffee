@@ -8,7 +8,6 @@ THREEFLOW.InfinitePlaneGeometry = (width, height, widthSegments, heightSegments)
 
   THREE.PlaneGeometry.call @,width,height,widthSegments,heightSegments
 
-  # rotate
   matrix = new THREE.Matrix4()
   matrix.makeRotationX Math.PI/2
   @applyMatrix matrix

@@ -15,11 +15,11 @@ THREEFLOW.SunskyLight = class SunskyLight extends THREE.Object3D
     # create the three.js objects that attempt to mimic the
     # sunsky light.
 
-    params.previewLights  = true if params.previewLights isnt false
+    params.simulate       = true if params.simulate isnt false
     params.dirLight       = true if params.dirLight isnt false
     params.hemLight       = true if params.hemLight isnt false
 
-    if params.previewLights
+    if params.simulate
       # TODO: Match up with Sunsky as best as possible.
       if params.dirLight
         console.log "ADD DIR LIGHT"

@@ -1,13 +1,19 @@
 
 window.THREEFLOW = window.THREEFLOW || {}
 
+# helper method for coffee getter/setters
+if not Function::property
+  Function::property = (prop, desc) ->
+    Object.defineProperty @prototype, prop, desc
+
 THREEFLOW.SunflowRenderer = class SunflowRenderer
 
   constructor:(options)->
     options = options || {}
 
-    @port = options.port || 3000
-    @host = options.host || "http://localhost"
+    @pngPath  = options.pngPath || null
+    @scPath   = options.scPath || null
+    @scSave   = options.scSave || false
 
     @exporter = new Exporter()
 
@@ -54,9 +60,10 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
       scContents = @exporter.exportCode()
 
       @socket.emit "render",
-         scFile:scContents
-
-
+         scContents:scContents
+         scPath:@scPath
+         scSave:@scSave
+         pngPath:@pngPath
 
     else
       console.log "QUEUE?"
@@ -64,7 +71,7 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     null
 
   onConnected:(data)=>
-    console.log "Sunflow conected."
+    console.log "Threeflow conected."
     @connected = true
     null
 

@@ -13,51 +13,63 @@ window.onload = ()->
   scene       = new THREE.Scene()
   camera      = new THREE.PerspectiveCamera(35,width/height,1,100000)
   controls    = new THREE.TrackballControls(camera,webgl.domElement)
-  sunsky      = new THREEFLOW.SunskyLight
-    simulate: true
-    dirLight: false
-    hemLight: true
-    direction: new THREE.Vector3 0.01,0.05,0
+
+  ambient     = new THREE.AmbientLight(0xffffff)
 
   plane       = new THREE.Mesh new THREEFLOW.InfinitePlaneGeometry(),new THREE.MeshLambertMaterial
     color:0xffffff
-    side: THREE.DoubleSide
+    wireframe:true
+
+  plane2       = new THREE.Mesh new THREEFLOW.InfinitePlaneGeometry(),new THREE.MeshLambertMaterial
+    color:0xffffff
     wireframe:true
 
   # add to scene
   scene.add camera
-  scene.add sunsky
+  scene.add ambient
   scene.add plane
+  #scene.add plane2
 
   # position objects
-  camera.position.set 0,0,-1000
+  camera.position.set 0,0,-300
   camera.lookAt new THREE.Vector3(0,0,0)
+  plane.position.set 0,-20,0
+  plane2.position.set 0,20,0
 
-  # create cubes
+  # create threeflow point lights
   simplex = new SimplexNoise()
-  simplexSmooth = .05
-  size = 10
-  gridX = 60
-  gridZ = 40
-  scale = 5
+  simplexSmooth = .1
+  size = 25
+  gridX = 10
+  gridZ = 10
   offset = new THREE.Vector3 -(gridX*size)/2,0,-(gridZ*size)/2
 
-  geometry = new THREE.CubeGeometry(size,size,size)
-  material = new THREE.MeshLambertMaterial
+  geometry = new THREE.SphereGeometry 6
+  material = new THREEFLOW.ShinyMaterial
+    wireframe: true
     color: 0xffffff
 
+  count = 0
   for ix in [0...gridX]
     for iz in [0...gridZ]
-      cube = new THREE.Mesh geometry,material
-      cubeScale = ((simplex.noise(ix*simplexSmooth,iz*simplexSmooth)+1)/2)*scale
-      cube.scale.set 1,cubeScale,1
-      cube.position.set ix*size,(cubeScale*size)/2,iz*size
-      cube.position.add offset
+      light = new THREEFLOW.PointLight()
+      lightPower = ((simplex.noise(ix*simplexSmooth,iz*simplexSmooth)+1)/2)*500
+      light.position.set ix*size,simplex.noise(ix*simplexSmooth,iz*simplexSmooth)*15,iz*size
+      light.position.add offset
 
-      scene.add cube
+      sphere = new THREE.Mesh geometry,material
+      sphere.position.copy light.position
+      light.power = lightPower
+
+      light.color.setHSL( count++/(gridX*gridZ),1,.5 )
+
+      light.position.y += 7
+      scene.add sphere
+      scene.add light
 
   # create the sunflow renderer and connect.
-  threeflow = new THREEFLOW.SunflowRenderer()
+  threeflow = new THREEFLOW.SunflowRenderer
+    pngPath:"examples/renders/lights_point.png"
   threeflow.connect()
 
   # gui

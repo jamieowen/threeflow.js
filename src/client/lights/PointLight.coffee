@@ -1,15 +1,33 @@
 
-THREEFLOW.PointLight = class PointLight extends THREE.PointLight
 
-  constructor:( hex, intensity, distance )->
-    super( hex, intensity, distance )
+THREEFLOW.PointLight = ( hex, intensity, distance )->
 
-    THREE.PointLight.call @
+  THREE.Object3D.call @
 
-    geometry = new THREE.SphereGeometry 6,3,3
-    material = new THREE.MeshBasicMaterial
-      color: 0x0000ff
-      wireframe: true
+  @power = 500 #params.power || 10
+  @color = new THREE.Color 0xffffff
 
-    @mesh = new THREE.Mesh geometry,material
-    @add @mesh
+  geometry = new THREE.SphereGeometry 6,3,3
+  material = new THREE.MeshBasicMaterial
+    color: 0x0000ff
+    wireframe: true
+
+  @mesh = new THREE.Mesh geometry,material
+  @add @mesh
+
+  #@light = new THREE.PointLight()
+
+
+THREEFLOW.PointLight:: = Object.create THREE.Object3D::
+
+
+
+
+
+
+
+
+
+
+
+

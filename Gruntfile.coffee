@@ -80,9 +80,24 @@ module.exports = (grunt)->
     template = grunt.file.read "src/examples/index.html.eco"
     grunt.file.write index,eco.render(template,{examples:examples})
     console.log "Written ", index
-
-
     null
+
+
+  grunt.registerTask "convert-obj",()->
+    files = grunt.file.expand "src/models/*.obj"
+    done = @async()
+    next = ()->
+      if files.length
+        obj = files.pop()
+        inFile = obj
+        outFile = "examples/models/" + obj.split("/").pop().replace("obj","json")
+
+        command = "python src/models/convert_obj_three.py -i " + inFile + " -o " + outFile
+        child_process.exec command,next
+      else
+        done()
+
+    next()
 
 
 

@@ -37,6 +37,14 @@ class MeshExporter extends BlockExporter
         result += '  c ' + @exportTransformPosition(mesh) + '\n'
         result += '  r ' + mesh.geometry.radius + '\n'
         #result += '  transform col' + @exportTransform(mesh) + '\n'
+      else if mesh.material instanceof THREE.MeshFaceMaterial
+        result += 'instance {\n'
+        result += '  name ' + mesh.uuid + '\n'
+        result += '  geometry ' + mesh.geometry.uuid + '\n'
+        result += '  transform col' + @exportTransform(mesh) + '\n'
+        result += '  shaders ' + mesh.material.materials.length + '\n'
+        for material in mesh.material.materials
+          result += '    ' + material.uuid + '\n'
       else
         result += 'instance {\n'
         result += '  name ' + mesh.uuid + '\n'

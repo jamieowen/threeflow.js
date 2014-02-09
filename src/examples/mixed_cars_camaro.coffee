@@ -27,9 +27,10 @@ window.onload = ()->
   scene.add sunsky
   scene.add plane
 
-
+  # store here to retrieve position ( temporarily )
+  window.CAMERA = camera
   # position objects
-  camera.position.set 1100,1200,1100
+  camera.position.set 615,564,1910
   camera.lookAt new THREE.Vector3(0,0,0)
   plane.position.set 0,-218,0
 
@@ -37,7 +38,7 @@ window.onload = ()->
   # create car materials
   materials =
     body:
-      Orange: new THREE.MeshLambertMaterial
+      Orange: new THREEFLOW.ShinyMaterial
         color: 0xff6600
         #envMap: textureCube
         combine: THREE.MixOperation
@@ -93,15 +94,17 @@ window.onload = ()->
         #envMap: textureCube
         combine: THREE.MultiplyOperation
 
-    chrome: new THREE.MeshLambertMaterial
+    chrome: new THREEFLOW.MirrorMaterial
       color: 0xffffff
+      reflection: 0xffffff
       #envMap: textureCube
 
-    darkchrome: new THREE.MeshLambertMaterial
+    darkchrome: new THREEFLOW.MirrorMaterial
       color: 0x444444
+      reflection: 0x444444
       #envMap: textureCube
 
-    glass: new THREE.MeshBasicMaterial
+    glass: new THREEFLOW.GlassMaterial
       color: 0x223344
       #envMap: textureCube
       opacity: 0.25
@@ -109,7 +112,7 @@ window.onload = ()->
       reflectivity: 0.25
       transparent: true
 
-    tire: new THREE.MeshLambertMaterial
+    tire: new THREEFLOW.DiffuseMaterial
       color: 0x050505
 
     interior: new THREE.MeshPhongMaterial

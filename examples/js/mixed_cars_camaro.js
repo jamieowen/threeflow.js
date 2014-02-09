@@ -22,12 +22,13 @@ window.onload = function() {
   scene.add(camera);
   scene.add(sunsky);
   scene.add(plane);
-  camera.position.set(1100, 1200, 1100);
+  window.CAMERA = camera;
+  camera.position.set(615, 564, 1910);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
   plane.position.set(0, -218, 0);
   materials = {
     body: {
-      Orange: new THREE.MeshLambertMaterial({
+      Orange: new THREEFLOW.ShinyMaterial({
         color: 0xff6600,
         combine: THREE.MixOperation,
         reflectivity: 0.3
@@ -76,20 +77,22 @@ window.onload = function() {
         combine: THREE.MultiplyOperation
       })
     },
-    chrome: new THREE.MeshLambertMaterial({
-      color: 0xffffff
+    chrome: new THREEFLOW.MirrorMaterial({
+      color: 0xffffff,
+      reflection: 0xffffff
     }),
-    darkchrome: new THREE.MeshLambertMaterial({
-      color: 0x444444
+    darkchrome: new THREEFLOW.MirrorMaterial({
+      color: 0x444444,
+      reflection: 0x444444
     }),
-    glass: new THREE.MeshBasicMaterial({
+    glass: new THREEFLOW.GlassMaterial({
       color: 0x223344,
       opacity: 0.25,
       combine: THREE.MixOperation,
       reflectivity: 0.25,
       transparent: true
     }),
-    tire: new THREE.MeshLambertMaterial({
+    tire: new THREEFLOW.DiffuseMaterial({
       color: 0x050505
     }),
     interior: new THREE.MeshPhongMaterial({

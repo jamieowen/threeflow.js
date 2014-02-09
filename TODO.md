@@ -34,7 +34,8 @@ All Lights should extend Object3D and give the option of adding markers & real t
 - SkyLight - ( Match Three )
 
 ## Geometry / Mesh
-- Infinite Plane ( finish )
+- Infinite Plane ( finish ) **one**
+- Face Materials
 
 ## Renderer
 - add render path to save **done**

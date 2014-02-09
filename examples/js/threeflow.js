@@ -322,9 +322,16 @@
     }
 
     GeometryExporter.prototype.addToIndex = function(object3d) {
-      if (object3d instanceof THREE.Mesh) {
-        if (object3d.geometry && !this.geometryIndex[object3d.geometry.uuid]) {
-          this.geometryIndex[object3d.geometry.uuid] = object3d.geometry;
+      var faceMaterials;
+      if (object3d instanceof THREE.Mesh && object3d.geometry) {
+        faceMaterials = object3d.material instanceof THREE.MeshFaceMaterial;
+        if (!this.geometryIndex[object3d.geometry.uuid]) {
+          this.geometryIndex[object3d.geometry.uuid] = {
+            geometry: object3d.geometry,
+            faceMaterials: faceMaterials
+          };
+        } else if (!this.geometryIndex[object3d.geometry.uuid].faceMaterials && faceMaterials) {
+          this.geometryIndex[object3d.geometry.uuid].faceMaterials = true;
         }
       }
       return null;
@@ -335,28 +342,34 @@
     };
 
     GeometryExporter.prototype.exportBlock = function() {
-      var face, geometry, result, uuid, vertex, _i, _j, _len, _len1, _ref, _ref1;
+      var entry, face, faceMaterialResult, result, uuid, vertex, _i, _j, _len, _len1, _ref, _ref1;
       result = '';
       for (uuid in this.geometryIndex) {
-        geometry = this.geometryIndex[uuid];
+        entry = this.geometryIndex[uuid];
         result += 'object {\n';
         result += '  noinstance\n';
         result += '  type generic-mesh\n';
-        result += '  name ' + geometry.uuid + '\n';
-        result += '  points ' + geometry.vertices.length + '\n';
-        _ref = geometry.vertices;
+        result += '  name ' + uuid + '\n';
+        result += '  points ' + entry.geometry.vertices.length + '\n';
+        _ref = entry.geometry.vertices;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           vertex = _ref[_i];
           result += '    ' + this.exportVector(vertex) + '\n';
         }
-        result += '  triangles ' + geometry.faces.length + '\n';
-        _ref1 = geometry.faces;
+        result += '  triangles ' + entry.geometry.faces.length + '\n';
+        faceMaterialResult = '';
+        _ref1 = entry.geometry.faces;
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
           face = _ref1[_j];
           result += '    ' + this.exportFace(face) + '\n';
+          faceMaterialResult += '    ' + face.materialIndex + '\n';
         }
         result += '  normals none\n';
         result += '  uvs none\n';
+        if (entry.faceMaterials) {
+          result += '  face_shaders\n';
+          result += faceMaterialResult;
+        }
         result += '}\n\n';
       }
       return result;
@@ -649,7 +662,7 @@
     };
 
     MeshExporter.prototype.exportBlock = function() {
-      var mesh, result, uuid;
+      var material, mesh, result, uuid, _i, _len, _ref;
       result = '';
       for (uuid in this.meshIndex) {
         mesh = this.meshIndex[uuid];
@@ -666,6 +679,17 @@
           result += '  name ' + mesh.uuid + '\n';
           result += '  c ' + this.exportTransformPosition(mesh) + '\n';
           result += '  r ' + mesh.geometry.radius + '\n';
+        } else if (mesh.material instanceof THREE.MeshFaceMaterial) {
+          result += 'instance {\n';
+          result += '  name ' + mesh.uuid + '\n';
+          result += '  geometry ' + mesh.geometry.uuid + '\n';
+          result += '  transform col' + this.exportTransform(mesh) + '\n';
+          result += '  shaders ' + mesh.material.materials.length + '\n';
+          _ref = mesh.material.materials;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            material = _ref[_i];
+            result += '    ' + material.uuid + '\n';
+          }
         } else {
           result += 'instance {\n';
           result += '  name ' + mesh.uuid + '\n';

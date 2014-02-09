@@ -22,5 +22,6 @@
     </style>
     <body>
         <canvas id="canvas" width="800" height="600"></canvas>
+        <img src="renders/<%= @example_name %>.png"/>
     </body>
 </html>

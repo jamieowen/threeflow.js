@@ -2,7 +2,19 @@ Dev..
 
 Threeflow.js
 ========================================
-Description to come..
+
+Install
+```shell
+# clone git
+git clone git@github.com:jamieowen/threeflow.js.git threeflow.js
+
+# start the server on http://localhost:3000
+grunt server
+
+# open a new terminal tab and start grunt dev to modify and recompile examples.
+grunt dev
+
+```
 
 Roadmap
 -------

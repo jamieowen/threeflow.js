@@ -27,7 +27,7 @@ window.onload = function() {
   count = 0;
   for (ix = _i = 0; 0 <= grid ? _i < grid : _i > grid; ix = 0 <= grid ? ++_i : --_i) {
     for (iz = _j = 0; 0 <= grid ? _j < grid : _j > grid; iz = 0 <= grid ? ++_j : --_j) {
-      material = new THREEFLOW.DiffuseMaterial;
+      material = new THREEFLOW.ConstantMaterial;
       material.color.setHSL(count / (grid * grid), 0.6, 0.6);
       count++;
       mesh = new THREE.Mesh(geometry, material);
@@ -38,8 +38,8 @@ window.onload = function() {
   camera.position.set(grid * spacing, size * 10, grid * spacing);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
   threeflow = new THREEFLOW.SunflowRenderer({
-    pngPath: "examples/renders/materials_diffuse.png",
-    scPath: "examples/renders/materials_diffuse.sc"
+    pngPath: "examples/renders/materials_constant.png",
+    scPath: "examples/renders/materials_constant.sc"
   });
   threeflow.connect();
   gui = new THREEFLOW.DatGui(threeflow);

@@ -32,10 +32,13 @@ window.onload = ()->
 
   geometry = new THREE.SphereGeometry size
 
+  eta = [0.8,1.1,1.33,1.5]
   count = 0
   for ix in [0...grid]
     for iz in [0...grid]
-      material = new THREEFLOW.DiffuseMaterial
+      material = new THREEFLOW.GlassMaterial
+        eta: eta[ix]
+
       material.color.setHSL( count/(grid*grid),0.6,0.6)
       count++
       mesh = new THREE.Mesh geometry,material
@@ -48,8 +51,9 @@ window.onload = ()->
 
   # create the sunflow renderer and connect.
   threeflow = new THREEFLOW.SunflowRenderer
-    pngPath:"examples/renders/materials_diffuse.png"
-    scPath:"examples/renders/materials_diffuse.sc"
+    pngPath:"examples/renders/materials_glass.png"
+    scPath:"examples/renders/materials_glass.sc"
+
   threeflow.connect()
 
   # gui

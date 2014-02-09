@@ -792,13 +792,13 @@
 
     function ConstantMaterial(parameters) {
       ConstantMaterial.__super__.constructor.call(this);
-      THREE.MeshPhongMaterial.call(this);
+      THREE.MeshBasicMaterial.call(this);
       this.setValues(parameters);
     }
 
     return ConstantMaterial;
 
-  })(THREE.MeshPhongMaterial);
+  })(THREE.MeshBasicMaterial);
 
   THREEFLOW.DiffuseMaterial = DiffuseMaterial = (function(_super) {
     __extends(DiffuseMaterial, _super);

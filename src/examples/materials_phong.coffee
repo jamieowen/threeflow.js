@@ -32,10 +32,15 @@ window.onload = ()->
 
   geometry = new THREE.SphereGeometry size
 
+  shininess = [50,300,1000,25000] # can be cranked up to 50000, but need to up the image samples. ( i think )
   count = 0
   for ix in [0...grid]
     for iz in [0...grid]
-      material = new THREEFLOW.DiffuseMaterial
+      material = new THREEFLOW.PhongMaterial
+        samples: 4
+        shininess: shininess[ix]
+        specular: 0x444444
+
       material.color.setHSL( count/(grid*grid),0.6,0.6)
       count++
       mesh = new THREE.Mesh geometry,material
@@ -48,8 +53,9 @@ window.onload = ()->
 
   # create the sunflow renderer and connect.
   threeflow = new THREEFLOW.SunflowRenderer
-    pngPath:"examples/renders/materials_diffuse.png"
-    scPath:"examples/renders/materials_diffuse.sc"
+    pngPath:"examples/renders/materials_phong.png"
+    scPath:"examples/renders/materials_phong.sc"
+
   threeflow.connect()
 
   # gui

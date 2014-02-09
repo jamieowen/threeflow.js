@@ -568,8 +568,17 @@
     }
 
     MaterialsExporter.prototype.addToIndex = function(object3d) {
+      var material, _i, _len, _ref;
       if (object3d instanceof THREE.Mesh) {
-        if (object3d.material && !this.materialsIndex[object3d.material.uuid]) {
+        if (object3d.material instanceof THREE.MeshFaceMaterial) {
+          _ref = object3d.material.materials;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            material = _ref[_i];
+            if (!this.materialsIndex[material.uuid]) {
+              this.materialsIndex[material.uuid] = material;
+            }
+          }
+        } else if (object3d.material && !this.materialsIndex[object3d.material.uuid]) {
           this.materialsIndex[object3d.material.uuid] = object3d.material;
         }
       }

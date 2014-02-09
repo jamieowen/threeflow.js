@@ -9,8 +9,13 @@ class MaterialsExporter extends BlockExporter
   addToIndex:(object3d)->
     if object3d instanceof THREE.Mesh
 
-      # index all unique material instances.
-      if object3d.material and not @materialsIndex[object3d.material.uuid]
+      if object3d.material instanceof THREE.MeshFaceMaterial
+        # don't index the face material just index its sub materials.
+        for material in object3d.material.materials
+          if not @materialsIndex[material.uuid]
+            @materialsIndex[ material.uuid ] = material
+
+      else if object3d.material and not @materialsIndex[object3d.material.uuid]
         @materialsIndex[object3d.material.uuid] = object3d.material
 
     null

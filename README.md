@@ -1,20 +1,22 @@
-Dev..
 
-Threeflow.js
-========================================
+# Threeflow.js
 
-Install
+![Geometry Cubes](examples/renders/geometry_cubes.png)
+
+Will create an npm module for this but for now:
 ```shell
 # clone git
-git clone git@github.com:jamieowen/threeflow.js.git threeflow.js
+git clone git@github.com:jamieowen/threeflow.js.git
 
 # start the server on http://localhost:3000
 grunt server
 
 # open a new terminal tab and start grunt dev to modify and recompile examples.
+# or just visit http://localhost:3000 in the browser
 grunt dev
-
 ```
+
+![Geometry Cubes](examples/renders/materials_shiny.png)
 
 Roadmap
 -------

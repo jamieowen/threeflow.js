@@ -772,7 +772,6 @@
       }
       if (params.simulate) {
         if (params.dirLight) {
-          console.log("ADD DIR LIGHT");
           this.dirLight = new THREE.DirectionalLight(0xffffff, 1);
           this.add(this.dirLight);
         }

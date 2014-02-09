@@ -37,7 +37,7 @@ window.onload = ()->
   for ix in [0...grid]
     for iz in [0...grid]
       material = new THREEFLOW.PhongMaterial
-        samples: 4
+        samples: 2
         shininess: shininess[ix]
         specular: 0x444444
 

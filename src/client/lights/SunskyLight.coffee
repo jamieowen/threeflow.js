@@ -22,7 +22,6 @@ THREEFLOW.SunskyLight = class SunskyLight extends THREE.Object3D
     if params.simulate
       # TODO: Match up with Sunsky as best as possible.
       if params.dirLight
-        console.log "ADD DIR LIGHT"
         @dirLight = new THREE.DirectionalLight 0xffffff,1
         @add @dirLight
 

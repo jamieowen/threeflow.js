@@ -12,9 +12,7 @@ window.onload = function() {
   controls = new THREE.TrackballControls(camera, webgl.domElement);
   sunsky = new THREEFLOW.SunskyLight({
     simulate: true,
-    dirLight: false,
-    hemLight: true,
-    direction: new THREE.Vector3(0.01, 0.05, 0)
+    direction: new THREE.Vector3(0.06, .03, 0)
   });
   plane = new THREE.Mesh(new THREEFLOW.InfinitePlaneGeometry(), new THREE.MeshLambertMaterial({
     color: 0xffffff,
@@ -24,14 +22,12 @@ window.onload = function() {
   scene.add(camera);
   scene.add(sunsky);
   scene.add(plane);
-  camera.position.set(0, 0, -1000);
-  camera.lookAt(new THREE.Vector3(0, 0, 0));
   simplex = new SimplexNoise();
   simplexSmooth = .05;
-  size = 10;
-  gridX = 60;
+  size = 30;
+  gridX = 40;
   gridZ = 40;
-  scale = 5;
+  scale = 10;
   offset = new THREE.Vector3(-(gridX * size) / 2, 0, -(gridZ * size) / 2);
   geometry = new THREE.CubeGeometry(size, size, size);
   material = new THREE.MeshLambertMaterial({
@@ -47,7 +43,12 @@ window.onload = function() {
       scene.add(cube);
     }
   }
-  threeflow = new THREEFLOW.SunflowRenderer();
+  camera.position.set(1100, 1200, 1100);
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
+  threeflow = new THREEFLOW.SunflowRenderer({
+    pngPath: "examples/renders/geometry_cubes.png",
+    scPath: "examples/renders/geometry_cubes.sc"
+  });
   threeflow.connect();
   gui = new THREEFLOW.DatGui(threeflow);
   gui.onRender = function() {

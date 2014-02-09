@@ -3,6 +3,7 @@
 Markers and Simulate Options.
 
 ## Point Light
+![Sunflow PointLight](../../../examples/renders/lights_point.png)
 
 ```coffee
 light = new THREEFLOW.PointLight
@@ -13,5 +14,3 @@ light = new THREEFLOW.PointLight
 scene.add light
 ```
 
-
-![Sunflow PointLight](../../../examples/renders/lights_point.png)

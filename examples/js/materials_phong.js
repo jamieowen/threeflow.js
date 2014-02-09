@@ -29,7 +29,7 @@ window.onload = function() {
   for (ix = _i = 0; 0 <= grid ? _i < grid : _i > grid; ix = 0 <= grid ? ++_i : --_i) {
     for (iz = _j = 0; 0 <= grid ? _j < grid : _j > grid; iz = 0 <= grid ? ++_j : --_j) {
       material = new THREEFLOW.PhongMaterial({
-        samples: 4,
+        samples: 2,
         shininess: shininess[ix],
         specular: 0x444444
       });

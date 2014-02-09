@@ -3,6 +3,7 @@
 ## Constant Material
 ![Constant Material](../../../examples/renders/materials_constant.png)
 
+*Coffeescript*
 ```coffee
 material = new THREEFLOW.ConstantMaterial
   color: 0xff0000
@@ -11,6 +12,17 @@ geometry = new THREE.SphereGeometry()
 mesh     = new THREE.Mesh geometry,material
 
 scene.add mesh
+```
+
+*Javascript*
+```javascript
+material = new THREEFLOW.ConstantMaterial(
+  { color: 0xff0000 } );
+
+geometry = new THREE.SphereGeometry();
+mesh     = new THREE.Mesh(geometry,material);
+
+scene.add(mesh);
 ```
 
 Aside from being used as a flat shader, the constant shader can also be used to fake lighting when path tracing is
@@ -31,6 +43,7 @@ scene.add mesh
 
 ## Phong Material
 ![Phong Material](../../../examples/renders/materials_phong.png)
+*need to render this again*
 
 ```coffee
 material = new THREEFLOW.PhongMaterial
@@ -49,8 +62,6 @@ The number after the spec color values is the "power" or hardness of the specula
 to 0, you'll turn off the indirect glossy reflections. If you set the samples to anything greater than 1, you'll get blurry
 reflections (with higher samples giving better reflections).
 
-
-*need to render this again*
 
 ## Shiny Material
 ![Shiny Material](../../../examples/renders/materials_shiny.png)

@@ -4,6 +4,9 @@
 ## General
 - Move all objects to THREEFLOW namespace. **done**
 
+## Getters/Setters
+- Getters and setters to effect simulated light when properties change.
+
 ## Dat GUI
 
 - remove sunsky settings **done**
@@ -34,7 +37,7 @@ All Lights should extend Object3D and give the option of adding markers & real t
 - Infinite Plane ( finish )
 
 ## Renderer
-- add render path to save
+- add render path to save **done**
 - save options
 
 ## Examples
@@ -47,10 +50,10 @@ All Lights should extend Object3D and give the option of adding markers & real t
 - geometry_spheres_gen
 - geometry_platonics
 
-- materials_constant
-- materials_diffuse
-- materials_phong
-- materials_shiny
-- materials_glass
-- materials_mirror
+- materials_constant **done**
+- materials_diffuse **done**
+- materials_phong **done**
+- materials_shiny **done**
+- materials_glass **done**
+- materials_mirror **done**
 

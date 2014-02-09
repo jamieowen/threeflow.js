@@ -18,8 +18,19 @@ grunt dev
 
 ![Camaro](examples/renders/mixed_cars_camaro.png)
 
-Roadmap
--------
+## Reference
+
++ Sunflow Site - http://sunflow.sourceforge.net/
+
++ Sunflow Wiki - http://geneome.com/sunflow/sfwiki.pdf
+
++ Sunflow Source - http://sourceforge.net/projects/sunflow/  ( ScParser.java for understanding the sc format )
+
++ Sunflow FAQ - http://home.comcast.net/~gamma-ray/sf/sunflow-faq.htm ( Useful info on rendering )
+
+
+## Roadmap
+
 
 ### General Scene Support
 

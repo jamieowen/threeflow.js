@@ -65,9 +65,6 @@ window.onload = ()->
   gui.onRender=()=>
     threeflow.render scene,camera,width,height
 
-  gui.onPreview=()=>
-    threeflow.render scene,camera,width,height
-
   # render
   render = ()->
     controls.update()

@@ -1,5 +1,5 @@
 window.onload = function() {
-  var camera, clock, controls, gui, height, loader, plane, render, scene, sunsky, threeflow, webgl, width,
+  var camera, controls, gui, height, loader, plane, render, scene, sunsky, threeflow, webgl, width,
     _this = this;
   webgl = new THREE.WebGLRenderer({
     antialias: true,
@@ -75,10 +75,6 @@ window.onload = function() {
   gui.onRender = function() {
     return threeflow.render(scene, camera, width, height);
   };
-  gui.onPreview = function() {
-    return threeflow.render(scene, camera, width, height);
-  };
-  clock = new THREE.Clock();
   render = function() {
     controls.update();
     webgl.render(scene, camera);

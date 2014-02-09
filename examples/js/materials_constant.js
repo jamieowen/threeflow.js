@@ -46,9 +46,6 @@ window.onload = function() {
   gui.onRender = function() {
     return threeflow.render(scene, camera, width, height);
   };
-  gui.onPreview = function() {
-    return threeflow.render(scene, camera, width, height);
-  };
   render = function() {
     controls.update();
     webgl.render(scene, camera);

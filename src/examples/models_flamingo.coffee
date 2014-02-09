@@ -92,19 +92,12 @@ window.onload = ()->
   gui.onRender=()=>
     threeflow.render scene,camera,width,height
 
-  gui.onPreview=()=>
-    threeflow.render scene,camera,width,height
-
-  clock = new THREE.Clock()
   # render
   render = ()->
     controls.update()
     webgl.render(scene,camera)
     requestAnimationFrame render
 
-    #delta = clock.getDelta();
-
-    #console.log delta
     null
 
   render()

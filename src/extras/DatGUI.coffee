@@ -22,11 +22,11 @@ THREEFLOW.DatGui = class DatGUI
 
     # user can add custom handlers by setting these properties.
     @onRender = null
-    @onPreview = null
+    #@onPreview = null
 
     # add render and preview buttons.
-    @gui.add(@,"_onRender").name("Render Final")
-    @gui.add(@,"_onPreview").name("Render Preview")
+    @gui.add(@,"_onRender").name("Render")
+    #@gui.add(@,"_onPreview").name("Render Preview")
 
     @imageFolder        = @gui.addFolder "Image"
     @traceDepthsFolder  = @gui.addFolder "Trace Depths"
@@ -112,9 +112,12 @@ THREEFLOW.DatGui = class DatGUI
     if @onRender
       @onRender()
 
+  ###
   _onPreview:()=>
     if @onPreview
       @onPreview()
+
+  ###
 
 
 

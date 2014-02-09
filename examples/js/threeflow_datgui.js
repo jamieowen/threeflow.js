@@ -9,7 +9,6 @@
       var updateFolder, updateType,
         _this = this;
       this.renderer = renderer;
-      this._onPreview = __bind(this._onPreview, this);
       this._onRender = __bind(this._onRender, this);
       if (!window.dat && !window.dat.GUI) {
         throw new Error("No dat.GUI found.");
@@ -24,9 +23,7 @@
       };
       this.gui = new dat.GUI();
       this.onRender = null;
-      this.onPreview = null;
-      this.gui.add(this, "_onRender").name("Render Final");
-      this.gui.add(this, "_onPreview").name("Render Preview");
+      this.gui.add(this, "_onRender").name("Render");
       this.imageFolder = this.gui.addFolder("Image");
       this.traceDepthsFolder = this.gui.addFolder("Trace Depths");
       this.causticsFolder = this.gui.addFolder("Caustics");
@@ -119,11 +116,12 @@
       }
     };
 
-    DatGUI.prototype._onPreview = function() {
-      if (this.onPreview) {
-        return this.onPreview();
-      }
-    };
+    /*
+    _onPreview:()=>
+      if @onPreview
+        @onPreview()
+    */
+
 
     return DatGUI;
 

@@ -4,6 +4,10 @@ class GeometryExporter extends BlockExporter
   constructor:()->
     super()
 
+    # one or the other of these.
+    @faceNormals = false
+    @vertexNormals = false
+
     @geometryIndex = {}
 
   addToIndex:(object3d)->
@@ -45,18 +49,30 @@ class GeometryExporter extends BlockExporter
 
       result += '  triangles ' + entry.geometry.faces.length + '\n'
 
-      faceMaterialResult = ''
+
+      # could optimized this and place in one loop for all face info
       for face in entry.geometry.faces
         result += '    ' + @exportFace(face) + '\n'
-        faceMaterialResult += '    ' + face.materialIndex + '\n'
 
-      # TODO: normals and uvs.
-      result += '  normals none\n'
+
+      if @faceNormals
+        result += '  normals facevarying\n'
+        result += '    '
+        for face in entry.geometry.faces
+          result += @exportVector(face.normal) + ' '
+        result += '\n'
+      else if @vertexNormals
+        result += '  normals none\n'
+      else
+        result += '  normals none\n'
+
+      # TODO: uvs
       result += '  uvs none\n'
 
       if entry.faceMaterials
         result += '  face_shaders\n'
-        result += faceMaterialResult
+        for face in entry.geometry.faces
+          result += '    ' + face.materialIndex + '\n'
 
       result += '}\n\n'
 

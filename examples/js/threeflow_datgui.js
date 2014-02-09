@@ -32,6 +32,7 @@
       this.causticsFolder = this.gui.addFolder("Caustics");
       this.giFolder = this.gui.addFolder("Global Illumination");
       this.meshFolder = this.gui.addFolder("Mesh Options");
+      this.geometryFolder = this.gui.addFolder("Geometry Options");
       this.imageFolder.add(this.renderer.image, "antialiasMin");
       this.imageFolder.add(this.renderer.image, "antialiasMax");
       this.imageFolder.add(this.renderer.image, "samples");
@@ -47,6 +48,8 @@
       this.causticsFolder.add(this.renderer.caustics, "kdEstimate");
       this.causticsFolder.add(this.renderer.caustics, "kdRadius");
       this.meshFolder.add(this.renderer.meshes, "convertPrimitives");
+      this.geometryFolder.add(this.renderer.geometry, "faceNormals");
+      this.geometryFolder.add(this.renderer.geometry, "vertexNormals");
       this.giFolder.add(this.renderer.gi, "enabled");
       this.giFolder.add(this.renderer.gi, "type", this.renderer.gi.types).onChange(function(value) {
         return updateType(value);

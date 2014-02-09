@@ -16,7 +16,9 @@ grunt server
 grunt dev
 ```
 
-![Camaro](examples/renders/mixed_cars_camaro.png)
+![Camaro](examples/renders/models_camaro.png)
+
+![Camaro](examples/renders/models_flamingo.png)
 
 ## Reference
 

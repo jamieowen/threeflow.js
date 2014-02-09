@@ -33,6 +33,7 @@ THREEFLOW.DatGui = class DatGUI
     @causticsFolder     = @gui.addFolder "Caustics"
     @giFolder           = @gui.addFolder "Global Illumination"
     @meshFolder         = @gui.addFolder "Mesh Options"
+    @geometryFolder     = @gui.addFolder "Geometry Options"
 
     @imageFolder.add @renderer.image,"antialiasMin"
     @imageFolder.add @renderer.image,"antialiasMax"
@@ -52,6 +53,9 @@ THREEFLOW.DatGui = class DatGUI
     @causticsFolder.add @renderer.caustics,"kdRadius"
 
     @meshFolder.add @renderer.meshes,"convertPrimitives"
+
+    @geometryFolder.add @renderer.geometry, "faceNormals"
+    @geometryFolder.add @renderer.geometry, "vertexNormals"
 
     @giFolder.add @renderer.gi,"enabled"
 

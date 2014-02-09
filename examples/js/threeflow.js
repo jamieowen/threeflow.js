@@ -318,6 +318,8 @@
 
     function GeometryExporter() {
       GeometryExporter.__super__.constructor.call(this);
+      this.faceNormals = false;
+      this.vertexNormals = false;
       this.geometryIndex = {};
     }
 
@@ -342,7 +344,7 @@
     };
 
     GeometryExporter.prototype.exportBlock = function() {
-      var entry, face, faceMaterialResult, result, uuid, vertex, _i, _j, _len, _len1, _ref, _ref1;
+      var entry, face, result, uuid, vertex, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3;
       result = '';
       for (uuid in this.geometryIndex) {
         entry = this.geometryIndex[uuid];
@@ -357,18 +359,33 @@
           result += '    ' + this.exportVector(vertex) + '\n';
         }
         result += '  triangles ' + entry.geometry.faces.length + '\n';
-        faceMaterialResult = '';
         _ref1 = entry.geometry.faces;
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
           face = _ref1[_j];
           result += '    ' + this.exportFace(face) + '\n';
-          faceMaterialResult += '    ' + face.materialIndex + '\n';
         }
-        result += '  normals none\n';
+        if (this.faceNormals) {
+          result += '  normals facevarying\n';
+          result += '    ';
+          _ref2 = entry.geometry.faces;
+          for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+            face = _ref2[_k];
+            result += this.exportVector(face.normal) + ' ';
+          }
+          result += '\n';
+        } else if (this.vertexNormals) {
+          result += '  normals none\n';
+        } else {
+          result += '  normals none\n';
+        }
         result += '  uvs none\n';
         if (entry.faceMaterials) {
           result += '  face_shaders\n';
-          result += faceMaterialResult;
+          _ref3 = entry.geometry.faces;
+          for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
+            face = _ref3[_l];
+            result += '    ' + face.materialIndex + '\n';
+          }
         }
         result += '}\n\n';
       }

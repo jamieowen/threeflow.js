@@ -16,7 +16,7 @@ grunt server
 grunt dev
 ```
 
-![Geometry Cubes](examples/renders/materials_shiny.png)
+![Camaro](examples/renders/mixed_cars_camaro.png)
 
 Roadmap
 -------

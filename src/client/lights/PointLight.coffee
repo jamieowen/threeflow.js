@@ -1,5 +1,3 @@
-
-
 ###
 
 params :
@@ -20,8 +18,9 @@ THREEFLOW.PointLight = class PointLight
 
     THREE.Object3D.call @
 
-    params.simulate   = true if params.simulate isnt false
-    params.markers    = true if params.markers isnt false
+    @simulate   = true if params.simulate isnt false
+    @markers    = true if params.markers isnt false
+    markerSize  = params.markerSize || 1
 
     params.color      = 0xffffff if isNaN params.color
     params.power      = params.power || 100.0
@@ -29,17 +28,14 @@ THREEFLOW.PointLight = class PointLight
     @_color = params.color
     @_power = params.power
 
-    @simulate = params.simulate
-
     if @simulate
-      @light = new THREE.PointLight(@_color,params.intensity,params.distance)
+      @light = new THREE.PointLight @_color,params.intensity,params.distance
       @add @light
     else
       @_color = new THREE.Color(@_color)
 
-    @markers = params.markers
     if @markers
-      geometry = new THREE.SphereGeometry 2,3,3
+      geometry = new THREE.SphereGeometry markerSize,3,3
       material = new THREE.MeshBasicMaterial
         color: @_color
         wireframe: true
@@ -73,18 +69,3 @@ THREEFLOW.PointLight = class PointLight
       set: (value) ->
         # TODO : Set the PointLight intensity when simulating?
         @_power = value
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

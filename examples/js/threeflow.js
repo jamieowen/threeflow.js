@@ -799,19 +799,90 @@
 
   THREEFLOW.InfinitePlaneGeometry.prototype = Object.create(THREE.PlaneGeometry.prototype);
 
+  /*
+  
+  # A Sunflow MeshLight with plane geometry..
+  
+  params :
+    color: 0xffffff
+    # three.js
+    intensity: 1
+    distance: 0
+  
+    # threeflow / sunflow
+    power: 100.0
+    simulate: true
+    markers: true
+  */
+
+
   THREEFLOW.AreaLight = AreaLight = (function() {
-    function AreaLight() {
-      this._color = 0xff000;
+    function AreaLight(params) {
+      var geometry, material;
+      if (params == null) {
+        params = {};
+      }
+      THREE.Object3D.call(this);
+      if (params.simulate !== false) {
+        params.simulate = true;
+      }
+      if (params.markers !== false) {
+        params.markers = true;
+      }
+      if (isNaN(params.color)) {
+        params.color = 0xffffff;
+      }
+      this.radiance = params.radiance || 100.0;
+      params.samples = params.samples || (params.width = params.width || 10);
+      params.height = params.height || 10;
+      this._color = params.color;
+      this._power = params.power;
+      this.simulate = params.simulate;
+      if (this.simulate) {
+        this.light = new THREE.PointLight(this._color, params.intensity, params.distance);
+        this.add(this.light);
+      } else {
+        this._color = new THREE.Color(this._color);
+      }
+      this.markers = params.markers;
+      if (this.markers) {
+        geometry = new THREE.PlaneGeometry(params.markerSize, 3, 3);
+        material = new THREE.MeshBasicMaterial({
+          color: this._color,
+          wireframe: true
+        });
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.add(this.mesh);
+      }
     }
+
+    AreaLight.prototype = Object.create(THREE.Object3D.prototype);
 
     Object.defineProperties(AreaLight.prototype, {
       color: {
         get: function() {
-          console.log("Color is...");
-          return this._color;
+          if (this.simulate) {
+            return this.light.color;
+          } else {
+            return this._color;
+          }
         },
         set: function(value) {
-          return this._color = value;
+          this._color = value;
+          if (this.simulate) {
+            this.light.color.set(this._color);
+          }
+          if (this.markers) {
+            return this.mesh.material.color.set(this._color);
+          }
+        }
+      },
+      power: {
+        get: function() {
+          return this._power;
+        },
+        set: function(value) {
+          return this._power = value;
         }
       }
     });
@@ -837,33 +908,32 @@
 
   THREEFLOW.PointLight = PointLight = (function() {
     function PointLight(params) {
-      var geometry, material;
+      var geometry, markerSize, material;
       if (params == null) {
         params = {};
       }
       THREE.Object3D.call(this);
       if (params.simulate !== false) {
-        params.simulate = true;
+        this.simulate = true;
       }
       if (params.markers !== false) {
-        params.markers = true;
+        this.markers = true;
       }
+      markerSize = params.markerSize || 1;
       if (isNaN(params.color)) {
         params.color = 0xffffff;
       }
       params.power = params.power || 100.0;
       this._color = params.color;
       this._power = params.power;
-      this.simulate = params.simulate;
       if (this.simulate) {
         this.light = new THREE.PointLight(this._color, params.intensity, params.distance);
         this.add(this.light);
       } else {
         this._color = new THREE.Color(this._color);
       }
-      this.markers = params.markers;
       if (this.markers) {
-        geometry = new THREE.SphereGeometry(2, 3, 3);
+        geometry = new THREE.SphereGeometry(markerSize, 3, 3);
         material = new THREE.MeshBasicMaterial({
           color: this._color,
           wireframe: true

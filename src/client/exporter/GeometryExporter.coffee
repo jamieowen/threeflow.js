@@ -14,6 +14,10 @@ class GeometryExporter extends BlockExporter
     # TODO : Skip Primitives Geometry when converting to sunflow primitives.
     if object3d instanceof THREE.Mesh and object3d.geometry
 
+      # exclude any custom geometry
+      if object3d.geometry instanceof THREEFLOW.InfinitePlaneGeometry
+        return
+
       # check if this mesh has a MeshFaceMaterial to define face materialIndexes
       faceMaterials = object3d.material instanceof THREE.MeshFaceMaterial
 

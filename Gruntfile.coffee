@@ -52,7 +52,11 @@ module.exports = (grunt)->
 
   grunt.registerTask "server",()->
     done = @async()
-    child_process.exec "coffee src/server/server.coffee",done
+    child = child_process.exec "coffee src/server/server.coffee",done
+    child.stdout.pipe process.stdout
+    child.stderr.pipe process.stderr
+    null
+
 
   grunt.registerTask "examples-html",()->
     examples = grunt.file.expandMapping "src/examples/*.coffee","examples/",

@@ -1,5 +1,5 @@
 (function() {
-  var BlockExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, ShinyMaterial, SunflowRenderer, SunskyLight, TraceDepthsExporter,
+  var AreaLight, BlockExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, SunflowRenderer, SunskyLight, TraceDepthsExporter,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -42,9 +42,9 @@
       }
       this.socket = io.connect(this.host);
       this.socket.on('connected', this.onConnected);
-      this.socket.on('renderstart', this.onRenderStart);
-      this.socket.on('renderprogress', this.onRenderProgress);
-      this.socket.on('rendercomplete', this.onRenderComplete);
+      this.socket.on('render-start', this.onRenderStart);
+      this.socket.on('render-progress', this.onRenderProgress);
+      this.socket.on('render-complete', this.onRenderComplete);
       return null;
     };
 
@@ -83,12 +83,12 @@
     };
 
     SunflowRenderer.prototype.onRenderProgress = function(data) {
-      console.log("onRenderProgress");
+      console.log("onRenderProgress", data);
       return null;
     };
 
     SunflowRenderer.prototype.onRenderComplete = function(data) {
-      console.log("onRenderComplete");
+      console.log("onRenderComplete", data);
       return null;
     };
 
@@ -326,6 +326,9 @@
     GeometryExporter.prototype.addToIndex = function(object3d) {
       var faceMaterials;
       if (object3d instanceof THREE.Mesh && object3d.geometry) {
+        if (object3d.geometry instanceof THREEFLOW.InfinitePlaneGeometry) {
+          return;
+        }
         faceMaterials = object3d.material instanceof THREE.MeshFaceMaterial;
         if (!this.geometryIndex[object3d.geometry.uuid]) {
           this.geometryIndex[object3d.geometry.uuid] = {
@@ -475,7 +478,7 @@
           result += global;
         }
       } else if (this.type === 'path') {
-        result += 'samples ' + this.path.samples + '\n';
+        result += '  samples ' + this.path.samples + '\n';
       } else if (this.type === 'ambocc') {
         result += '  bright { "sRGB nonlinear" 1 1 1 }' + '\n';
         result += '  dark { "sRGB nonlinear" 0 0 0 }' + '\n';
@@ -547,9 +550,11 @@
     }
 
     LightsExporter.prototype.addToIndex = function(object3d) {
-      if (object3d instanceof THREEFLOW.PointLight && !this.lightIndex[object3d.uuid]) {
+      var indexed;
+      indexed = this.lightIndex[object3d.uuid];
+      if (!indexed && object3d instanceof THREEFLOW.SunskyLight) {
         this.lightIndex[object3d.uuid] = object3d;
-      } else if (object3d instanceof THREEFLOW.SunskyLight && !this.lightIndex[object3d.uuid]) {
+      } else if (!indexed && object3d instanceof THREEFLOW.PointLight) {
         this.lightIndex[object3d.uuid] = object3d;
       }
       return null;
@@ -580,6 +585,16 @@
           result += '  power ' + light.power + ' \n';
           result += '  p ' + this.exportVector(light.position) + '\n';
           result += '}\n\n';
+        } else if (light instanceof THREEFLOW.AreaLight) {
+          result += 'light {\n';
+          result += '  type meshlight\n';
+          result += '  name ' + light.uuid + '\n';
+          result += '  color ' + this.exportColorTHREE(light.color) + '\n';
+          result += '  power ' + light.power + ' \n';
+          result += '  p ' + this.exportVector(light.position) + '\n';
+          result += '}\n\n';
+        } else if (light instanceof THREEFLOW.MeshLight) {
+          result += '';
         }
       }
       return result;
@@ -784,21 +799,114 @@
 
   THREEFLOW.InfinitePlaneGeometry.prototype = Object.create(THREE.PlaneGeometry.prototype);
 
-  THREEFLOW.PointLight = function(hex, intensity, distance) {
-    var geometry, material;
-    THREE.Object3D.call(this);
-    this.power = 500;
-    this.color = new THREE.Color(0xffffff);
-    geometry = new THREE.SphereGeometry(2, 3, 3);
-    material = new THREE.MeshBasicMaterial({
-      color: 0x0000ff,
-      wireframe: true
-    });
-    this.mesh = new THREE.Mesh(geometry, material);
-    return this.add(this.mesh);
-  };
+  THREEFLOW.AreaLight = AreaLight = (function() {
+    function AreaLight() {
+      this._color = 0xff000;
+    }
 
-  THREEFLOW.PointLight.prototype = Object.create(THREE.Object3D.prototype);
+    Object.defineProperties(AreaLight.prototype, {
+      color: {
+        get: function() {
+          console.log("Color is...");
+          return this._color;
+        },
+        set: function(value) {
+          return this._color = value;
+        }
+      }
+    });
+
+    return AreaLight;
+
+  })();
+
+  /*
+  
+  params :
+    color: 0xffffff
+    # three.js
+    intensity: 1
+    distance: 0
+  
+    # threeflow / sunflow
+    power: 100.0
+    simulate: true
+    markers: true
+  */
+
+
+  THREEFLOW.PointLight = PointLight = (function() {
+    function PointLight(params) {
+      var geometry, material;
+      if (params == null) {
+        params = {};
+      }
+      THREE.Object3D.call(this);
+      if (params.simulate !== false) {
+        params.simulate = true;
+      }
+      if (params.markers !== false) {
+        params.markers = true;
+      }
+      if (isNaN(params.color)) {
+        params.color = 0xffffff;
+      }
+      params.power = params.power || 100.0;
+      this._color = params.color;
+      this._power = params.power;
+      this.simulate = params.simulate;
+      if (this.simulate) {
+        this.light = new THREE.PointLight(this._color, params.intensity, params.distance);
+        this.add(this.light);
+      } else {
+        this._color = new THREE.Color(this._color);
+      }
+      this.markers = params.markers;
+      if (this.markers) {
+        geometry = new THREE.SphereGeometry(2, 3, 3);
+        material = new THREE.MeshBasicMaterial({
+          color: this._color,
+          wireframe: true
+        });
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.add(this.mesh);
+      }
+    }
+
+    PointLight.prototype = Object.create(THREE.Object3D.prototype);
+
+    Object.defineProperties(PointLight.prototype, {
+      color: {
+        get: function() {
+          if (this.simulate) {
+            return this.light.color;
+          } else {
+            return this._color;
+          }
+        },
+        set: function(value) {
+          this._color = value;
+          if (this.simulate) {
+            this.light.color.set(this._color);
+          }
+          if (this.markers) {
+            return this.mesh.material.color.set(this._color);
+          }
+        }
+      },
+      power: {
+        get: function() {
+          return this._power;
+        },
+        set: function(value) {
+          return this._power = value;
+        }
+      }
+    });
+
+    return PointLight;
+
+  })();
 
   THREEFLOW.SunskyLight = SunskyLight = (function(_super) {
     __extends(SunskyLight, _super);

@@ -38,9 +38,9 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     @socket = io.connect @host
 
     @socket.on 'connected',@onConnected
-    @socket.on 'renderstart',@onRenderStart
-    @socket.on 'renderprogress',@onRenderProgress
-    @socket.on 'rendercomplete',@onRenderComplete
+    @socket.on 'render-start',@onRenderStart
+    @socket.on 'render-progress',@onRenderProgress
+    @socket.on 'render-complete',@onRenderComplete
 
     null
 
@@ -80,11 +80,11 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     null
 
   onRenderProgress:(data)=>
-    console.log "onRenderProgress"
+    console.log "onRenderProgress",data
     null
 
   onRenderComplete:(data)=>
-    console.log "onRenderComplete"
+    console.log "onRenderComplete",data
     null
 
 

@@ -80,7 +80,7 @@ class GiExporter extends BlockExporter
         result += global
 
     else if @type is 'path'
-      result += 'samples ' + @path.samples + '\n'
+      result += '  samples ' + @path.samples + '\n'
 
     else if @type is 'ambocc'
       result += '  bright { "sRGB nonlinear" 1 1 1 }' + '\n'

@@ -1,9 +1,15 @@
 
-#threeflow.js : A Sunflow Renderer for three.js
+#threeflow.js : Sunflow for three.js
 
 ### Overview
 
 To come..
+
+### Major to-do.
++ clean up materials implementation
++ add GI lights
++ node server work & npm package.
++ export normals & uvs > texture support
 
 ### Installation
 
@@ -13,12 +19,12 @@ Installation via npm. Will run a local socket server that projects can connect t
 ```
 
 ------------------------------------------------------------------------------
-#### Quick Render Examples
+#### Quick render examples so far
 
-*1. Perlin noise scaled THREE.CubeGeometry with Sunflow Sunsky Light*
+*1. Perlin noise scaled THREE.CubeGeometry with THREEFLOW.SunskyLight*
 ![Geometry Cubes](examples/renders/geometry_cubes.png)
 
-*2. Json loaded Camaro model with THREEFLOW.ShinyMaterial & THREEFLOW.MirrorMaterial*
+*2. Camaro Model with THREE.MeshFaceMaterial,THREEFLOW.ShinyMaterial & THREEFLOW.MirrorMaterials*
 ![Camaro](examples/renders/models_camaro.png)
 
 *3. WIP - working on THREE.MorphAnimMesh & THREE.FaceColors support*

@@ -24,7 +24,7 @@ Installation via npm. Will run a local socket server that projects can connect t
 *1. Perlin noise scaled THREE.CubeGeometry with THREEFLOW.SunskyLight*
 ![Geometry Cubes](examples/renders/geometry_cubes.png)
 
-*2. Camaro Model with THREE.MeshFaceMaterial,THREEFLOW.ShinyMaterial & THREEFLOW.MirrorMaterials*
+*2. Camaro Model with THREE.MeshFaceMaterial,THREEFLOW.Shiny/MirrorMaterial
 ![Camaro](examples/renders/models_camaro.png)
 
 *3. WIP - working on THREE.MorphAnimMesh & THREE.FaceColors support*

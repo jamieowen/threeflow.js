@@ -569,11 +569,13 @@
         return false;
       } else if (object3d instanceof THREEFLOW.AreaLight) {
         return false;
+      } else {
+        return true;
       }
     };
 
     LightsExporter.prototype.exportBlock = function() {
-      var face, light, result, uuid, vertex, _i, _j, _len, _len1, _ref, _ref1;
+      var face, light, matrix, result, uuid, vertex, _i, _j, _len, _len1, _ref, _ref1;
       result = '';
       for (uuid in this.lightIndex) {
         light = this.lightIndex[uuid];
@@ -601,9 +603,12 @@
           result += '  radiance ' + light.radiance + ' \n';
           result += '  samples ' + light.samples + ' \n';
           result += '  points ' + light.geometry.vertices.length + '\n';
+          matrix = light.matrixWorld;
           _ref = light.geometry.vertices;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             vertex = _ref[_i];
+            vertex = vertex.clone();
+            vertex.applyMatrix4(matrix);
             result += '    ' + this.exportVector(vertex) + '\n';
           }
           result += '  triangles ' + light.geometry.faces.length + '\n';

@@ -17,8 +17,6 @@ class LightsExporter extends BlockExporter
 
     else if not indexed and object3d instanceof THREEFLOW.AreaLight
       @lightIndex[object3d.uuid] = object3d
-
-
     null
 
   doTraverse:(object3d)->
@@ -28,6 +26,8 @@ class LightsExporter extends BlockExporter
       false
     else if object3d instanceof THREEFLOW.AreaLight
       false
+    else
+      true
 
   exportBlock:()->
     result = ''
@@ -65,7 +65,11 @@ class LightsExporter extends BlockExporter
         result += '  samples ' + light.samples + ' \n'
 
         result += '  points ' + light.geometry.vertices.length + '\n'
+        matrix = light.matrixWorld
+
         for vertex in light.geometry.vertices
+          vertex = vertex.clone()
+          vertex.applyMatrix4 matrix
           result += '    ' + @exportVector(vertex) + '\n'
 
         result += '  triangles ' + light.geometry.faces.length + '\n'

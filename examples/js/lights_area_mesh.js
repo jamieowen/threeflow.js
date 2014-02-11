@@ -20,13 +20,13 @@ window.onload = function() {
   camera.lookAt(new THREE.Vector3(0, 0, 0));
   geometry = new THREE.IcosahedronGeometry(5, 1);
   material = new THREEFLOW.DiffuseMaterial({
-    color: 0x1212ef,
+    color: 0x0000ff,
     shading: THREE.FlatShading
   });
   cube = new THREE.Mesh(geometry, material);
   cube.position.set(0, geometry.radius, 0);
   scene.add(cube);
-  redLight = new THREEFLOW.PointLight({
+  redLight = new THREEFLOW.AreaLight({
     color: 0xff9999,
     power: 3500,
     intensity: 3

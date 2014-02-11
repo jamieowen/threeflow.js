@@ -1,15 +1,19 @@
 ###
 
-# A Sunflow MeshLight with plane geometry..
-
 params :
+  # both
   color: 0xffffff
-  # three.js
+
+  # three.js ( AreaLight )
   intensity: 1
-  distance: 0
+  width: 1
+  height: 1
 
   # threeflow / sunflow
-  power: 100.0
+  radiance: 100.0
+  samples: 16
+  geometry: THREE.PlaneGeometry ( or any other geometry object )
+  matrix: THREE.Matrix4 ( to transform default geometry, or supplied )
   simulate: true
   markers: true
 
@@ -20,39 +24,28 @@ THREEFLOW.AreaLight = class AreaLight
 
     THREE.Object3D.call @
 
-    params.simulate   = true if params.simulate isnt false
-    params.markers    = true if params.markers isnt false
+    @simulate     = true if params.simulate isnt false
+    @markers      = true if params.markers isnt false
 
-    params.color      = 0xffffff if isNaN params.color
+    @_color       = new THREE.Color params.color
+    @_radiance    = params.radiance || 100.0
+    @samples      = params.samples || 16
 
-    @radiance   = params.radiance || 100.0
-
-    params.samples    = params.samples ||
-
-    params.width      = params.width || 10
-    params.height     = params.height || 10
-
-    @_color = params.color
-    @_power = params.power
-
-    @simulate = params.simulate
-
-    if @simulate
-      @light = new THREE.PointLight(@_color,params.intensity,params.distance)
-      @add @light
-    else
-      @_color = new THREE.Color(@_color)
-
-    @markers = params.markers
+    @geometry = params.geometry || new THREE.PlaneGeometry 10,10
 
     if @markers
-      geometry = new THREE.PlaneGeometry params.markerSize,3,3
       material = new THREE.MeshBasicMaterial
-        color: @_color
         wireframe: true
+      material.color = @_color
 
-      @mesh = new THREE.Mesh geometry,material
+      @mesh = new THREE.Mesh @geometry,material
       @add @mesh
+
+    if @simulate
+      # Just use three.js point light for now.
+      @light = new THREE.PointLight params.color,params.intensity
+      @light.color = @_color
+      @add @light
 
   # Extend THREE.Object3D
   @:: = Object.create THREE.Object3D::
@@ -61,22 +54,12 @@ THREEFLOW.AreaLight = class AreaLight
   Object.defineProperties @::,
     color:
       get: ->
-        if @simulate
-          @light.color
-        else
-          @_color
+        @_color
       set: (value) ->
         @_color = value
-
-        if @simulate
-          @light.color.set @_color
-
-        if @markers
-          @mesh.material.color.set @_color
-
-    power:
+    radiance:
       get: ->
-        @_power
+        @_radiance
       set: (value) ->
-        # TODO : Set the PointLight intensity when simulating?
-        @_power = value
+        # TODO : Set the three.js PointLight intensity when simulating?
+        @_radiance = value

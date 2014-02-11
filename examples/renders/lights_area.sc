@@ -1,6 +1,6 @@
 image {
   resolution 800 600
-  aa -1 1
+  aa 1 2
   samples 4
   contrast 0.1
   filter mitchell
@@ -8,14 +8,17 @@ image {
 }
 
 trace-depths {
-  diff 4
+  diff 2
   refl 4
   refr 4
 }
 
 gi {
-  type path
-  samples 32
+  type igi
+  samples 64
+  sets 1
+  b 0.01
+  bias-samples 0
 }
 
 camera {
@@ -28,42 +31,37 @@ camera {
 }
 
 light {
-  type point
-  color { "sRGB nonlinear" 1 0.6 0.6 }
-  power 3500 
-  p 15 20 -15
-}
-
-light {
-  type point
-  color { "sRGB nonlinear" 0.6 1 0.6 }
-  power 3500 
-  p -15 20 15
-}
-
-light {
-  type point
-  color { "sRGB nonlinear" 1 1 1 }
-  power 3500 
-  p 0 15 0
+  type meshlight
+  name E7641607-B159-464E-AA40-E2F0BBFACEEE
+  emit { "sRGB nonlinear" 1 1 1 }
+  radiance 10 
+  samples 16 
+  points 4
+    -5 5 0
+    5 5 0
+    -5 -5 0
+    5 -5 0
+  triangles 2
+    0 2 1
+    2 3 1
 }
 
 shader {
-  name 50630156-2BA6-4B40-8448-77B829719F54
+  name 12BF2C0B-C014-4819-A534-03A9DFE1CE90
   type diffuse
   diff { "sRGB nonlinear" 1 1 1 }
 }
 
 shader {
-  name 68E2BCDA-58BB-4E47-84CA-22EB83AA8DDB
+  name BDD9CA4B-FC06-4614-AE52-76BFC112BF99
   type diffuse
-  diff { "sRGB nonlinear" 0.07058823529411765 0.07058823529411765 0.9372549019607843 }
+  diff { "sRGB nonlinear" 0 0 1 }
 }
 
 object {
   noinstance
   type generic-mesh
-  name BA004AC4-479B-46DA-9108-24FD5729477D
+  name 8A02299D-388A-4ECF-8FB3-50CB6E86F7F2
   points 42
     -2.628655560595668 4.2532540417602 0
     2.628655560595668 4.2532540417602 0
@@ -193,16 +191,16 @@ object {
 }
 
 object {
-  shader 50630156-2BA6-4B40-8448-77B829719F54
+  shader 12BF2C0B-C014-4819-A534-03A9DFE1CE90
   type plane
   p 0 0 0
   n 0 1 0
 }
 
 instance {
-  name 0CF8087A-6598-42CD-A642-CFB67C0AA6F9
-  geometry BA004AC4-479B-46DA-9108-24FD5729477D
+  name 6CADA058-F148-44E3-BE23-360DD8B12413
+  geometry 8A02299D-388A-4ECF-8FB3-50CB6E86F7F2
   transform col 1 0 0 0 0 1 0 0 0 0 1 0 0 5 0 1
-  shader 68E2BCDA-58BB-4E47-84CA-22EB83AA8DDB
+  shader BDD9CA4B-FC06-4614-AE52-76BFC112BF99
 }
 

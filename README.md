@@ -8,6 +8,7 @@ To come..
 ### Major to-do.
 + clean up materials implementation
 + add GI lights
++ ao materials & ao overrides
 + node server work & npm package.
 + export normals & uvs > texture support
 

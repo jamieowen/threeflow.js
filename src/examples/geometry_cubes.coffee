@@ -13,32 +13,57 @@ window.onload = ()->
   scene       = new THREE.Scene()
   camera      = new THREE.PerspectiveCamera(35,width/height,1,100000)
   controls    = new THREE.TrackballControls(camera,webgl.domElement)
-  sunsky      = new THREEFLOW.SunskyLight
-    simulate: true
-    direction: new THREE.Vector3 0.06,.03,0
+
+  # for general lighting for preview in three.js ( not rendered in sunflow )
+  ambientLight = new THREE.AmbientLight()
 
   plane       = new THREE.Mesh new THREEFLOW.InfinitePlaneGeometry(),new THREE.MeshLambertMaterial
     color:0xffffff
     side: THREE.DoubleSide
     wireframe:true
 
+  # area light
+  lightGeom = new THREE.PlaneGeometry 30,30
+  areaLight1 = new THREEFLOW.AreaLight
+    color: 0xff9999
+    radiance: 40
+    simulate: false
+    geometry: lightGeom
+
+  areaLight1.position.set( -100,70,100 )
+  areaLight1.lookAt plane.position
+
+  areaLight2 = new THREEFLOW.AreaLight
+    color: 0x8888ff
+    radiance: 10
+    simulate: false
+    geometry: lightGeom
+
+  areaLight2.position.set( 75,100,-75 )
+  areaLight2.lookAt plane.position  
+
+
   # add to scene
   scene.add camera
-  scene.add sunsky
   scene.add plane
-
+  scene.add ambientLight
+  scene.add areaLight1
+  scene.add areaLight2
+  
+  
   # create cubes
   simplex = new SimplexNoise()
   simplexSmooth = .05
-  size = 30
+  size = 5
   gridX = 40
   gridZ = 40
-  scale = 10
+  scale = 5
   offset = new THREE.Vector3 -(gridX*size)/2,0,-(gridZ*size)/2
 
   geometry = new THREE.CubeGeometry(size,size,size)
-  material = new THREE.MeshLambertMaterial
+  material = new THREEFLOW.DiffuseMaterial
     color: 0xffffff
+    wireframe: true
 
   for ix in [0...gridX]
     for iz in [0...gridZ]
@@ -51,7 +76,7 @@ window.onload = ()->
       scene.add cube
 
   # position objects
-  camera.position.set 1100,1200,1100
+  camera.position.set 170,170,170
   camera.lookAt new THREE.Vector3(0,0,0)
 
   # create the sunflow renderer and connect.

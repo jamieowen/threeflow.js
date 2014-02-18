@@ -837,7 +837,6 @@
     radiance: 100.0
     samples: 16
     geometry: THREE.PlaneGeometry ( or any other geometry object )
-    matrix: THREE.Matrix4 ( to transform default geometry, or supplied )
     simulate: true
     markers: true
   */

@@ -1010,104 +1010,142 @@
 
   })();
 
-  THREEFLOW.ConstantMaterial = ConstantMaterial = (function(_super) {
-    __extends(ConstantMaterial, _super);
-
-    function ConstantMaterial(parameters) {
-      ConstantMaterial.__super__.constructor.call(this);
+  THREEFLOW.ConstantMaterial = ConstantMaterial = (function() {
+    function ConstantMaterial(params) {
+      if (params == null) {
+        params = {};
+      }
       THREE.MeshBasicMaterial.call(this);
-      this.setValues(parameters);
+      this.setValues(params);
     }
+
+    ConstantMaterial.prototype = Object.create(THREE.MeshBasicMaterial.prototype);
 
     return ConstantMaterial;
 
-  })(THREE.MeshBasicMaterial);
+  })();
 
-  THREEFLOW.DiffuseMaterial = DiffuseMaterial = (function(_super) {
-    __extends(DiffuseMaterial, _super);
-
-    function DiffuseMaterial(parameters) {
-      DiffuseMaterial.__super__.constructor.call(this);
+  THREEFLOW.DiffuseMaterial = DiffuseMaterial = (function() {
+    function DiffuseMaterial(params) {
+      if (params == null) {
+        params = {};
+      }
+      if (params.color === void 0) {
+        params.color = 0xffffff;
+      }
       THREE.MeshLambertMaterial.call(this);
-      this.setValues(parameters);
+      this.setValues(params);
     }
+
+    DiffuseMaterial.prototype = Object.create(THREE.MeshLambertMaterial.prototype);
 
     return DiffuseMaterial;
 
-  })(THREE.MeshLambertMaterial);
+  })();
 
-  THREEFLOW.GlassMaterial = GlassMaterial = (function(_super) {
-    __extends(GlassMaterial, _super);
-
-    function GlassMaterial(parameters) {
-      GlassMaterial.__super__.constructor.call(this);
-      parameters = parameters || {};
-      this.eta = parameters.eta || 1.0;
-      this.absorptionDistance = parameters.absorptionDistance || 5.0;
-      if (typeof parameters.absorptionColor === THREE.Color) {
-        this.absorptionColor = parameters.absorptionColor;
-      } else if (typeof parameters.absorptionColor === 'number') {
-        this.absorptionColor = new THREE.Color(parameters.absorptionColor);
-      } else {
-        this.absorptionColor = new THREE.Color(0xffffff);
+  THREEFLOW.GlassMaterial = GlassMaterial = (function() {
+    function GlassMaterial(params) {
+      if (params == null) {
+        params = {};
       }
+      if (params.color === void 0) {
+        params.color = 0xffffff;
+      }
+      if (params.eta === void 0) {
+        params.eta = 1.0;
+      }
+      this.eta = params.eta;
+      /*
+      # No support yet
+      @absorptionDistance = params.absorptionDistance || 5.0
+      
+      if typeof params.absorptionColor is THREE.Color
+        @absorptionColor = params.absorptionColor
+      else if typeof params.absorptionColor is 'number'
+        @absorptionColor = new THREE.Color( params.absorptionColor )
+      else
+        @absorptionColor = new THREE.Color( 0xffffff )
+      */
+
       THREE.MeshPhongMaterial.call(this);
-      this.setValues(parameters);
+      this.setValues(params);
     }
+
+    GlassMaterial.prototype = Object.create(THREE.MeshPhongMaterial.prototype);
 
     return GlassMaterial;
 
-  })(THREE.MeshPhongMaterial);
+  })();
 
-  THREEFLOW.MirrorMaterial = MirrorMaterial = (function(_super) {
-    __extends(MirrorMaterial, _super);
-
-    function MirrorMaterial(parameters) {
-      MirrorMaterial.__super__.constructor.call(this);
-      parameters = parameters || {};
-      if (typeof parameters.reflection === THREE.Color) {
-        this.reflection = parameters.reflection;
-      } else if (typeof parameters.reflection === 'number') {
-        this.reflection = new THREE.Color(parameters.reflection);
+  THREEFLOW.MirrorMaterial = MirrorMaterial = (function() {
+    function MirrorMaterial(params) {
+      if (params == null) {
+        params = {};
+      }
+      if (params.reflection === void 0 && params.color === void 0) {
+        params.color = 0xffffff;
+      } else if (params.reflection === void 0) {
+        params.color = params.color;
+      } else if (params.color === void 0) {
+        params.color = params.reflection;
       } else {
-        this.reflection = new THREE.Color(0xffffff);
+        params.color = 0xffffff;
       }
       THREE.MeshPhongMaterial.call(this);
-      this.setValues(parameters);
+      this.setValues(params);
+      this.reflection = this.color;
     }
+
+    MirrorMaterial.prototype = Object.create(THREE.MeshPhongMaterial.prototype);
 
     return MirrorMaterial;
 
-  })(THREE.MeshPhongMaterial);
+  })();
 
-  THREEFLOW.PhongMaterial = PhongMaterial = (function(_super) {
-    __extends(PhongMaterial, _super);
-
-    function PhongMaterial(parameters) {
-      PhongMaterial.__super__.constructor.call(this);
-      parameters = parameters || {};
-      this.samples = parameters.samples || 4;
+  THREEFLOW.PhongMaterial = PhongMaterial = (function() {
+    function PhongMaterial(params) {
+      if (params == null) {
+        params = {};
+      }
+      if (params.color === void 0) {
+        params.color = 0xffffff;
+      }
+      if (params.power === void 0) {
+        this.power = 100;
+      }
+      if (params.samples === void 0) {
+        this.samples = 4;
+      }
       THREE.MeshPhongMaterial.call(this);
-      this.setValues(parameters);
+      this.setValues(params);
     }
+
+    PhongMaterial.prototype = Object.create(THREE.MeshPhongMaterial.prototype);
 
     return PhongMaterial;
 
-  })(THREE.MeshPhongMaterial);
+  })();
 
-  THREEFLOW.ShinyMaterial = ShinyMaterial = (function(_super) {
-    __extends(ShinyMaterial, _super);
-
-    function ShinyMaterial(parameters) {
-      ShinyMaterial.__super__.constructor.call(this);
-      parameters = parameters || {};
-      this.reflection = parameters.reflection || 0.5;
+  THREEFLOW.ShinyMaterial = ShinyMaterial = (function() {
+    function ShinyMaterial(params) {
+      if (params == null) {
+        params = {};
+      }
+      if (params.color === void 0) {
+        params.color = 0xffffff;
+      }
+      if (params.reflection === void 0) {
+        params.reflection = 0.5;
+      }
+      this.reflection = params.reflection;
       THREE.MeshPhongMaterial.call(this);
-      this.setValues(parameters);
+      this.setValues(params);
     }
+
+    ShinyMaterial.prototype = Object.create(THREE.MeshPhongMaterial.prototype);
 
     return ShinyMaterial;
 
-  })(THREE.MeshPhongMaterial);
+  })();
 
 }).call(this);

@@ -1,7 +1,9 @@
-THREEFLOW.ConstantMaterial = class ConstantMaterial extends THREE.MeshBasicMaterial
+THREEFLOW.ConstantMaterial = class ConstantMaterial
 
-  constructor:(parameters)->
-    super()
+  constructor:(params = {})->
 
     THREE.MeshBasicMaterial.call @
-    @setValues parameters
+
+    @setValues params
+
+  @:: = Object.create THREE.MeshBasicMaterial::

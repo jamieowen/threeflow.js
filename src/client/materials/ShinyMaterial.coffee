@@ -1,9 +1,12 @@
-THREEFLOW.ShinyMaterial = class ShinyMaterial extends THREE.MeshPhongMaterial
+THREEFLOW.ShinyMaterial = class ShinyMaterial
 
-  constructor:(parameters)->
-    super()
-    parameters = parameters || {}
-    @reflection = parameters.reflection || 0.5
+  constructor:(params = {})->
+
+    params.color = 0xffffff if params.color is undefined
+    params.reflection = 0.5 if params.reflection is undefined
+    @reflection = params.reflection
 
     THREE.MeshPhongMaterial.call @
-    @setValues parameters
+    @setValues params
+
+  @:: = Object.create THREE.MeshPhongMaterial::

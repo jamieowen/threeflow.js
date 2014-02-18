@@ -1,15 +1,20 @@
-THREEFLOW.MirrorMaterial = class MirrorMaterial extends THREE.MeshPhongMaterial
+THREEFLOW.MirrorMaterial = class MirrorMaterial
 
-  constructor:(parameters)->
-    super()
-    parameters = parameters || {}
+  constructor:(params={})->
 
-    if typeof parameters.reflection is THREE.Color
-      @reflection = parameters.reflection
-    else if typeof parameters.reflection is 'number'
-      @reflection = new THREE.Color( parameters.reflection )
+    if params.reflection is undefined and params.color is undefined
+      params.color = 0xffffff
+    else if params.reflection is undefined
+      params.color = params.color
+    else if params.color is undefined
+      params.color = params.reflection
     else
-      @reflection = new THREE.Color( 0xffffff )
+      params.color = 0xffffff
 
     THREE.MeshPhongMaterial.call @
-    @setValues parameters
+
+    @setValues params
+
+    @reflection = @color
+
+  @:: = Object.create THREE.MeshPhongMaterial::

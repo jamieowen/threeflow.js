@@ -1,18 +1,25 @@
-THREEFLOW.GlassMaterial = class GlassMaterial extends THREE.MeshPhongMaterial
+THREEFLOW.GlassMaterial = class GlassMaterial
 
-  constructor:(parameters)->
-    super()
-    parameters = parameters || {}
+  constructor:(params = {})->
 
-    @eta = parameters.eta || 1.0
-    @absorptionDistance = parameters.absorptionDistance || 5.0
+    params.color = 0xffffff if params.color is undefined
 
-    if typeof parameters.absorptionColor is THREE.Color
-      @absorptionColor = parameters.absorptionColor
-    else if typeof parameters.absorptionColor is 'number'
-      @absorptionColor = new THREE.Color( parameters.absorptionColor )
+    params.eta = 1.0 if params.eta is undefined
+
+    @eta = params.eta
+    ###
+    # No support yet
+    @absorptionDistance = params.absorptionDistance || 5.0
+
+    if typeof params.absorptionColor is THREE.Color
+      @absorptionColor = params.absorptionColor
+    else if typeof params.absorptionColor is 'number'
+      @absorptionColor = new THREE.Color( params.absorptionColor )
     else
       @absorptionColor = new THREE.Color( 0xffffff )
+    ###
 
     THREE.MeshPhongMaterial.call @
-    @setValues parameters
+    @setValues params
+
+  @:: = Object.create THREE.MeshPhongMaterial::

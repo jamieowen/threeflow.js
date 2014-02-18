@@ -1,4 +1,6 @@
 
+# IGNORE - Out of date..
+
 # Todo
 
 ## Lights
@@ -33,7 +35,7 @@
 ## Lights
 
 All Lights should extend Object3D and give the option of adding markers & real three.js lights.
-- Area/Mesh Light
+- Area/Mesh Light *done*
 - On/off THREE lights (for many lights)
 - Directional Lights
 - SkyLight - ( Match Three )
@@ -116,7 +118,7 @@ Target camera will have to be passed into the render() method, the same as three
 Include camera geometry model to show camera direction.
 Exporter will have to prevent traversing into that mesh.
 
-1. Pinhole
+1. Pinhole *done*
 2. Thinlens ( Bokeh/DOF )
 3. Fisheye
 4. FOV / Aspect Match problems http://forum.processing.org/one/topic/coding-opengl-sunflow.html

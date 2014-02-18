@@ -1,7 +1,8 @@
 
-THREEFLOW.SunskyLight = class SunskyLight extends THREE.Object3D
+THREEFLOW.SunskyLight = class SunskyLight
   constructor:( params )->
-    super()
+
+    THREE.Object3D.call @
 
     params = params || {}
 
@@ -28,3 +29,6 @@ THREEFLOW.SunskyLight = class SunskyLight extends THREE.Object3D
       if params.hemLight
         @hemLight  = new THREE.HemisphereLight 0xffffff,0x333333,.8
         @add @hemLight
+
+  # Extend THREE.Object3D
+  @:: = Object.create THREE.Object3D::

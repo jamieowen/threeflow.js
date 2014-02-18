@@ -22,7 +22,7 @@ Installation via npm. Will run a local socket server that projects can connect t
 ------------------------------------------------------------------------------
 #### Quick render examples so far
 
-*1. Perlin noise scaled THREE.CubeGeometry with THREEFLOW.SunskyLight*
+*1. Perlin noise scaled THREE.CubeGeometry with THREEFLOW.AreaLight*
 ![Geometry Cubes](examples/renders/geometry_cubes.png)
 
 *2. Camaro Model with THREE.MeshFaceMaterial,THREEFLOW.Shiny/MirrorMaterial*

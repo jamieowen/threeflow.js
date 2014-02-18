@@ -974,11 +974,9 @@
 
   })();
 
-  THREEFLOW.SunskyLight = SunskyLight = (function(_super) {
-    __extends(SunskyLight, _super);
-
+  THREEFLOW.SunskyLight = SunskyLight = (function() {
     function SunskyLight(params) {
-      SunskyLight.__super__.constructor.call(this);
+      THREE.Object3D.call(this);
       params = params || {};
       this.up = params.up || new THREE.Vector3(0, 1, 0);
       this.east = params.east || new THREE.Vector3(0, 0, 1);
@@ -1006,9 +1004,11 @@
       }
     }
 
+    SunskyLight.prototype = Object.create(THREE.Object3D.prototype);
+
     return SunskyLight;
 
-  })(THREE.Object3D);
+  })();
 
   THREEFLOW.ConstantMaterial = ConstantMaterial = (function(_super) {
     __extends(ConstantMaterial, _super);

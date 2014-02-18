@@ -28,8 +28,13 @@ Installation via npm. Will run a local socket server that projects can connect t
 *2. Camaro Model with THREE.MeshFaceMaterial,THREEFLOW.Shiny/MirrorMaterial*
 ![Camaro](examples/renders/models_camaro.png)
 
+*4. THREE.IcosahedronGeometry with THREEFLOW.AreaLight*
+![AreaLight](examples/renders/lights_area.png)
+
 *3. WIP - working on THREE.MorphAnimMesh & THREE.FaceColors support*
 ![Camaro](examples/renders/models_flamingo.png)
+
+
 
 ------------------------------------------------------------------------------
 

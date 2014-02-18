@@ -14,3 +14,19 @@ light = new THREEFLOW.PointLight
 scene.add light
 ```
 
+## Area Light
+![Sunflow AreaLight](../../../examples/renders/lights_area.png)
+
+```coffee
+# custom geometry
+lightGeometry = new THREE.PlaneGeometry 300,300,2,2
+
+light = new THREEFLOW.AreaLight
+  color: 0xff0000
+  radiance: 20
+  simulate: false
+  geometry: lightGeometry
+
+scene.add light
+```
+

@@ -21,13 +21,15 @@ module.exports = (grunt)->
             destBase + destPath.replace(".coffee",".js")
           )
       extras:
+        options:
+          join:true
         files:
-          "bin/threeflow_datgui.js":"src/extras/DatGui.coffee"
+          "bin/threeflow_extras.js":"src/extras/**/*.coffee"
     uglify:
       main:
         files:
           "bin/threeflow.min.js":"bin/threeflow.js"
-          "bin/threeflow_datgui.min.js":"bin/threeflow_datgui.js"
+          "bin/threeflow_extras.min.js":"bin/threeflow_extras.js"
     copy:
       examples:
         expand:true
@@ -37,7 +39,7 @@ module.exports = (grunt)->
 
     watch:
       main:
-        files:[ "src/client/**/*.coffee","src/server/**/*.coffee", "src/examples/*.coffee","src/examples/*.html.eco","src/extras/*.coffee" ]
+        files:[ "src/client/**/*.coffee","src/server/**/*.coffee", "src/examples/*.coffee","src/examples/*.html.eco","src/extras/**/*.coffee" ]
         tasks:["coffee","copy","examples-html"]
 
 

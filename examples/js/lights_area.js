@@ -1,5 +1,5 @@
 window.onload = function() {
-  var camera, controls, cube, geometry, greenLight, gui, height, material, plane, redLight, render, scene, threeflow, webgl, whiteLight, width,
+  var box, camera, controls, geometry, greenLight, gui, height, material, object, plane, redLight, render, scene, threeflow, webgl, whiteLight, width,
     _this = this;
   webgl = new THREE.WebGLRenderer({
     antialias: true,
@@ -14,54 +14,53 @@ window.onload = function() {
     color: 0xffffff,
     wireframe: true
   }));
+  box = new THREEFLOW.LightingBox({
+    scaleY: 0.3,
+    size: 200
+  });
+  scene.add(box);
   scene.add(camera);
   scene.add(plane);
-  camera.position.set(50, 20, 50);
-  camera.lookAt(new THREE.Vector3(0, 0, 0));
-  geometry = new THREE.SphereGeometry(5);
-  material = new THREEFLOW.DiffuseMaterial({
-    color: 0x0000ff,
-    shading: THREE.FlatShading,
+  camera.position.set(-20, 10, 30);
+  geometry = new THREE.IcosahedronGeometry(5, 2);
+  material = new THREEFLOW.MirrorMaterial({
+    color: 0x665599,
+    reflection: 0xffffff,
     wireframe: true
   });
-  cube = new THREE.Mesh(geometry, material);
-  cube.position.set(0, geometry.radius, 0);
-  scene.add(cube);
+  object = new THREE.Mesh(geometry, material);
+  object.position.set(0, geometry.radius, 0);
+  scene.add(object);
   redLight = new THREEFLOW.AreaLight({
     color: 0xff9999,
     radiance: 20,
-    intensity: 3,
-    markers: false
+    intensity: 3
   });
-  redLight.position.set(20, 23, -30);
-  redLight.lookAt(cube.position);
+  redLight.position.set(20, 19, -30);
+  redLight.lookAt(object.position);
   scene.add(redLight);
   greenLight = new THREEFLOW.AreaLight({
     color: 0x99ff99,
-    radiance: 4,
+    radiance: 14,
     intensity: 3
   });
   greenLight.position.set(-30, 20, 20);
-  greenLight.lookAt(cube.position);
+  greenLight.lookAt(object.position);
   scene.add(greenLight);
   whiteLight = new THREEFLOW.AreaLight({
     color: 0xffffff,
-    radiance: 6,
+    radiance: 10,
     intensity: 3
   });
-  whiteLight.position.set(0, 25, 0);
-  whiteLight.lookAt(cube.position);
+  whiteLight.position.set(0, 20, 50);
+  whiteLight.lookAt(object.position);
   scene.add(whiteLight);
   threeflow = new THREEFLOW.SunflowRenderer({
     pngPath: "examples/renders/lights_area.png",
     scPath: "examples/renders/lights_area.sc"
   });
   threeflow.connect();
-  threeflow.image.samples = 2;
-  threeflow.gi.enabled = true;
-  threeflow.gi.type = "path";
-  threeflow.traceDepths.enabled = true;
-  threeflow.traceDepths.diffusion = 2;
+  threeflow.image.filter = "mitchell";
   gui = new THREEFLOW.DatGui(threeflow);
   gui.onRender = function() {
     return threeflow.render(scene, camera, width, height);

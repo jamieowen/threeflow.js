@@ -18,52 +18,55 @@ window.onload = ()->
     color:0xffffff
     wireframe:true
 
+
+  box = new THREEFLOW.LightingBox
+    scaleY: 0.3
+    size: 200
+
+  scene.add box
+
   # add to scene
   scene.add camera
   scene.add plane
 
   # position objects
-  camera.position.set 50,20,50
-  camera.lookAt new THREE.Vector3(0,0,0)
+  camera.position.set -20,10,30
 
-  geometry = new THREE.SphereGeometry 5
-  #geometry = new THREE.IcosahedronGeometry 5,1
-  material = new THREEFLOW.DiffuseMaterial
-    color: 0x0000ff
-    shading:THREE.FlatShading
+  geometry = new THREE.IcosahedronGeometry 5,2
+  material = new THREEFLOW.MirrorMaterial
+    color: 0x665599
+    reflection: 0xffffff
     wireframe:true
 
-  cube = new THREE.Mesh geometry,material
-  cube.position.set 0,geometry.radius,0
-  scene.add cube
+  object = new THREE.Mesh geometry,material
+  object.position.set 0,geometry.radius,0
+  scene.add object
 
   redLight = new THREEFLOW.AreaLight
     color: 0xff9999
     radiance: 20
     intensity: 3
-    markers: false
 
-  redLight.position.set 20,23,-30
-  redLight.lookAt cube.position
+  redLight.position.set 20,19,-30
+  redLight.lookAt object.position
   scene.add redLight
 
   greenLight = new THREEFLOW.AreaLight
     color: 0x99ff99
-    radiance: 4
+    radiance: 14
     intensity: 3
 
   greenLight.position.set -30,20,20
-  greenLight.lookAt cube.position
+  greenLight.lookAt object.position
   scene.add greenLight
 
   whiteLight = new THREEFLOW.AreaLight
     color: 0xffffff
-    radiance: 6
+    radiance: 10
     intensity: 3
-    #simulate: false
 
-  whiteLight.position.set 0,25,0
-  whiteLight.lookAt cube.position
+  whiteLight.position.set 0,20,50
+  whiteLight.lookAt object.position
   scene.add whiteLight
 
   # create the sunflow renderer and connect.
@@ -73,12 +76,7 @@ window.onload = ()->
 
   threeflow.connect()
 
-  threeflow.image.samples = 2
-  #threeflow.image.filter = "mitchell"
-  threeflow.gi.enabled = true
-  threeflow.gi.type = "path"
-  threeflow.traceDepths.enabled = true
-  threeflow.traceDepths.diffusion = 2
+  threeflow.image.filter = "mitchell"
 
   # gui
   gui = new THREEFLOW.DatGui threeflow

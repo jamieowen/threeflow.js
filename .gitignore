@@ -2,3 +2,4 @@
 .idea
 node_modules
 .tmp.render.sc
+examples/renders/

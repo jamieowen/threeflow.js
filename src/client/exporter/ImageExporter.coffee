@@ -13,8 +13,8 @@ class ImageExporter extends BlockExporter
     'lanczos'
     'ospline' ]
 
-  constructor:()->
-    super()
+  constructor:(exporter)->
+    super(exporter)
 
     @resolutionX    = 800
     @resolutionY    = 600

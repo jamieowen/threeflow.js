@@ -1,8 +1,8 @@
 
 class CausticsExporter extends BlockExporter
 
-  constructor:()->
-    super()
+  constructor:(exporter)->
+    super(exporter)
 
     @enabled    = false
     @photons    = 10000

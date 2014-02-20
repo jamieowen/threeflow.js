@@ -1,5 +1,5 @@
 (function() {
-  var AreaLight, BlockExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, SunflowRenderer, SunskyLight, TraceDepthsExporter,
+  var AreaLight, BlockExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, SunflowRenderer, SunskyLight, TraceDepthsExporter,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -97,7 +97,9 @@
   })();
 
   BlockExporter = (function() {
-    function BlockExporter() {}
+    function BlockExporter(exporter) {
+      this.exporter = exporter;
+    }
 
     BlockExporter.prototype.addToIndex = function(object3d) {
       throw new Error('BlockExporter subclasses must override this method.');
@@ -154,11 +156,114 @@
 
   })();
 
+  BufferGeometryExporter = (function(_super) {
+    __extends(BufferGeometryExporter, _super);
+
+    function BufferGeometryExporter(exporter) {
+      BufferGeometryExporter.__super__.constructor.call(this, exporter);
+      this.faceNormals = false;
+      this.vertexNormals = false;
+      this.bufferGeometryIndex = {};
+    }
+
+    BufferGeometryExporter.prototype.addToIndex = function(object3d) {
+      if (!object3d instanceof THREE.Mesh) {
+        return;
+      }
+      if (object3d.geometry instanceof THREE.BufferGeometry && !this.bufferGeometryIndex[object3d.geometry.uuid]) {
+        this.bufferGeometryIndex[object3d.geometry.uuid] = {
+          geometry: object3d.geometry,
+          faceMaterials: false
+        };
+      }
+      return null;
+    };
+
+    BufferGeometryExporter.prototype.doTraverse = function(object3d) {
+      return true;
+    };
+
+    BufferGeometryExporter.prototype.exportBlock = function() {
+      var attributes, entry, face, i, index, indices, offset, offsets, positions, result, result2, triCount, uuid, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _o, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
+      result = '';
+      for (uuid in this.bufferGeometryIndex) {
+        entry = this.bufferGeometryIndex[uuid];
+        result += 'object {\n';
+        result += '  noinstance\n';
+        result += '  type generic-mesh\n';
+        result += '  name ' + uuid + '\n';
+        offsets = entry.geometry.offsets;
+        attributes = entry.geometry.attributes;
+        positions = attributes.position.array;
+        result += '  points ' + (positions.length / 3) + '\n';
+        for (i = _i = 0, _ref = positions.length; _i < _ref; i = _i += 3) {
+          result += '    ' + positions[i] + ' ' + positions[i + 1] + ' ' + positions[i + 2] + '\n';
+        }
+        if (attributes.index) {
+          indices = attributes.index.array;
+          if (offsets.length) {
+            triCount = 0;
+            result2 = '';
+            for (_j = 0, _len = offsets.length; _j < _len; _j++) {
+              offset = offsets[_j];
+              index = offset.index;
+              for (i = _k = _ref1 = offset.start, _ref2 = offset.start + offset.count; _k < _ref2; i = _k += 3) {
+                triCount++;
+                result2 += '    ' + (indices[i] + index) + ' ' + (indices[i + 1] + index) + ' ' + (indices[i + 2] + index) + '\n';
+              }
+            }
+            result += '  triangles ' + triCount + '\n';
+            result += result2;
+          } else {
+            result += '  triangles ' + (indices.length / 3) + '\n';
+            for (i = _l = 0, _ref3 = indices.length; _l < _ref3; i = _l += 3) {
+              result += '    ' + indices[i] + ' ' + indices[i + 1] + ' ' + indices[i + 2] + '\n';
+            }
+          }
+        } else {
+          result += '  triangles ' + (positions.length / 9) + '\n';
+          for (i = _m = 0, _ref4 = positions.length / 3; _m < _ref4; i = _m += 3) {
+            result += '    ' + i + ' ' + (i + 1) + ' ' + (i + 2) + '\n';
+          }
+        }
+        if (this.faceNormals) {
+          result += '  normals facevarying\n';
+          result += '    ';
+          _ref5 = entry.geometry.faces;
+          for (_n = 0, _len1 = _ref5.length; _n < _len1; _n++) {
+            face = _ref5[_n];
+            result += this.exportVector(face.normal) + ' ';
+          }
+          result += '\n';
+        } else if (this.vertexNormals) {
+          result += '  normals none\n';
+        } else {
+          result += '  normals none\n';
+        }
+        result += '  uvs none\n';
+        if (entry.faceMaterials) {
+          result += '  face_shaders\n';
+          _ref6 = entry.geometry.faces;
+          for (_o = 0, _len2 = _ref6.length; _o < _len2; _o++) {
+            face = _ref6[_o];
+            result += '    ' + face.materialIndex + '\n';
+          }
+        }
+        result += '}\n\n';
+      }
+      return result;
+    };
+
+    return BufferGeometryExporter;
+
+  })(BlockExporter);
+
   CameraExporter = (function(_super) {
     __extends(CameraExporter, _super);
 
-    function CameraExporter() {
-      CameraExporter.__super__.constructor.call(this);
+    function CameraExporter(exporter) {
+      CameraExporter.__super__.constructor.call(this, exporter);
+      this.helperVec = new THREE.Vector3();
       this.camera = null;
     }
 
@@ -185,8 +290,12 @@
       }
       result += 'camera {\n';
       result += '  type pinhole\n';
+      this.helperVec.copy(this.camera.position);
+      this.helperVec.applyMatrix4(this.camera.matrixWorld);
       result += '  eye ' + this.exportVector(this.camera.position) + '\n';
-      result += '  target ' + this.exportVector(this.camera.rotation) + '\n';
+      this.helperVec.set(0, 0, -1);
+      this.helperVec.applyMatrix4(this.camera.matrixWorld);
+      result += '  target ' + this.exportVector(this.helperVec) + '\n';
       result += '  up ' + this.exportVector(this.camera.up) + '\n';
       result += '  fov ' + this.camera.fov * this.camera.aspect + '\n';
       result += '  aspect ' + this.camera.aspect + '\n';
@@ -201,8 +310,8 @@
   CausticsExporter = (function(_super) {
     __extends(CausticsExporter, _super);
 
-    function CausticsExporter() {
-      CausticsExporter.__super__.constructor.call(this);
+    function CausticsExporter(exporter) {
+      CausticsExporter.__super__.constructor.call(this, exporter);
       this.enabled = false;
       this.photons = 10000;
       this.kdEstimate = 100;
@@ -257,15 +366,16 @@
         convertPrimitives: false
       };
       this.blockExporters = [];
-      this.image = this.addBlockExporter(new ImageExporter());
-      this.traceDepths = this.addBlockExporter(new TraceDepthsExporter());
-      this.caustics = this.addBlockExporter(new CausticsExporter());
-      this.gi = this.addBlockExporter(new GiExporter());
-      this.cameras = this.addBlockExporter(new CameraExporter());
-      this.lights = this.addBlockExporter(new LightsExporter());
-      this.materials = this.addBlockExporter(new MaterialsExporter());
-      this.geometry = this.addBlockExporter(new GeometryExporter());
-      this.meshes = this.addBlockExporter(new MeshExporter());
+      this.image = this.addBlockExporter(new ImageExporter(this));
+      this.traceDepths = this.addBlockExporter(new TraceDepthsExporter(this));
+      this.caustics = this.addBlockExporter(new CausticsExporter(this));
+      this.gi = this.addBlockExporter(new GiExporter(this));
+      this.cameras = this.addBlockExporter(new CameraExporter(this));
+      this.lights = this.addBlockExporter(new LightsExporter(this));
+      this.materials = this.addBlockExporter(new MaterialsExporter(this));
+      this.geometry = this.addBlockExporter(new GeometryExporter(this));
+      this.bufferGeometry = this.addBlockExporter(new BufferGeometryExporter(this));
+      this.meshes = this.addBlockExporter(new MeshExporter(this));
     }
 
     Exporter.prototype.addBlockExporter = function(exporter) {
@@ -316,8 +426,8 @@
   GeometryExporter = (function(_super) {
     __extends(GeometryExporter, _super);
 
-    function GeometryExporter() {
-      GeometryExporter.__super__.constructor.call(this);
+    function GeometryExporter(exporter) {
+      GeometryExporter.__super__.constructor.call(this, exporter);
       this.faceNormals = false;
       this.vertexNormals = false;
       this.geometryIndex = {};
@@ -325,7 +435,10 @@
 
     GeometryExporter.prototype.addToIndex = function(object3d) {
       var faceMaterials;
-      if (object3d instanceof THREE.Mesh && object3d.geometry) {
+      if (!object3d instanceof THREE.Mesh) {
+        return;
+      }
+      if (object3d.geometry instanceof THREE.Geometry) {
         if (object3d.geometry instanceof THREEFLOW.InfinitePlaneGeometry) {
           return;
         }
@@ -406,7 +519,8 @@
 
     GiExporter.TYPES = ['igi', 'irr-cache', 'path', 'ambocc', 'fake'];
 
-    function GiExporter() {
+    function GiExporter(exporter) {
+      GiExporter.__super__.constructor.call(this, exporter);
       this.type = GiExporter.TYPES[0];
       this.enabled = false;
       this.globalMapTypes = GiExporter.GLOBAL_MAP_TYPES;
@@ -502,8 +616,8 @@
 
     ImageExporter.FILTERS = ['box', 'triangle', 'gaussian', 'mitchell', 'catmull-rom', 'blackman-harris', 'sinc', 'lanczos', 'ospline'];
 
-    function ImageExporter() {
-      ImageExporter.__super__.constructor.call(this);
+    function ImageExporter(exporter) {
+      ImageExporter.__super__.constructor.call(this, exporter);
       this.resolutionX = 800;
       this.resolutionY = 600;
       this.antialiasMin = -1;
@@ -544,8 +658,9 @@
   LightsExporter = (function(_super) {
     __extends(LightsExporter, _super);
 
-    function LightsExporter() {
-      LightsExporter.__super__.constructor.call(this);
+    function LightsExporter(exporter) {
+      LightsExporter.__super__.constructor.call(this, exporter);
+      this.helperVec = new THREE.Vector3();
       this.lightIndex = {};
     }
 
@@ -575,7 +690,7 @@
     };
 
     LightsExporter.prototype.exportBlock = function() {
-      var face, light, matrix, result, uuid, vertex, _i, _j, _len, _len1, _ref, _ref1;
+      var face, light, result, uuid, vertex, _i, _j, _len, _len1, _ref, _ref1;
       result = '';
       for (uuid in this.lightIndex) {
         light = this.lightIndex[uuid];
@@ -603,13 +718,12 @@
           result += '  radiance ' + light.radiance + ' \n';
           result += '  samples ' + light.samples + ' \n';
           result += '  points ' + light.geometry.vertices.length + '\n';
-          matrix = light.matrixWorld;
           _ref = light.geometry.vertices;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             vertex = _ref[_i];
-            vertex = vertex.clone();
-            vertex.applyMatrix4(matrix);
-            result += '    ' + this.exportVector(vertex) + '\n';
+            this.helperVec.copy(vertex);
+            this.helperVec.applyMatrix4(light.matrixWorld);
+            result += '    ' + this.exportVector(this.helperVec) + '\n';
           }
           result += '  triangles ' + light.geometry.faces.length + '\n';
           _ref1 = light.geometry.faces;
@@ -630,8 +744,8 @@
   MaterialsExporter = (function(_super) {
     __extends(MaterialsExporter, _super);
 
-    function MaterialsExporter() {
-      MaterialsExporter.__super__.constructor.call(this);
+    function MaterialsExporter(exporter) {
+      MaterialsExporter.__super__.constructor.call(this, exporter);
       this.materialsIndex = {};
     }
 
@@ -699,8 +813,8 @@
   MeshExporter = (function(_super) {
     __extends(MeshExporter, _super);
 
-    function MeshExporter() {
-      MeshExporter.__super__.constructor.call(this);
+    function MeshExporter(exporter) {
+      MeshExporter.__super__.constructor.call(this, exporter);
       this.convertPrimitives = true;
       this.meshIndex = {};
     }
@@ -764,8 +878,8 @@
   TraceDepthsExporter = (function(_super) {
     __extends(TraceDepthsExporter, _super);
 
-    function TraceDepthsExporter() {
-      TraceDepthsExporter.__super__.constructor.call(this);
+    function TraceDepthsExporter(exporter) {
+      TraceDepthsExporter.__super__.constructor.call(this, exporter);
       this.enabled = false;
       this.diffusion = 1;
       this.reflection = 4;

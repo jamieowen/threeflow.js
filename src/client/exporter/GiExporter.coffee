@@ -4,7 +4,9 @@ class GiExporter extends BlockExporter
   @GLOBAL_MAP_TYPES = ['grid','path']
   @TYPES         = ['igi','irr-cache','path','ambocc','fake']
 
-  constructor:()->
+  constructor:(exporter)->
+    super(exporter)
+
     @type = GiExporter.TYPES[0]
     @enabled = false
 

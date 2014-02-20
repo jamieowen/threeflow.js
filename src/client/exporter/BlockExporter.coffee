@@ -1,6 +1,7 @@
 
 class BlockExporter
-  constructor:()->
+  # pass a reference to the root Exporter object.
+  constructor:(@exporter)->
     #---
 
   # override.

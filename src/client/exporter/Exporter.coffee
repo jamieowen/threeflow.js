@@ -33,16 +33,17 @@ class Exporter
 
     @blockExporters = []
 
-    @image        = @addBlockExporter new ImageExporter()
-    @traceDepths  = @addBlockExporter new TraceDepthsExporter()
-    @caustics     = @addBlockExporter new CausticsExporter()
-    @gi           = @addBlockExporter new GiExporter()
+    @image              = @addBlockExporter new ImageExporter(@)
+    @traceDepths        = @addBlockExporter new TraceDepthsExporter(@)
+    @caustics           = @addBlockExporter new CausticsExporter(@)
+    @gi                 = @addBlockExporter new GiExporter(@)
 
-    @cameras      = @addBlockExporter new CameraExporter()
-    @lights       = @addBlockExporter new LightsExporter()
-    @materials    = @addBlockExporter new MaterialsExporter()
-    @geometry     = @addBlockExporter new GeometryExporter()
-    @meshes       = @addBlockExporter new MeshExporter()
+    @cameras            = @addBlockExporter new CameraExporter(@)
+    @lights             = @addBlockExporter new LightsExporter(@)
+    @materials          = @addBlockExporter new MaterialsExporter(@)
+    @geometry           = @addBlockExporter new GeometryExporter(@)
+    @bufferGeometry     = @addBlockExporter new BufferGeometryExporter(@)
+    @meshes             = @addBlockExporter new MeshExporter(@)
 
 
   addBlockExporter:(exporter)->

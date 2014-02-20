@@ -1,20 +1,27 @@
 
 class GeometryExporter extends BlockExporter
 
-  constructor:()->
-    super()
+  constructor:(exporter)->
+    super(exporter)
 
     # one or the other of these.
     @faceNormals = false
     @vertexNormals = false
 
+    # geometry export can vary according to :
+    # 1. same geometry - one material - ( a basic geometry export - with sunflow
     @geometryIndex = {}
 
   addToIndex:(object3d)->
-    # TODO : Skip Primitives Geometry when converting to sunflow primitives.
-    if object3d instanceof THREE.Mesh and object3d.geometry
 
-      # exclude any custom geometry
+    if not object3d instanceof THREE.Mesh
+      return
+
+    if object3d.geometry instanceof THREE.Geometry
+
+      # TODO : Skip Primitives Geometry when converting to sunflow primitives.
+
+      # Exclude any custom geometry - these will be exported via the MeshExporter
       if object3d.geometry instanceof THREEFLOW.InfinitePlaneGeometry
         return
 
@@ -25,9 +32,11 @@ class GeometryExporter extends BlockExporter
         @geometryIndex[object3d.geometry.uuid] =
           geometry: object3d.geometry
           faceMaterials:  faceMaterials
+
       else if not @geometryIndex[object3d.geometry.uuid].faceMaterials and faceMaterials
         # if we already have this geometry but no face material we may have more than one instance of this
         # geometry with face materials defined. We would then need to store face materialIndexes.
+
         # *Note* Not sure if we should define this as another geometry/generic-mesh instance
         # or sunflow will allow us to create an instance without satisfying all shaders.
         @geometryIndex[object3d.geometry.uuid].faceMaterials = true
@@ -53,11 +62,9 @@ class GeometryExporter extends BlockExporter
 
       result += '  triangles ' + entry.geometry.faces.length + '\n'
 
-
       # could optimized this and place in one loop for all face info
       for face in entry.geometry.faces
         result += '    ' + @exportFace(face) + '\n'
-
 
       if @faceNormals
         result += '  normals facevarying\n'

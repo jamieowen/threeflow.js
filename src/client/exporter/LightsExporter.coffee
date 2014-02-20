@@ -1,9 +1,10 @@
 
 class LightsExporter extends BlockExporter
 
-  constructor:()->
-    super()
+  constructor:(exporter)->
+    super(exporter)
 
+    @helperVec  = new THREE.Vector3()
     @lightIndex = {}
 
   addToIndex:(object3d)->
@@ -65,19 +66,17 @@ class LightsExporter extends BlockExporter
         result += '  samples ' + light.samples + ' \n'
 
         result += '  points ' + light.geometry.vertices.length + '\n'
-        matrix = light.matrixWorld
 
         for vertex in light.geometry.vertices
-          vertex = vertex.clone()
-          vertex.applyMatrix4 matrix
-          result += '    ' + @exportVector(vertex) + '\n'
+
+          @helperVec.copy vertex
+          @helperVec.applyMatrix4 light.matrixWorld
+          result += '    ' + @exportVector(@helperVec) + '\n'
 
         result += '  triangles ' + light.geometry.faces.length + '\n'
         for face in light.geometry.faces
           result += '    ' + @exportFace(face) + '\n'
 
         result += '}\n\n'
-
-
 
     return result

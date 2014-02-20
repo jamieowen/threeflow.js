@@ -1,8 +1,8 @@
 
 class MeshExporter extends BlockExporter
 
-  constructor:()->
-    super()
+  constructor:(exporter)->
+    super(exporter)
 
     @convertPrimitives = true
 
@@ -36,7 +36,7 @@ class MeshExporter extends BlockExporter
         result += '  name ' + mesh.uuid + '\n'
         result += '  c ' + @exportTransformPosition(mesh) + '\n'
         result += '  r ' + mesh.geometry.radius + '\n'
-        #result += '  transform col' + @exportTransform(mesh) + '\n'
+
       else if mesh.material instanceof THREE.MeshFaceMaterial
         result += 'instance {\n'
         result += '  name ' + mesh.uuid + '\n'
@@ -45,6 +45,7 @@ class MeshExporter extends BlockExporter
         result += '  shaders ' + mesh.material.materials.length + '\n'
         for material in mesh.material.materials
           result += '    ' + material.uuid + '\n'
+
       else
         result += 'instance {\n'
         result += '  name ' + mesh.uuid + '\n'

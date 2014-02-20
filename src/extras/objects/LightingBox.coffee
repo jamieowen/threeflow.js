@@ -31,7 +31,7 @@ THREEFLOW.LightingBox = class LightingBox
         side: THREE.DoubleSide
 
       white = new THREEFLOW.DiffuseMaterial
-        color: 0xffffff
+        color: 0xfafafa
         side: THREE.DoubleSide
 
       # up, down, left, right, forward, backward

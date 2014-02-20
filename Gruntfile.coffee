@@ -11,7 +11,7 @@ module.exports = (grunt)->
         options:
           join:true
         files:
-          "bin/threeflow.js":"src/client/**/*.coffee"
+          "build/threeflow.js":"src/client/**/*.coffee"
       examples:
         options:
           bare:true
@@ -24,17 +24,28 @@ module.exports = (grunt)->
         options:
           join:true
         files:
-          "bin/threeflow_extras.js":"src/extras/**/*.coffee"
+          "build/threeflow_extras.js":"src/extras/**/*.coffee"
+      server:
+        options:
+          bare:true
+        files: grunt.file.expandMapping("src/server/*.coffee","lib/",
+          flatten:true
+          rename:(destBase,destPath)->
+            filename = destPath.replace ".coffee",".js"
+            # only map bin file to bin folder.
+            destBase = "bin/" if filename.indexOf("threeflow.bin") is 0
+            destBase + filename
+        )
     uglify:
       main:
         files:
-          "bin/threeflow.min.js":"bin/threeflow.js"
-          "bin/threeflow_extras.min.js":"bin/threeflow_extras.js"
+          "build/threeflow.min.js":"build/threeflow.js"
+          "build/threeflow_extras.min.js":"build/threeflow_extras.js"
     copy:
       examples:
         expand:true
         flatten:true
-        src:"bin/*.*"
+        src:"build/*.*"
         dest: "examples/js/"
 
     watch:
@@ -49,7 +60,7 @@ module.exports = (grunt)->
   grunt.loadNpmTasks "grunt-contrib-watch"
 
   grunt.registerTask "default",["deploy"]
-  grunt.registerTask "deploy",["coffee","uglify","copy"]
+  grunt.registerTask "deploy",["coffee","uglify","copy","examples-html"]
   grunt.registerTask "dev",["watch"]
 
   grunt.registerTask "server",()->

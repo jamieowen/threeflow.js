@@ -1,10 +1,11 @@
 
 class CameraExporter extends BlockExporter
 
-  constructor:()->
-    super()
+  constructor:(exporter)->
+    super(exporter)
 
-    @camera = null
+    @helperVec  = new THREE.Vector3()
+    @camera     = null
 
   addToIndex:(object3d)->
     if @camera
@@ -30,8 +31,16 @@ class CameraExporter extends BlockExporter
 
     result += 'camera {\n'
     result += '  type pinhole\n'
+
+    @helperVec.copy @camera.position
+    @helperVec.applyMatrix4 @camera.matrixWorld
+
     result += '  eye ' + @exportVector(@camera.position) + '\n'
-    result += '  target ' + @exportVector(@camera.rotation) + '\n'
+
+    @helperVec.set 0,0,-1
+    @helperVec.applyMatrix4 @camera.matrixWorld
+
+    result += '  target ' + @exportVector(@helperVec) + '\n'
     result += '  up ' + @exportVector(@camera.up) + '\n'
 
     # TODO: multiplying the fov by the aspect ratio seems to correct

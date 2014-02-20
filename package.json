@@ -1,14 +1,21 @@
 {
-  "name": "threeflow.js",
-  "version": "0.0.0",
+  "name": "threeflow",
+  "preferGlobal": true,
+  "version": "0.6.0",
+  "author": "Jamie Owen <hello@jamieowen.com>",
   "description": "Render three.js scenes using the open source sunflow renderer\"",
-  "main": "./lib/main.js",
+
+  "main": "./lib/threeflow.lib.js",
+  "bin": {
+    "threeflow":"./bin/threeflow.bin.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": "",
-  "author": "Jamie Owen",
+  "repository": "https://github.com/jamieowen/threeflow.js",
+
   "license": "BSD",
+
   "dependencies": {
     "express": "~3.4.8",
     "socket.io": "~0.9.16"

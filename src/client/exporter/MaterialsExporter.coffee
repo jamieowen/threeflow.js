@@ -1,8 +1,8 @@
 
 class MaterialsExporter extends BlockExporter
 
-  constructor:()->
-    super()
+  constructor:(exporter)->
+    super(exporter)
 
     @materialsIndex = {}
 

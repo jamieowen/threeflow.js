@@ -158,7 +158,7 @@
           side: THREE.DoubleSide
         });
         white = new THREEFLOW.DiffuseMaterial({
-          color: 0xffffff,
+          color: 0xfafafa,
           side: THREE.DoubleSide
         });
         materials = [white, white, red, green, blue, yellow];

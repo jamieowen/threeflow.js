@@ -1,8 +1,8 @@
 
 class TraceDepthsExporter extends BlockExporter
 
-  constructor:()->
-    super()
+  constructor:(exporter)->
+    super(exporter)
 
     @enabled      = false
     @diffusion    = 1

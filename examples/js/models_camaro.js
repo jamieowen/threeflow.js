@@ -122,8 +122,8 @@ window.onload = function() {
     return scene.add(mesh);
   });
   threeflow = new THREEFLOW.SunflowRenderer({
-    pngPath: "examples/renders/mixed_cars_camaro.png",
-    scPath: "examples/renders/mixed_cars_camaro.sc"
+    pngPath: "examples/renders/models_camaro.png",
+    scPath: "examples/renders/models_camaro.sc"
   });
   threeflow.connect();
   gui = new THREEFLOW.DatGui(threeflow);

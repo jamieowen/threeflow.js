@@ -18,6 +18,10 @@ Installation via npm. Will run a local socket server that projects can connect t
 ```
 
 ------------------------------------------------------------------------------
+#### Screenshot
+![Screenshot](screenshot.jpg)
+
+------------------------------------------------------------------------------
 #### Quick render examples so far
 
 *1. Perlin noise scaled THREE.CubeGeometry with THREEFLOW.AreaLight*

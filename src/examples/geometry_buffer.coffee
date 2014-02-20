@@ -137,12 +137,6 @@ window.onload = ()->
 
   geometry.computeBoundingSphere()
 
-  material = new THREEFLOW.MirrorMaterial
-    color: 0x665599
-    reflection: 0xffffff
-    wireframe:true
-
-
   material = new THREE.MeshPhongMaterial
     color: 0xaaaaaa
     ambient: 0xaaaaaa

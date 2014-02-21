@@ -24,13 +24,29 @@ window.onload = ()->
 
   # add to scene
   scene.add camera
-  scene.add sunsky
+  #scene.add sunsky
   scene.add plane
 
   # position objects
   camera.position.set 615,564,1910
   camera.lookAt new THREE.Vector3(0,0,0)
   plane.position.set 0,-218,0
+
+  light = new THREEFLOW.AreaLight
+    geometry: new THREE.PlaneGeometry 400,400
+    radiance: 70
+
+  scene.add light
+  light.position.set 300,600,300
+  light.lookAt plane.position
+
+  light = new THREEFLOW.AreaLight
+    geometry: new THREE.PlaneGeometry 400,400
+    radiance: 60
+
+  scene.add light
+  light.position.set 500,600,-300
+  light.lookAt plane.position
 
 
   # create car materials
@@ -41,50 +57,6 @@ window.onload = ()->
         #envMap: textureCube
         combine: THREE.MixOperation
         reflectivity: 0.3
-      Blue: new THREE.MeshLambertMaterial
-        color: 0x226699
-        #envMap: textureCube
-        combine: THREE.MixOperation
-        reflectivity: 0.3
-
-      Red: new THREE.MeshLambertMaterial
-        color: 0x660000
-        #envMap: textureCube
-        combine: THREE.MixOperation
-        reflectivity: 0.5
-
-      Black: new THREE.MeshLambertMaterial
-        color: 0x000000
-        #envMap: textureCube
-        combine: THREE.MixOperation
-        reflectivity: 0.5
-
-      White: new THREE.MeshLambertMaterial
-        color: 0xffffff
-        #envMap: textureCube
-        combine: THREE.MixOperation
-        reflectivity: 0.5
-
-      Carmine: new THREE.MeshPhongMaterial
-        color: 0x770000,
-        specular: 0xffaaaa,
-        #envMap: textureCube,
-        combine: THREE.MultiplyOperation
-
-      Gold: new THREE.MeshPhongMaterial
-        color: 0xaa9944
-        specular: 0xbbaa99
-        shininess: 50
-        #envMap: textureCube
-        combine: THREE.MultiplyOperation
-
-      Bronze: new THREE.MeshPhongMaterial
-        color: 0x150505
-        specular: 0xee6600
-        shininess: 10
-        #envMap: textureCube
-        combine: THREE.MixOperation
-        reflectivity: 0.5
 
       Chrome: new THREE.MeshPhongMaterial
         color: 0xffffff
@@ -129,22 +101,32 @@ window.onload = ()->
     m.materials[ 1 ] = materials.chrome # wheels chrome
     m.materials[ 2 ] = materials.chrome # grille chrome
     m.materials[ 3 ] = materials.darkchrome # door lines
-    m.materials[ 4 ] = materials.glass # windshield
-    m.materials[ 5 ] = materials.interior # interior
+
+
+    # TODO : Errors when using the GlassMaterial
+    m.materials[ 4 ] = materials.black #materials.glass # windshield
+    m.materials[ 5 ] = materials.black ##materials.interior # interior
     m.materials[ 6 ] = materials.tire # tire
     m.materials[ 7 ] = materials.black # tireling
     m.materials[ 8 ] = materials.black # behind grille
 
-    mesh = new THREE.Mesh geometry, m
+    material = new THREEFLOW.DiffuseMaterial()
+
+    mesh = new THREE.Mesh geometry,m
     mesh.rotation.y = 1
     mesh.scale.set s,s,s
 
     scene.add mesh
 
+    vertexNormals = new THREE.VertexNormalsHelper(mesh,10)
+    scene.add vertexNormals
+
   # create the sunflow renderer and connect.
   threeflow = new THREEFLOW.SunflowRenderer
     pngPath:"examples/renders/models_camaro.png"
     scPath:"examples/renders/models_camaro.sc"
+    scale:0.25
+
   threeflow.connect()
 
   # gui

@@ -1,11 +1,6 @@
 
 window.THREEFLOW = window.THREEFLOW || {}
 
-# helper method for coffee getter/setters
-if not Function::property
-  Function::property = (prop, desc) ->
-    Object.defineProperty @prototype, prop, desc
-
 THREEFLOW.SunflowRenderer = class SunflowRenderer
 
   constructor:(options)->
@@ -14,20 +9,23 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     @pngPath  = options.pngPath || null
     @scPath   = options.scPath || null
     @scSave   = options.scSave || false
+    @scale    = options.scale || 1
 
     @exporter = new Exporter()
 
     # map block exporters for shorthand access
-    @image        = @exporter.image
-    @traceDepths  = @exporter.traceDepths
-    @caustics     = @exporter.caustics
-    @gi           = @exporter.gi
+    @image            = @exporter.image
+    @bucket           = @exporter.bucket
+    @traceDepths      = @exporter.traceDepths
+    @caustics         = @exporter.caustics
+    @gi               = @exporter.gi
 
-    @cameras      = @exporter.cameras
-    @lights       = @exporter.lights
-    @materials    = @exporter.materials
-    @geometry     = @exporter.geometry
-    @meshes       = @exporter.meshes
+    @cameras          = @exporter.cameras
+    @lights           = @exporter.lights
+    @materials        = @exporter.materials
+    @geometry         = @exporter.geometry
+    @bufferGeometry   = @exporter.bufferGeometry
+    @meshes           = @exporter.meshes
 
     @connected = false
     @rendering = false
@@ -49,12 +47,13 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
       throw new Error "[SunflowRenderer] Call connect() before rendering."
     else if not @rendering
 
+
+      @rendering = true
       console.log "RENDER"
 
-      scale = 1;
 
-      @exporter.image.resolutionX = width*scale
-      @exporter.image.resolutionY = height*scale
+      @exporter.image.resolutionX = width*@scale
+      @exporter.image.resolutionY = height*@scale
 
       @exporter.indexScene scene
       scContents = @exporter.exportCode()
@@ -66,7 +65,7 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
          pngPath:@pngPath
 
     else
-      console.log "QUEUE?"
+      console.log "[Render in Progress]"
 
     null
 
@@ -84,6 +83,7 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     null
 
   onRenderComplete:(data)=>
+    @rendering = false
     console.log "onRenderComplete",data
     null
 

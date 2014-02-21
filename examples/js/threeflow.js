@@ -1,16 +1,10 @@
 (function() {
-  var AreaLight, BlockExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, SunflowRenderer, SunskyLight, TraceDepthsExporter,
+  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, SunflowRenderer, SunskyLight, TraceDepthsExporter,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   window.THREEFLOW = window.THREEFLOW || {};
-
-  if (!Function.prototype.property) {
-    Function.prototype.property = function(prop, desc) {
-      return Object.defineProperty(this.prototype, prop, desc);
-    };
-  }
 
   THREEFLOW.SunflowRenderer = SunflowRenderer = (function() {
     function SunflowRenderer(options) {
@@ -22,8 +16,10 @@
       this.pngPath = options.pngPath || null;
       this.scPath = options.scPath || null;
       this.scSave = options.scSave || false;
+      this.scale = options.scale || 1;
       this.exporter = new Exporter();
       this.image = this.exporter.image;
+      this.bucket = this.exporter.bucket;
       this.traceDepths = this.exporter.traceDepths;
       this.caustics = this.exporter.caustics;
       this.gi = this.exporter.gi;
@@ -31,6 +27,7 @@
       this.lights = this.exporter.lights;
       this.materials = this.exporter.materials;
       this.geometry = this.exporter.geometry;
+      this.bufferGeometry = this.exporter.bufferGeometry;
       this.meshes = this.exporter.meshes;
       this.connected = false;
       this.rendering = false;
@@ -49,14 +46,14 @@
     };
 
     SunflowRenderer.prototype.render = function(scene, camera, width, height) {
-      var scContents, scale;
+      var scContents;
       if (!this.connected) {
         throw new Error("[SunflowRenderer] Call connect() before rendering.");
       } else if (!this.rendering) {
+        this.rendering = true;
         console.log("RENDER");
-        scale = 1;
-        this.exporter.image.resolutionX = width * scale;
-        this.exporter.image.resolutionY = height * scale;
+        this.exporter.image.resolutionX = width * this.scale;
+        this.exporter.image.resolutionY = height * this.scale;
         this.exporter.indexScene(scene);
         scContents = this.exporter.exportCode();
         this.socket.emit("render", {
@@ -66,7 +63,7 @@
           pngPath: this.pngPath
         });
       } else {
-        console.log("QUEUE?");
+        console.log("[Render in Progress]");
       }
       return null;
     };
@@ -88,6 +85,7 @@
     };
 
     SunflowRenderer.prototype.onRenderComplete = function(data) {
+      this.rendering = false;
       console.log("onRenderComplete", data);
       return null;
     };
@@ -156,13 +154,55 @@
 
   })();
 
+  BucketExporter = (function(_super) {
+    __extends(BucketExporter, _super);
+
+    BucketExporter.ORDER_TYPES = ['hilbert', 'spiral', 'column', 'row', 'diagonal', 'random'];
+
+    function BucketExporter(exporter) {
+      BucketExporter.__super__.constructor.call(this, exporter);
+      this.orderTypes = BucketExporter.ORDER_TYPES;
+      this.enabled = true;
+      this.reverse = false;
+      this.size = 64;
+      this.order = this.orderTypes[0];
+    }
+
+    BucketExporter.prototype.addToIndex = function(object3d) {
+      return null;
+    };
+
+    BucketExporter.prototype.doTraverse = function(object3d) {
+      return true;
+    };
+
+    BucketExporter.prototype.exportBlock = function() {
+      var bucket, result;
+      result = '';
+      if (!this.enabled) {
+        return result;
+      }
+      bucket = this.size + ' ';
+      if (this.reverse) {
+        bucket += '"reverse ' + this.order + '"';
+      } else {
+        bucket += this.order;
+      }
+      result += 'bucket ' + bucket + '\n';
+      return result;
+    };
+
+    return BucketExporter;
+
+  })(BlockExporter);
+
   BufferGeometryExporter = (function(_super) {
     __extends(BufferGeometryExporter, _super);
 
     function BufferGeometryExporter(exporter) {
       BufferGeometryExporter.__super__.constructor.call(this, exporter);
-      this.faceNormals = false;
-      this.vertexNormals = false;
+      this.normals = true;
+      this.uvs = false;
       this.bufferGeometryIndex = {};
     }
 
@@ -184,7 +224,7 @@
     };
 
     BufferGeometryExporter.prototype.exportBlock = function() {
-      var attributes, entry, face, i, index, indices, offset, offsets, positions, result, result2, triCount, uuid, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _o, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
+      var attributes, entry, face, i, index, indices, normals, offset, offsets, positions, result, result2, tris, uuid, _i, _j, _k, _l, _len, _len1, _m, _n, _o, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
       result = '';
       for (uuid in this.bufferGeometryIndex) {
         entry = this.bufferGeometryIndex[uuid];
@@ -195,6 +235,7 @@
         offsets = entry.geometry.offsets;
         attributes = entry.geometry.attributes;
         positions = attributes.position.array;
+        normals = attributes.normal.array;
         result += '  points ' + (positions.length / 3) + '\n';
         for (i = _i = 0, _ref = positions.length; _i < _ref; i = _i += 3) {
           result += '    ' + positions[i] + ' ' + positions[i + 1] + ' ' + positions[i + 2] + '\n';
@@ -202,17 +243,17 @@
         if (attributes.index) {
           indices = attributes.index.array;
           if (offsets.length) {
-            triCount = 0;
+            tris = 0;
             result2 = '';
             for (_j = 0, _len = offsets.length; _j < _len; _j++) {
               offset = offsets[_j];
               index = offset.index;
               for (i = _k = _ref1 = offset.start, _ref2 = offset.start + offset.count; _k < _ref2; i = _k += 3) {
-                triCount++;
+                tris++;
                 result2 += '    ' + (indices[i] + index) + ' ' + (indices[i + 1] + index) + ' ' + (indices[i + 2] + index) + '\n';
               }
             }
-            result += '  triangles ' + triCount + '\n';
+            result += '  triangles ' + tris + '\n';
             result += result2;
           } else {
             result += '  triangles ' + (indices.length / 3) + '\n';
@@ -226,25 +267,24 @@
             result += '    ' + i + ' ' + (i + 1) + ' ' + (i + 2) + '\n';
           }
         }
-        if (this.faceNormals) {
-          result += '  normals facevarying\n';
-          result += '    ';
-          _ref5 = entry.geometry.faces;
-          for (_n = 0, _len1 = _ref5.length; _n < _len1; _n++) {
-            face = _ref5[_n];
-            result += this.exportVector(face.normal) + ' ';
+        if (this.normals && normals.length > 0) {
+          result += '  normals vertex\n';
+          for (i = _n = 0, _ref5 = normals.length; _n < _ref5; i = _n += 3) {
+            result += '    ' + normals[i] + ' ' + normals[i + 1] + ' ' + normals[i + 2] + '\n';
           }
           result += '\n';
-        } else if (this.vertexNormals) {
-          result += '  normals none\n';
         } else {
           result += '  normals none\n';
         }
-        result += '  uvs none\n';
+        if (this.uvs) {
+          result += '  uvs none\n';
+        } else {
+          result += '  uvs none\n';
+        }
         if (entry.faceMaterials) {
           result += '  face_shaders\n';
           _ref6 = entry.geometry.faces;
-          for (_o = 0, _len2 = _ref6.length; _o < _len2; _o++) {
+          for (_o = 0, _len1 = _ref6.length; _o < _len1; _o++) {
             face = _ref6[_o];
             result += '    ' + face.materialIndex + '\n';
           }
@@ -343,30 +383,13 @@
   })(BlockExporter);
 
   Exporter = (function() {
-    Exporter.BUCKET_ORDERS = ['hilbert', 'spiral', 'column', 'row', 'diagonal', 'random'];
-
-    /*
-        bucketSize: 48
-        bucketOrder: ImageExporter.BUCKET_ORDERS[0]
-        bucketOrderReverse: false
-    
-      # format bucket options.
-      bucket = @settings.bucketSize + ' '
-      if @settings.bucketOrderReverse
-        bucket += '"reverse ' + @settings.bucketOrder + '"'
-      else
-        bucket += @settings.bucketOrder
-    
-      result += '  bucket ' + bucket + '\n'
-    */
-
-
     function Exporter() {
       this.exporterSettings = {
         convertPrimitives: false
       };
       this.blockExporters = [];
       this.image = this.addBlockExporter(new ImageExporter(this));
+      this.bucket = this.addBlockExporter(new BucketExporter(this));
       this.traceDepths = this.addBlockExporter(new TraceDepthsExporter(this));
       this.caustics = this.addBlockExporter(new CausticsExporter(this));
       this.gi = this.addBlockExporter(new GiExporter(this));
@@ -428,14 +451,17 @@
 
     function GeometryExporter(exporter) {
       GeometryExporter.__super__.constructor.call(this, exporter);
-      this.faceNormals = false;
-      this.vertexNormals = false;
+      this.normals = true;
+      this.uvs = false;
       this.geometryIndex = {};
     }
 
     GeometryExporter.prototype.addToIndex = function(object3d) {
       var faceMaterials;
       if (!object3d instanceof THREE.Mesh) {
+        return;
+      }
+      if (object3d instanceof THREE.VertexNormalsHelper) {
         return;
       }
       if (object3d.geometry instanceof THREE.Geometry) {
@@ -460,7 +486,7 @@
     };
 
     GeometryExporter.prototype.exportBlock = function() {
-      var entry, face, result, uuid, vertex, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3;
+      var entry, face, normal, normals, result, uuid, vertex, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1, _ref2, _ref3;
       result = '';
       for (uuid in this.geometryIndex) {
         entry = this.geometryIndex[uuid];
@@ -480,26 +506,38 @@
           face = _ref1[_j];
           result += '    ' + this.exportFace(face) + '\n';
         }
-        if (this.faceNormals) {
-          result += '  normals facevarying\n';
-          result += '    ';
+        if (this.normals) {
+          result += '  normals vertex\n';
+          normals = [];
           _ref2 = entry.geometry.faces;
           for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
             face = _ref2[_k];
-            result += this.exportVector(face.normal) + ' ';
+            normals[face.a] = face.vertexNormals[0];
+            normals[face.b] = face.vertexNormals[1];
+            normals[face.c] = face.vertexNormals[2];
           }
-          result += '\n';
-        } else if (this.vertexNormals) {
-          result += '  normals none\n';
+          if (normals.length > 0 && normals.length === entry.geometry.vertices.length) {
+            for (_l = 0, _len3 = normals.length; _l < _len3; _l++) {
+              normal = normals[_l];
+              result += '    ' + normal.x + ' ' + normal.y + ' ' + normal.z + '\n';
+            }
+            result += '\n';
+          } else {
+            result += '  normals none\n';
+          }
         } else {
           result += '  normals none\n';
         }
-        result += '  uvs none\n';
+        if (this.uvs) {
+          result += '  uvs none\n';
+        } else {
+          result += '  uvs none\n';
+        }
         if (entry.faceMaterials) {
           result += '  face_shaders\n';
           _ref3 = entry.geometry.faces;
-          for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
-            face = _ref3[_l];
+          for (_m = 0, _len4 = _ref3.length; _m < _len4; _m++) {
+            face = _ref3[_m];
             result += '    ' + face.materialIndex + '\n';
           }
         }
@@ -820,7 +858,13 @@
     }
 
     MeshExporter.prototype.addToIndex = function(object3d) {
-      if (object3d instanceof THREE.Mesh && !this.meshIndex[object3d.uuid]) {
+      if (!(object3d instanceof THREE.Mesh)) {
+        return;
+      }
+      if (object3d instanceof THREE.VertexNormalsHelper) {
+        return;
+      }
+      if (!this.meshIndex[object3d.uuid]) {
         this.meshIndex[object3d.uuid] = object3d;
       }
       return null;

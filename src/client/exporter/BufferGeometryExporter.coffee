@@ -5,9 +5,8 @@ class BufferGeometryExporter extends BlockExporter
   constructor:(exporter)->
     super(exporter)
 
-    # one or the other of these.
-    @faceNormals = false
-    @vertexNormals = false
+    @normals = true
+    @uvs = false
 
     @bufferGeometryIndex = {}
 
@@ -40,6 +39,7 @@ class BufferGeometryExporter extends BlockExporter
       offsets = entry.geometry.offsets
       attributes = entry.geometry.attributes
       positions = attributes.position.array
+      normals = attributes.normal.array
 
       # points
       result += '  points ' + (positions.length/3) + '\n'
@@ -53,16 +53,16 @@ class BufferGeometryExporter extends BlockExporter
         indices = attributes.index.array
 
         if offsets.length
-          triCount = 0
+          tris = 0
           result2 = ''
           for offset in offsets
             index = offset.index
 
             for i in [offset.start...(offset.start+offset.count)] by 3
-              triCount++
+              tris++
               result2 += '    ' + (indices[i]+index) + ' ' + (indices[i+1]+index) + ' ' + (indices[i+2]+index) + '\n'
 
-          result += '  triangles ' + triCount + '\n'
+          result += '  triangles ' + tris + '\n'
           result += result2
 
         else
@@ -75,21 +75,20 @@ class BufferGeometryExporter extends BlockExporter
         for i in [0...(positions.length/3)] by 3
           result += '    ' + i + ' ' + (i+1) + ' ' + (i+2) + '\n'
 
-      # TODO : Face Normals.
-      # REMOVE From legacy Geometry.
-      if @faceNormals
-        result += '  normals facevarying\n'
-        result += '    '
-        for face in entry.geometry.faces
-          result += @exportVector(face.normal) + ' '
+      if @normals and normals.length > 0
+        result += '  normals vertex\n'
+
+        for i in [0...normals.length] by 3
+            result += '    ' + normals[i] + ' ' + normals[i+1] + ' ' + normals[i+2] + '\n'
+
         result += '\n'
-      else if @vertexNormals
-        result += '  normals none\n'
       else
         result += '  normals none\n'
 
-      # TODO: uvs
-      result += '  uvs none\n'
+      if @uvs
+        result += '  uvs none\n'
+      else
+        result += '  uvs none\n'
 
       if entry.faceMaterials
         result += '  face_shaders\n'

@@ -4,9 +4,8 @@ class GeometryExporter extends BlockExporter
   constructor:(exporter)->
     super(exporter)
 
-    # one or the other of these.
-    @faceNormals = false
-    @vertexNormals = false
+    @normals = true
+    @uvs = false
 
     # geometry export can vary according to :
     # 1. same geometry - one material - ( a basic geometry export - with sunflow
@@ -15,6 +14,9 @@ class GeometryExporter extends BlockExporter
   addToIndex:(object3d)->
 
     if not object3d instanceof THREE.Mesh
+      return
+
+    if object3d instanceof THREE.VertexNormalsHelper
       return
 
     if object3d.geometry instanceof THREE.Geometry
@@ -62,23 +64,31 @@ class GeometryExporter extends BlockExporter
 
       result += '  triangles ' + entry.geometry.faces.length + '\n'
 
-      # could optimized this and place in one loop for all face info
       for face in entry.geometry.faces
         result += '    ' + @exportFace(face) + '\n'
 
-      if @faceNormals
-        result += '  normals facevarying\n'
-        result += '    '
+      if @normals
+        result += '  normals vertex\n'
+        normals = []
         for face in entry.geometry.faces
-          result += @exportVector(face.normal) + ' '
-        result += '\n'
-      else if @vertexNormals
-        result += '  normals none\n'
+
+          normals[ face.a ] = face.vertexNormals[0]
+          normals[ face.b ] = face.vertexNormals[1]
+          normals[ face.c ] = face.vertexNormals[2]
+
+        if normals.length > 0 and normals.length is entry.geometry.vertices.length
+          for normal in normals
+            result += '    ' + normal.x + ' ' + normal.y + ' ' + normal.z + '\n'
+          result += '\n'
+        else
+          result += '  normals none\n'
       else
         result += '  normals none\n'
 
-      # TODO: uvs
-      result += '  uvs none\n'
+      if @uvs
+        result += '  uvs none\n'
+      else
+        result += '  uvs none\n'
 
       if entry.faceMaterials
         result += '  face_shaders\n'

@@ -1,5 +1,5 @@
 window.onload = function() {
-  var camera, controls, gui, height, loader, materials, plane, render, scene, sunsky, threeflow, webgl, width,
+  var camera, controls, gui, height, light, loader, materials, plane, render, scene, sunsky, threeflow, webgl, width,
     _this = this;
   webgl = new THREE.WebGLRenderer({
     antialias: true,
@@ -20,55 +20,30 @@ window.onload = function() {
     wireframe: true
   }));
   scene.add(camera);
-  scene.add(sunsky);
   scene.add(plane);
   camera.position.set(615, 564, 1910);
   camera.lookAt(new THREE.Vector3(0, 0, 0));
   plane.position.set(0, -218, 0);
+  light = new THREEFLOW.AreaLight({
+    geometry: new THREE.PlaneGeometry(400, 400),
+    radiance: 70
+  });
+  scene.add(light);
+  light.position.set(300, 600, 300);
+  light.lookAt(plane.position);
+  light = new THREEFLOW.AreaLight({
+    geometry: new THREE.PlaneGeometry(400, 400),
+    radiance: 60
+  });
+  scene.add(light);
+  light.position.set(500, 600, -300);
+  light.lookAt(plane.position);
   materials = {
     body: {
       Orange: new THREEFLOW.ShinyMaterial({
         color: 0xff6600,
         combine: THREE.MixOperation,
         reflectivity: 0.3
-      }),
-      Blue: new THREE.MeshLambertMaterial({
-        color: 0x226699,
-        combine: THREE.MixOperation,
-        reflectivity: 0.3
-      }),
-      Red: new THREE.MeshLambertMaterial({
-        color: 0x660000,
-        combine: THREE.MixOperation,
-        reflectivity: 0.5
-      }),
-      Black: new THREE.MeshLambertMaterial({
-        color: 0x000000,
-        combine: THREE.MixOperation,
-        reflectivity: 0.5
-      }),
-      White: new THREE.MeshLambertMaterial({
-        color: 0xffffff,
-        combine: THREE.MixOperation,
-        reflectivity: 0.5
-      }),
-      Carmine: new THREE.MeshPhongMaterial({
-        color: 0x770000,
-        specular: 0xffaaaa,
-        combine: THREE.MultiplyOperation
-      }),
-      Gold: new THREE.MeshPhongMaterial({
-        color: 0xaa9944,
-        specular: 0xbbaa99,
-        shininess: 50,
-        combine: THREE.MultiplyOperation
-      }),
-      Bronze: new THREE.MeshPhongMaterial({
-        color: 0x150505,
-        specular: 0xee6600,
-        shininess: 10,
-        combine: THREE.MixOperation,
-        reflectivity: 0.5
       }),
       Chrome: new THREE.MeshPhongMaterial({
         color: 0xffffff,
@@ -104,26 +79,30 @@ window.onload = function() {
   };
   loader = new THREE.BinaryLoader();
   loader.load("/models/CamaroNoUv_bin.js", function(geometry) {
-    var m, mesh, s;
+    var m, material, mesh, s, vertexNormals;
     s = 75;
     m = new THREE.MeshFaceMaterial();
     m.materials[0] = materials.body["Orange"];
     m.materials[1] = materials.chrome;
     m.materials[2] = materials.chrome;
     m.materials[3] = materials.darkchrome;
-    m.materials[4] = materials.glass;
-    m.materials[5] = materials.interior;
+    m.materials[4] = materials.black;
+    m.materials[5] = materials.black;
     m.materials[6] = materials.tire;
     m.materials[7] = materials.black;
     m.materials[8] = materials.black;
+    material = new THREEFLOW.DiffuseMaterial();
     mesh = new THREE.Mesh(geometry, m);
     mesh.rotation.y = 1;
     mesh.scale.set(s, s, s);
-    return scene.add(mesh);
+    scene.add(mesh);
+    vertexNormals = new THREE.VertexNormalsHelper(mesh, 10);
+    return scene.add(vertexNormals);
   });
   threeflow = new THREEFLOW.SunflowRenderer({
     pngPath: "examples/renders/models_camaro.png",
-    scPath: "examples/renders/models_camaro.sc"
+    scPath: "examples/renders/models_camaro.sc",
+    scale: 0.25
   });
   threeflow.connect();
   gui = new THREEFLOW.DatGui(threeflow);

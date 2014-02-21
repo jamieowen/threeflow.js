@@ -1,31 +1,6 @@
 
 class Exporter
 
-  # command line options. ( or passed in single liners inside .sc code )
-  # mistakenly defined in the image{} block to begin with
-  @BUCKET_ORDERS = [
-    'hilbert'
-    'spiral'
-    'column'
-    'row'
-    'diagonal'
-    'random' ]
-
-  ###
-      bucketSize: 48
-      bucketOrder: ImageExporter.BUCKET_ORDERS[0]
-      bucketOrderReverse: false
-
-    # format bucket options.
-    bucket = @settings.bucketSize + ' '
-    if @settings.bucketOrderReverse
-      bucket += '"reverse ' + @settings.bucketOrder + '"'
-    else
-      bucket += @settings.bucketOrder
-
-    result += '  bucket ' + bucket + '\n'
-  ###
-
   constructor:()->
     # global exporter settings
     @exporterSettings =
@@ -34,6 +9,7 @@ class Exporter
     @blockExporters = []
 
     @image              = @addBlockExporter new ImageExporter(@)
+    @bucket             = @addBlockExporter new BucketExporter(@)
     @traceDepths        = @addBlockExporter new TraceDepthsExporter(@)
     @caustics           = @addBlockExporter new CausticsExporter(@)
     @gi                 = @addBlockExporter new GiExporter(@)

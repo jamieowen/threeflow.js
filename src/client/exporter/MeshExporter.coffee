@@ -9,7 +9,13 @@ class MeshExporter extends BlockExporter
     @meshIndex = {}
 
   addToIndex:(object3d)->
-    if object3d instanceof THREE.Mesh and not @meshIndex[object3d.uuid]
+    if not (object3d instanceof THREE.Mesh)
+      return
+
+    if object3d instanceof THREE.VertexNormalsHelper
+      return
+
+    if not @meshIndex[object3d.uuid]
       @meshIndex[object3d.uuid] = object3d
 
     null

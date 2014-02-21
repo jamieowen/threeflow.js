@@ -27,13 +27,14 @@ THREEFLOW.DatGui = class DatGUI
     # add render and preview buttons.
     @gui.add(@,"_onRender").name("Render")
     #@gui.add(@,"_onPreview").name("Render Preview")
+    @gui.add @renderer,"scale"
 
     @imageFolder        = @gui.addFolder "Image"
+    @bucketFolder       = @gui.addFolder "Bucket Size/Order"
     @traceDepthsFolder  = @gui.addFolder "Trace Depths"
     @causticsFolder     = @gui.addFolder "Caustics"
     @giFolder           = @gui.addFolder "Global Illumination"
     @meshFolder         = @gui.addFolder "Mesh Options"
-    @geometryFolder     = @gui.addFolder "Geometry Options"
 
     @imageFolder.add @renderer.image,"antialiasMin"
     @imageFolder.add @renderer.image,"antialiasMax"
@@ -41,6 +42,11 @@ THREEFLOW.DatGui = class DatGUI
     @imageFolder.add @renderer.image,"contrast"
     @imageFolder.add @renderer.image,"filter",@renderer.image.filterTypes
     @imageFolder.add @renderer.image,"jitter"
+
+    @bucketFolder.add @renderer.bucket,"enabled"
+    @bucketFolder.add @renderer.bucket,"size"
+    @bucketFolder.add @renderer.bucket,"order",@renderer.bucket.orderTypes
+    @bucketFolder.add @renderer.bucket,"reverse"
 
     @traceDepthsFolder.add @renderer.traceDepths,"enabled"
     @traceDepthsFolder.add @renderer.traceDepths,"diffusion"
@@ -53,9 +59,6 @@ THREEFLOW.DatGui = class DatGUI
     @causticsFolder.add @renderer.caustics,"kdRadius"
 
     @meshFolder.add @renderer.meshes,"convertPrimitives"
-
-    @geometryFolder.add @renderer.geometry, "faceNormals"
-    @geometryFolder.add @renderer.geometry, "vertexNormals"
 
     @giFolder.add @renderer.gi,"enabled"
 

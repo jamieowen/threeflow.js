@@ -24,18 +24,23 @@
       this.gui = new dat.GUI();
       this.onRender = null;
       this.gui.add(this, "_onRender").name("Render");
+      this.gui.add(this.renderer, "scale");
       this.imageFolder = this.gui.addFolder("Image");
+      this.bucketFolder = this.gui.addFolder("Bucket Size/Order");
       this.traceDepthsFolder = this.gui.addFolder("Trace Depths");
       this.causticsFolder = this.gui.addFolder("Caustics");
       this.giFolder = this.gui.addFolder("Global Illumination");
       this.meshFolder = this.gui.addFolder("Mesh Options");
-      this.geometryFolder = this.gui.addFolder("Geometry Options");
       this.imageFolder.add(this.renderer.image, "antialiasMin");
       this.imageFolder.add(this.renderer.image, "antialiasMax");
       this.imageFolder.add(this.renderer.image, "samples");
       this.imageFolder.add(this.renderer.image, "contrast");
       this.imageFolder.add(this.renderer.image, "filter", this.renderer.image.filterTypes);
       this.imageFolder.add(this.renderer.image, "jitter");
+      this.bucketFolder.add(this.renderer.bucket, "enabled");
+      this.bucketFolder.add(this.renderer.bucket, "size");
+      this.bucketFolder.add(this.renderer.bucket, "order", this.renderer.bucket.orderTypes);
+      this.bucketFolder.add(this.renderer.bucket, "reverse");
       this.traceDepthsFolder.add(this.renderer.traceDepths, "enabled");
       this.traceDepthsFolder.add(this.renderer.traceDepths, "diffusion");
       this.traceDepthsFolder.add(this.renderer.traceDepths, "reflection");
@@ -45,8 +50,6 @@
       this.causticsFolder.add(this.renderer.caustics, "kdEstimate");
       this.causticsFolder.add(this.renderer.caustics, "kdRadius");
       this.meshFolder.add(this.renderer.meshes, "convertPrimitives");
-      this.geometryFolder.add(this.renderer.geometry, "faceNormals");
-      this.geometryFolder.add(this.renderer.geometry, "vertexNormals");
       this.giFolder.add(this.renderer.gi, "enabled");
       this.giFolder.add(this.renderer.gi, "type", this.renderer.gi.types).onChange(function(value) {
         return updateType(value);

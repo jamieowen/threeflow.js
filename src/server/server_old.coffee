@@ -33,30 +33,21 @@ io.sockets.on 'connection', (socket)->
 
       fs.writeFileSync scPath,data.scContents
 
-      command = 'java -Xmx1G -server -jar sunflow/sunflow.jar'
+      command = 'java'
+      args = [ "-Xmx1G", "-server", "-jar", "sunflow/sunflow.jar" ]
 
       socket.emit 'render-start',
         event:'render-start'
         data: 'ok'
 
       if pngPath
-        command += " -o " + pngPath
+        #command += " -o " + pngPath
+        args.push "-o",pngPath
 
-      command += " " + scPath
+      #command += " " + scPath
+      args.push scPath
 
-      child = child_process.exec command,(error,stdout,stderror)->
-        console.log "RENDER COMPLETE"
-
-        if not error
-          socket.emit 'render-progress',
-            event:'render-progress'
-            data:null
-
-          socket.emit 'render-complete',
-            event:'render-complete'
-            data:null
-        else
-          console.log error
+      child = child_process.spawn command,args
 
       progressMatch     = /\[\d{1,2}%\]/
       progressIntMatch  = /\d{1,2}/
@@ -68,6 +59,20 @@ io.sockets.on 'connection', (socket)->
       doneMatch  = /Done\./
       isDone = false
       renderTime = null
+
+      child.on 'close',(code)->
+        console.log "RENDER COMPLETE"
+
+        if not code
+          socket.emit 'render-progress',
+            event:'render-progress'
+            data:null
+
+          socket.emit 'render-complete',
+            event:'render-complete'
+            data:null
+        else
+          console.log "CODE",code
 
       child.stderr.on 'data',(buffer)->
         progress = progressMatch.exec buffer

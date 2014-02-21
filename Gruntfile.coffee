@@ -1,5 +1,6 @@
 child_process = require "child_process"
 eco           = require "eco"
+fs            = require "fs"
 
 module.exports = (grunt)->
   grunt.initConfig
@@ -48,19 +49,30 @@ module.exports = (grunt)->
         src:"build/*.*"
         dest: "examples/js/"
 
+    imagemin:
+      renders:
+        files: [
+            pngquant: true
+            expand: true                  #Enable dynamic expansion
+            cwd: 'examples/renders'      #Src matches are relative to this path
+            src: ['**/*.{png,jpg,gif}']   #Actual patterns to match
+            dest: 'examples/renders/test'       #Destination path prefix
+        ]
+
     watch:
       main:
         files:[ "src/client/**/*.coffee","src/server/**/*.coffee", "src/examples/*.coffee","src/examples/*.html.eco","src/extras/**/*.coffee" ]
-        tasks:["coffee","copy","examples-html"]
+        tasks:["coffee","copy","examples-html","bin-shebang"]
 
 
   grunt.loadNpmTasks "grunt-contrib-coffee"
   grunt.loadNpmTasks "grunt-contrib-copy"
   grunt.loadNpmTasks "grunt-contrib-uglify"
   grunt.loadNpmTasks "grunt-contrib-watch"
+  grunt.loadNpmTasks "grunt-contrib-imagemin"
 
   grunt.registerTask "default",["deploy"]
-  grunt.registerTask "deploy",["coffee","uglify","copy","examples-html"]
+  grunt.registerTask "deploy",["coffee","uglify","copy","examples-html","bin-shebang"]
   grunt.registerTask "dev",["watch"]
 
   grunt.registerTask "server",()->
@@ -70,6 +82,12 @@ module.exports = (grunt)->
     child.stderr.pipe process.stderr
     null
 
+  grunt.registerTask "bin-shebang",()->
+    binFile = "bin/threeflow.bin.js"
+    binContents = fs.readFileSync binFile
+    binContents = "#!/usr/bin/env node" + "\n" + binContents
+    fs.writeFileSync binFile, binContents
+    null
 
   grunt.registerTask "examples-html",()->
     examples = grunt.file.expandMapping "src/examples/*.coffee","examples/",

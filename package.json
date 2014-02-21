@@ -1,24 +1,22 @@
 {
   "name": "threeflow",
   "preferGlobal": true,
-  "version": "0.6.0",
+  "version": "0.6.0-test-4",
   "author": "Jamie Owen <hello@jamieowen.com>",
   "description": "Render three.js scenes using the open source sunflow renderer\"",
-
   "main": "./lib/threeflow.lib.js",
   "bin": {
-    "threeflow":"./bin/threeflow.bin.js"
+    "threeflow": "./bin/threeflow.bin.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": "https://github.com/jamieowen/threeflow.js",
-
   "license": "BSD",
-
   "dependencies": {
     "express": "~3.4.8",
-    "socket.io": "~0.9.16"
+    "socket.io": "~0.9.16",
+    "cli-color": "~0.2.3"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
@@ -27,6 +25,7 @@
     "grunt-contrib-watch": "~0.5.3",
     "grunt-contrib-connect": "~0.5.0",
     "grunt-contrib-uglify": "~0.2.7",
-    "eco": "~1.1.0-rc-3"
+    "eco": "~1.1.0-rc-3",
+    "grunt-contrib-imagemin": "~0.5.0"
   }
 }

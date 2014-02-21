@@ -1,115 +1,58 @@
-express         = require 'express'
-io              = require 'socket.io'
-http            = require 'http'
-path            = require 'path'
-child_process   = require 'child_process'
-fs              = require 'fs'
+express           = require 'express'
+io                = require 'socket.io'
+http              = require 'http'
+path              = require 'path'
+fs                = require 'fs'
 
-app             = express()
-server          = http.createServer app
-io              = io.listen server
+module.exports =
 
-server.listen 3000
+  create: ()->
+    instance = new @ThreeflowServer()
+    instance
 
-# http
+  ThreeflowServer: class ThreeflowServer
 
-app.post '/render',(request,response)->
-  response.send "render"
+    constructor:()->
+      console.log "new server instance"
+      @options()
 
-app.use '/', express.static( path.join( process.cwd(),'examples') )
 
-# sockets
-io.sockets.on 'connection', (socket)->
-  socket.emit 'connected',
-    event:'connected'
-    data: {}
+    ###
+    saving : allow saving of pngs & .sc files.
+    output : output save path of pngs and .sc files.
+    multiple : allow multiple render jobs to be spawned at once.
+    queue: queue jobs and spawn automatically, if multiple is true
+    ###
+    options:( options={} )->
+      @saving     = options.saving || false
+      @output     = options.output || null
+      @multiple   = options.output || false
+      @queue      = options.queue || false
 
-  socket.on 'render', (data)->
+      # server options.
+      # port: the listening port
+      # static: an alternative static serving folder ( instead of examples )
+      @port       = options.port || 3710
+      @deploy     = options.deploy || null
 
-    if data.scContents
+      null
 
-      pngPath = data.pngPath || null
-      scPath = data.scPath || ".tmp.render.sc"
+    startup:()->
+      console.log "startup"
 
-      fs.writeFileSync scPath,data.scContents
+      # validate options.
 
-      command = 'java -Xmx1G -server -jar sunflow/sunflow.jar'
 
-      socket.emit 'render-start',
-        event:'render-start'
-        data: 'ok'
+      # if all is good.
+      @app      = express()
+      @server   = http.createServer @app
+      @io       = io.listen @server
 
-      if pngPath
-        command += " -o " + pngPath
+      @server.listen @port
 
-      command += " " + scPath
-
-      child = child_process.exec command,(error,stdout,stderror)->
-        console.log "RENDER COMPLETE"
-
-        if not error
-          socket.emit 'render-progress',
-            event:'render-progress'
-            data:null
-
-          socket.emit 'render-complete',
-            event:'render-complete'
-            data:null
-        else
-          console.log error
-
-      progressMatch     = /\[\d{1,2}%\]/
-      progressIntMatch  = /\d{1,2}/
-
-      # Render time: 0:00:14.4
-      renderTimeMatch    = /Render time: \d*:\d{1,2}:\d{1,2}\.\d*/
-
-      # Done.
-      doneMatch  = /Done\./
-      isDone = false
-      renderTime = null
-
-      child.stderr.on 'data',(buffer)->
-        progress = progressMatch.exec buffer
-
-        if progress
-          pInt = progressIntMatch.exec progress[0]
-          pInt = parseInt(pInt[0])
-          pInt = "ERROR" if isNaN(pInt)
-
-          socket.emit 'render-progress',
-            event:'render-progress'
-            data: pInt
-        else if not isDone
-          # check render time.
-          if not renderTime
-            time = renderTimeMatch.exec buffer
-            if time
-              renderTime = time[0]
-
-          done = doneMatch.exec buffer
-          if done
-            isDone = true
-            socket.emit 'render-complete',
-              event:'render-complete'
-              data:renderTime
+      @app.use '/', express.static( path.join( __dirname,'../','examples') )
 
 
 
-
-
-
-
-
-
-        process.stdout.write buffer
-
-      #child.stdout.pipe process.stdout
-      #child.stderr.pipe process.stderr
-
-
-    null
-
-  null
 
 

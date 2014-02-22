@@ -4,23 +4,23 @@ THREEFLOW.LightingRig = class LightingRig
 
     THREE.Object3D.call @
 
-    params.backdropWall  = params.backdropWall || 300
-    params.backdropFloor = params.backdropFloor  || 1000
-    params.backdropCurve = params.backdropCurve || 50
-
+    params.backdropWall       = params.backdropWall || 600
+    params.backdropFloor      = params.backdropFloor  || 1500
+    params.backdropCurve      = params.backdropCurve || 400
+    params.backdropCurveSteps = params.backdropCurveSteps || 20
 
     focus = new THREE.Vector3()
 
-    geometry = @createBackdropGeometry params.backdropWall,params.backdropFloor,params.backdropCurve
+    geometry = @createBackdropGeometry params.backdropWall,params.backdropFloor,params.backdropCurve,params.backdropCurveSteps
 
     material = new THREE.MeshLambertMaterial
       color: 0xefefef
-      ambient: 0x333333
+      ambient: 0xffffff
       side: THREE.DoubleSide
 
     mesh = new THREE.Mesh geometry,material
     mesh.rotation.x = -(Math.PI/2)
-    mesh.position.z = ( params.backdropFloor + params.backdropCurve )/2
+    mesh.position.z = (params.backdropFloor)/2
 
     @add mesh
 
@@ -43,20 +43,20 @@ THREEFLOW.LightingRig = class LightingRig
 
   @:: = Object.create THREE.Object3D::
 
-  createBackdropGeometry:(wall,floor,curve)->
+  createBackdropGeometry:(wall,floor,curve,curveSteps)->
     points = []
 
-
     points.push new THREE.Vector3()
-    points.push new THREE.Vector3(floor,0,0)
+    PI2 = Math.PI/2
 
-    points.push new THREE.Vector3(floor,0,wall)
+    for angle in [Math.PI...Math.PI-PI2] by -(PI2/curveSteps)
+      x = ( Math.sin(angle)*curve ) + floor
+      z = ( Math.cos(angle)*curve ) + curve
+      points.push new THREE.Vector3(x,0,z)
 
-    detail = .1
-    #for angle in [0...Math.PI] by detail
-    #  pts.push(new THREE.Vector3(Math.cos(angle) * radius,0,Math.sin(angle) * radius)) #angle/radius to x,z
+    points.push new THREE.Vector3(floor+curve,0,curve+wall)
 
-    geometry = new THREE.LatheGeometry( points, 12, 0, Math.PI ) # create the lathe with 12 radial repetitions of the profile
+    geometry = new THREE.LatheGeometry( points, 12, 0, Math.PI )
     geometry
 
 

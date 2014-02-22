@@ -208,19 +208,20 @@
         params = {};
       }
       THREE.Object3D.call(this);
-      params.backdropWall = params.backdropWall || 300;
-      params.backdropFloor = params.backdropFloor || 1000;
-      params.backdropCurve = params.backdropCurve || 50;
+      params.backdropWall = params.backdropWall || 600;
+      params.backdropFloor = params.backdropFloor || 1500;
+      params.backdropCurve = params.backdropCurve || 400;
+      params.backdropCurveSteps = params.backdropCurveSteps || 20;
       focus = new THREE.Vector3();
-      geometry = this.createBackdropGeometry(params.backdropWall, params.backdropFloor, params.backdropCurve);
+      geometry = this.createBackdropGeometry(params.backdropWall, params.backdropFloor, params.backdropCurve, params.backdropCurveSteps);
       material = new THREE.MeshLambertMaterial({
         color: 0xefefef,
-        ambient: 0x333333,
+        ambient: 0xffffff,
         side: THREE.DoubleSide
       });
       mesh = new THREE.Mesh(geometry, material);
       mesh.rotation.x = -(Math.PI / 2);
-      mesh.position.z = (params.backdropFloor + params.backdropCurve) / 2;
+      mesh.position.z = params.backdropFloor / 2;
       this.add(mesh);
       light1 = new THREEFLOW.AreaLight({
         radiance: 5,
@@ -240,13 +241,17 @@
 
     LightingRig.prototype = Object.create(THREE.Object3D.prototype);
 
-    LightingRig.prototype.createBackdropGeometry = function(wall, floor, curve) {
-      var detail, geometry, points;
+    LightingRig.prototype.createBackdropGeometry = function(wall, floor, curve, curveSteps) {
+      var PI2, angle, geometry, points, x, z, _i, _ref, _ref1, _ref2;
       points = [];
       points.push(new THREE.Vector3());
-      points.push(new THREE.Vector3(floor, 0, 0));
-      points.push(new THREE.Vector3(floor, 0, wall));
-      detail = .1;
+      PI2 = Math.PI / 2;
+      for (angle = _i = _ref = Math.PI, _ref1 = Math.PI - PI2, _ref2 = -(PI2 / curveSteps); _ref2 > 0 ? _i < _ref1 : _i > _ref1; angle = _i += _ref2) {
+        x = (Math.sin(angle) * curve) + floor;
+        z = (Math.cos(angle) * curve) + curve;
+        points.push(new THREE.Vector3(x, 0, z));
+      }
+      points.push(new THREE.Vector3(floor + curve, 0, curve + wall));
       geometry = new THREE.LatheGeometry(points, 12, 0, Math.PI);
       return geometry;
     };

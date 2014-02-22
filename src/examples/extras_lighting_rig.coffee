@@ -38,7 +38,7 @@ window.onload = ()->
   scene.add rig
   scene.add camera
 
-  camera.position.set 0,0,200
+  camera.position.set 0,0,4000
 
   # create the sunflow renderer and connect.
   threeflow = new THREEFLOW.SunflowRenderer

@@ -27,7 +27,7 @@ window.onload = function() {
   scene.add(normals);
   scene.add(rig);
   scene.add(camera);
-  camera.position.set(0, 0, 200);
+  camera.position.set(0, 0, 4000);
   threeflow = new THREEFLOW.SunflowRenderer({
     pngPath: "examples/renders/extras_lighting_rig.png",
     scPath: "examples/renders/extras_lighting_rig.sc"

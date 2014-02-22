@@ -30,7 +30,7 @@ class Exporter
 
     exporter
 
-  # index the three js scene and
+  # index the three js scene
   indexScene:(object3d)->
     if object3d.children.length
       for child in object3d.children
@@ -38,6 +38,8 @@ class Exporter
         # helper to prevent traversing children further
         # to exclude elements from the render.
         doTraverse = true
+
+        # TODO : Auto No add-to-index with certain meshes.
 
         for blockExporter in @blockExporters
           blockExporter.addToIndex( child )

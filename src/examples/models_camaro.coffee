@@ -12,42 +12,17 @@ window.onload = ()->
   # define basics
   scene       = new THREE.Scene()
   camera      = new THREE.PerspectiveCamera(35,width/height,1,100000)
-  controls    = new THREE.TrackballControls(camera,webgl.domElement)
-  sunsky      = new THREEFLOW.SunskyLight
-    simulate: true
-    direction: new THREE.Vector3 0.06,.03,0
+  controls    = new THREE.OrbitControls(camera,webgl.domElement)
 
-  plane       = new THREE.Mesh new THREEFLOW.InfinitePlaneGeometry(),new THREE.MeshLambertMaterial
-    color:0xffffff
-    side: THREE.DoubleSide
-    wireframe:true
+  rig = new THREEFLOW.LightingRig()
+  scene.add rig
 
   # add to scene
   scene.add camera
-  #scene.add sunsky
-  scene.add plane
 
   # position objects
   camera.position.set 615,564,1910
   camera.lookAt new THREE.Vector3(0,0,0)
-  plane.position.set 0,-218,0
-
-  light = new THREEFLOW.AreaLight
-    geometry: new THREE.PlaneGeometry 400,400
-    radiance: 70
-
-  scene.add light
-  light.position.set 300,600,300
-  light.lookAt plane.position
-
-  light = new THREEFLOW.AreaLight
-    geometry: new THREE.PlaneGeometry 400,400
-    radiance: 60
-
-  scene.add light
-  light.position.set 500,600,-300
-  light.lookAt plane.position
-
 
   # create car materials
   materials =
@@ -94,7 +69,7 @@ window.onload = ()->
 
   loader = new THREE.BinaryLoader()
   loader.load "/models/CamaroNoUv_bin.js",(geometry)->
-    s = 75
+    s = 30
     m = new THREE.MeshFaceMaterial()
 
     m.materials[ 0 ] = materials.body[ "Orange" ]# // car body
@@ -113,7 +88,8 @@ window.onload = ()->
     material = new THREEFLOW.DiffuseMaterial()
 
     mesh = new THREE.Mesh geometry,m
-    mesh.rotation.y = 1
+    geometry.computeBoundingBox()
+    mesh.position.set 0,-geometry.boundingBox.min.y*s,0
     mesh.scale.set s,s,s
 
     scene.add mesh
@@ -125,7 +101,6 @@ window.onload = ()->
   threeflow = new THREEFLOW.SunflowRenderer
     pngPath:"examples/renders/models_camaro.png"
     scPath:"examples/renders/models_camaro.sc"
-    scale:0.25
 
   threeflow.connect()
 

@@ -68,10 +68,14 @@ io.sockets.on 'connection', (socket)->
             event:'render-progress'
             data:null
 
+
           socket.emit 'render-complete',
             event:'render-complete'
             data:null
         else
+          socket.emit 'render-error',
+            event:'render-error'
+            data:code
           console.log "CODE",code
 
       child.stderr.on 'data',(buffer)->

@@ -39,6 +39,7 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     @socket.on 'render-start',@onRenderStart
     @socket.on 'render-progress',@onRenderProgress
     @socket.on 'render-complete',@onRenderComplete
+    @socket.on 'render-error',@onRenderError
 
     null
 
@@ -85,6 +86,11 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
   onRenderComplete:(data)=>
     @rendering = false
     console.log "onRenderComplete",data
+    null
+
+  onRenderError:(data)=>
+    @rendering = false
+    console.log "onRenderError",data
     null
 
 

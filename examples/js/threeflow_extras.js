@@ -1,5 +1,5 @@
 (function() {
-  var DatGUI, LightingBox,
+  var DatGUI, LightingBox, LightingRig,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   window.THREEFLOW = window.THREEFLOW || {};
@@ -30,7 +30,7 @@
       this.traceDepthsFolder = this.gui.addFolder("Trace Depths");
       this.causticsFolder = this.gui.addFolder("Caustics");
       this.giFolder = this.gui.addFolder("Global Illumination");
-      this.meshFolder = this.gui.addFolder("Mesh Options");
+      this.otherFolder = this.gui.addFolder("Other Options");
       this.imageFolder.add(this.renderer.image, "antialiasMin");
       this.imageFolder.add(this.renderer.image, "antialiasMax");
       this.imageFolder.add(this.renderer.image, "samples");
@@ -49,7 +49,9 @@
       this.causticsFolder.add(this.renderer.caustics, "photons");
       this.causticsFolder.add(this.renderer.caustics, "kdEstimate");
       this.causticsFolder.add(this.renderer.caustics, "kdRadius");
-      this.meshFolder.add(this.renderer.meshes, "convertPrimitives");
+      this.otherFolder.add(this.renderer.meshes, "convertPrimitives");
+      this.otherFolder.add(this.renderer.geometry, "normals").name("geomNormals");
+      this.otherFolder.add(this.renderer.bufferGeometry, "normals").name("bufferGeomNormals");
       this.giFolder.add(this.renderer.gi, "enabled");
       this.giFolder.add(this.renderer.gi, "type", this.renderer.gi.types).onChange(function(value) {
         return updateType(value);
@@ -196,6 +198,60 @@
     LightingBox.prototype = Object.create(THREE.Object3D.prototype);
 
     return LightingBox;
+
+  })();
+
+  THREEFLOW.LightingRig = LightingRig = (function() {
+    function LightingRig(params) {
+      var focus, geometry, light1, light2, material, mesh;
+      if (params == null) {
+        params = {};
+      }
+      THREE.Object3D.call(this);
+      params.backdropWall = params.backdropWall || 300;
+      params.backdropFloor = params.backdropFloor || 1000;
+      params.backdropCurve = params.backdropCurve || 50;
+      focus = new THREE.Vector3();
+      geometry = this.createBackdropGeometry(params.backdropWall, params.backdropFloor, params.backdropCurve);
+      material = new THREE.MeshLambertMaterial({
+        color: 0xefefef,
+        ambient: 0x333333,
+        side: THREE.DoubleSide
+      });
+      mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = -(Math.PI / 2);
+      mesh.position.z = (params.backdropFloor + params.backdropCurve) / 2;
+      this.add(mesh);
+      light1 = new THREEFLOW.AreaLight({
+        radiance: 5,
+        geometry: new THREE.PlaneGeometry(200, 200)
+      });
+      light1.position.set(-200, 200, 200);
+      light1.lookAt(focus);
+      light2 = new THREEFLOW.AreaLight({
+        radiance: 5,
+        geometry: new THREE.PlaneGeometry(200, 200)
+      });
+      light2.position.set(200, 400, 200);
+      light2.lookAt(focus);
+      this.add(light1);
+      this.add(light2);
+    }
+
+    LightingRig.prototype = Object.create(THREE.Object3D.prototype);
+
+    LightingRig.prototype.createBackdropGeometry = function(wall, floor, curve) {
+      var detail, geometry, points;
+      points = [];
+      points.push(new THREE.Vector3());
+      points.push(new THREE.Vector3(floor, 0, 0));
+      points.push(new THREE.Vector3(floor, 0, wall));
+      detail = .1;
+      geometry = new THREE.LatheGeometry(points, 12, 0, Math.PI);
+      return geometry;
+    };
+
+    return LightingRig;
 
   })();
 

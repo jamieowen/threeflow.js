@@ -5,6 +5,9 @@ class GeometryExporter extends BlockExporter
     super(exporter)
 
     @normals = true
+
+    @vertexNormals = false # otherwise facevarying
+
     @uvs = false
 
     # geometry export can vary according to :
@@ -67,21 +70,34 @@ class GeometryExporter extends BlockExporter
       for face in entry.geometry.faces
         result += '    ' + @exportFace(face) + '\n'
 
-      if @normals
-        result += '  normals vertex\n'
+      if @normals and @vertexNormals
         normals = []
-        for face in entry.geometry.faces
 
+        for face in entry.geometry.faces
           normals[ face.a ] = face.vertexNormals[0]
           normals[ face.b ] = face.vertexNormals[1]
           normals[ face.c ] = face.vertexNormals[2]
 
         if normals.length > 0 and normals.length is entry.geometry.vertices.length
+          result += '  normals vertex\n'
+
           for normal in normals
             result += '    ' + normal.x + ' ' + normal.y + ' ' + normal.z + '\n'
+
           result += '\n'
         else
+          console.log "[Threeflow] Problem with geometry normals. ", entry.geometry
           result += '  normals none\n'
+      else if @normals and not @vertexNormals
+        result += '  normals facevarying\n'
+
+        for face in entry.geometry.faces
+          v1 = face.vertexNormals[0]
+          v2 = face.vertexNormals[1]
+          v3 = face.vertexNormals[2]
+
+          result += '    ' + v1.x + ' ' + v1.y + ' ' + v1.z + ' ' + v2.x + ' ' + v2.y + ' ' + v2.z + ' ' + v3.x + ' ' + v3.y + ' ' + v3.z + '\n'
+
       else
         result += '  normals none\n'
 

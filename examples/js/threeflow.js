@@ -8,6 +8,7 @@
 
   THREEFLOW.SunflowRenderer = SunflowRenderer = (function() {
     function SunflowRenderer(options) {
+      this.onRenderError = __bind(this.onRenderError, this);
       this.onRenderComplete = __bind(this.onRenderComplete, this);
       this.onRenderProgress = __bind(this.onRenderProgress, this);
       this.onRenderStart = __bind(this.onRenderStart, this);
@@ -42,6 +43,7 @@
       this.socket.on('render-start', this.onRenderStart);
       this.socket.on('render-progress', this.onRenderProgress);
       this.socket.on('render-complete', this.onRenderComplete);
+      this.socket.on('render-error', this.onRenderError);
       return null;
     };
 
@@ -87,6 +89,12 @@
     SunflowRenderer.prototype.onRenderComplete = function(data) {
       this.rendering = false;
       console.log("onRenderComplete", data);
+      return null;
+    };
+
+    SunflowRenderer.prototype.onRenderError = function(data) {
+      this.rendering = false;
+      console.log("onRenderError", data);
       return null;
     };
 
@@ -452,6 +460,7 @@
     function GeometryExporter(exporter) {
       GeometryExporter.__super__.constructor.call(this, exporter);
       this.normals = true;
+      this.vertexNormals = false;
       this.uvs = false;
       this.geometryIndex = {};
     }
@@ -486,7 +495,7 @@
     };
 
     GeometryExporter.prototype.exportBlock = function() {
-      var entry, face, normal, normals, result, uuid, vertex, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1, _ref2, _ref3;
+      var entry, face, normal, normals, result, uuid, v1, v2, v3, vertex, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _ref, _ref1, _ref2, _ref3, _ref4;
       result = '';
       for (uuid in this.geometryIndex) {
         entry = this.geometryIndex[uuid];
@@ -506,8 +515,7 @@
           face = _ref1[_j];
           result += '    ' + this.exportFace(face) + '\n';
         }
-        if (this.normals) {
-          result += '  normals vertex\n';
+        if (this.normals && this.vertexNormals) {
           normals = [];
           _ref2 = entry.geometry.faces;
           for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
@@ -517,13 +525,25 @@
             normals[face.c] = face.vertexNormals[2];
           }
           if (normals.length > 0 && normals.length === entry.geometry.vertices.length) {
+            result += '  normals vertex\n';
             for (_l = 0, _len3 = normals.length; _l < _len3; _l++) {
               normal = normals[_l];
               result += '    ' + normal.x + ' ' + normal.y + ' ' + normal.z + '\n';
             }
             result += '\n';
           } else {
+            console.log("[Threeflow] Problem with geometry normals. ", entry.geometry);
             result += '  normals none\n';
+          }
+        } else if (this.normals && !this.vertexNormals) {
+          result += '  normals facevarying\n';
+          _ref3 = entry.geometry.faces;
+          for (_m = 0, _len4 = _ref3.length; _m < _len4; _m++) {
+            face = _ref3[_m];
+            v1 = face.vertexNormals[0];
+            v2 = face.vertexNormals[1];
+            v3 = face.vertexNormals[2];
+            result += '    ' + v1.x + ' ' + v1.y + ' ' + v1.z + ' ' + v2.x + ' ' + v2.y + ' ' + v2.z + ' ' + v3.x + ' ' + v3.y + ' ' + v3.z + '\n';
           }
         } else {
           result += '  normals none\n';
@@ -535,9 +555,9 @@
         }
         if (entry.faceMaterials) {
           result += '  face_shaders\n';
-          _ref3 = entry.geometry.faces;
-          for (_m = 0, _len4 = _ref3.length; _m < _len4; _m++) {
-            face = _ref3[_m];
+          _ref4 = entry.geometry.faces;
+          for (_n = 0, _len5 = _ref4.length; _n < _len5; _n++) {
+            face = _ref4[_n];
             result += '    ' + face.materialIndex + '\n';
           }
         }

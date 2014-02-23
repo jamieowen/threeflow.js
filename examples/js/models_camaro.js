@@ -22,10 +22,11 @@ window.onload = function() {
         combine: THREE.MixOperation,
         reflectivity: 0.3
       }),
-      Chrome: new THREE.MeshPhongMaterial({
+      Chrome: new THREEFLOW.ShinyMaterial({
         color: 0xffffff,
         specular: 0xffffff,
-        combine: THREE.MultiplyOperation
+        combine: THREE.MixOperation,
+        reflectivity: 0.3
       })
     },
     chrome: new THREEFLOW.MirrorMaterial({
@@ -36,7 +37,17 @@ window.onload = function() {
       color: 0x444444,
       reflection: 0x444444
     }),
-    glass: new THREEFLOW.GlassMaterial({
+    /*
+    glass: new THREEFLOW.GlassMaterial
+      color: 0x223344
+      #envMap: textureCube
+      opacity: 0.25
+      combine: THREE.MixOperation
+      reflectivity: 0.25
+      transparent: true
+    */
+
+    glass: new THREEFLOW.ShinyMaterial({
       color: 0x223344,
       opacity: 0.25,
       combine: THREE.MixOperation,
@@ -63,7 +74,7 @@ window.onload = function() {
     m.materials[1] = materials.chrome;
     m.materials[2] = materials.chrome;
     m.materials[3] = materials.darkchrome;
-    m.materials[4] = materials.black;
+    m.materials[4] = materials.glass;
     m.materials[5] = materials.black;
     m.materials[6] = materials.tire;
     m.materials[7] = materials.black;
@@ -73,6 +84,7 @@ window.onload = function() {
     geometry.computeBoundingBox();
     mesh.position.set(0, -geometry.boundingBox.min.y * s, 0);
     mesh.scale.set(s, s, s);
+    mesh.rotation.y = Math.PI / 4;
     scene.add(mesh);
     vertexNormals = new THREE.VertexNormalsHelper(mesh, 10);
     return scene.add(vertexNormals);

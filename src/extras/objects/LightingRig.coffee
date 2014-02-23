@@ -4,46 +4,93 @@ THREEFLOW.LightingRig = class LightingRig
 
     THREE.Object3D.call @
 
+    # target
+    @target                   = params.target || new THREE.Vector3()
+
+    # backdrop
     params.backdropWall       = params.backdropWall || 600
     params.backdropFloor      = params.backdropFloor  || 1500
     params.backdropCurve      = params.backdropCurve || 400
     params.backdropCurveSteps = params.backdropCurveSteps || 20
-
-    focus = new THREE.Vector3()
-
-    geometry = @createBackdropGeometry params.backdropWall,params.backdropFloor,params.backdropCurve,params.backdropCurveSteps
-
-    material = new THREE.MeshLambertMaterial
+    params.backdropMaterial   = params.backdropMaterial || new THREEFLOW.DiffuseMaterial
       color: 0xefefef
       ambient: 0xffffff
       side: THREE.DoubleSide
 
-    mesh = new THREE.Mesh geometry,material
-    mesh.rotation.x = -(Math.PI/2)
-    mesh.position.z = (params.backdropFloor)/2
+    @createBackdrop params.backdropWall,params.backdropFloor,params.backdropCurve,params.backdropCurveSteps,params.backdropMaterial
 
-    @add mesh
+    geometry = new THREE.PlaneGeometry 400,400
 
-    light1 = new THREEFLOW.AreaLight
-      radiance: 5
-      geometry: new THREE.PlaneGeometry 200,200
+    keyRadiance = 5.5
 
-    light1.position.set -200,200,200
-    light1.lookAt focus
+    baseYaw = Math.PI/2
+    basePitch = Math.PI/2
 
-    light2 = new THREEFLOW.AreaLight
-      radiance: 5
-      geometry: new THREE.PlaneGeometry 200,200
+    toRADIANS = Math.PI/180
 
-    light2.position.set 200,400,200
-    light2.lookAt focus
+    # lights
+    @lights = params.lights || [
+      # key light
+      new THREEFLOW.LightingRigLight
+        target: @target
+        pitch: basePitch - ( 30*toRADIANS )
+        yaw: baseYaw + ( 45*toRADIANS )
+        distance: 700
+        light: new THREEFLOW.AreaLight
+          color: 0xffffef
+          geometry: geometry
+          intensity: .5
+          radiance: keyRadiance
 
-    @add light1
-    @add light2
+      # fill light
+
+      new THREEFLOW.LightingRigLight
+        target: @target
+        pitch: basePitch - ( 16*toRADIANS )
+        yaw: baseYaw - ( 60*toRADIANS )
+        distance: 700
+        light: new THREEFLOW.AreaLight
+          color: 0xffffef
+          geometry: geometry
+          intensity: .5
+          radiance: keyRadiance / 5
+
+      # back light
+      new THREEFLOW.LightingRigLight
+        # target the back wall
+        target: new THREE.Vector3(0,0,-((params.backdropFloor/2)+params.backdropCurve))
+        pitch: basePitch - ( 20*toRADIANS )
+        yaw: baseYaw + ( 135*toRADIANS )
+        distance: 900
+        light: new THREEFLOW.AreaLight
+          color: 0xffffef
+          geometry: geometry
+          intensity: .5
+          radiance: keyRadiance / 2
+
+
+      # background light
+      new THREEFLOW.LightingRigLight
+        # target the back wall
+        target: new THREE.Vector3(0,0,-((params.backdropFloor/2)+params.backdropCurve))
+        pitch: basePitch - ( 20*toRADIANS )
+        yaw: baseYaw - ( 120*toRADIANS )
+        distance: 900
+        light: new THREEFLOW.AreaLight
+          color: 0xffffef
+          geometry: geometry
+          intensity: .5
+          radiance: keyRadiance / 4
+    ]
+
+    for light in @lights
+      @add light
+
+    @update()
 
   @:: = Object.create THREE.Object3D::
 
-  createBackdropGeometry:(wall,floor,curve,curveSteps)->
+  createBackdrop:(wall,floor,curve,curveSteps,material)->
     points = []
 
     points.push new THREE.Vector3()
@@ -57,7 +104,18 @@ THREEFLOW.LightingRig = class LightingRig
     points.push new THREE.Vector3(floor+curve,0,curve+wall)
 
     geometry = new THREE.LatheGeometry( points, 12, 0, Math.PI )
-    geometry
+
+    mesh = new THREE.Mesh geometry,material
+    mesh.rotation.x = -(Math.PI/2)
+    mesh.position.z = floor/2
+
+    @add mesh
+    null
+
+  update:()->
+    for light in @lights
+      light.update()
+
 
 
 

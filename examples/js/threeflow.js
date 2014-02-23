@@ -718,6 +718,12 @@
 
     function LightsExporter(exporter) {
       LightsExporter.__super__.constructor.call(this, exporter);
+      this.override = {
+        samples: {
+          enabled: false,
+          value: 64
+        }
+      };
       this.helperVec = new THREE.Vector3();
       this.lightIndex = {};
     }
@@ -759,7 +765,11 @@
           result += '  east ' + this.exportVector(light.east) + '\n';
           result += '  sundir ' + this.exportVector(light.direction) + '\n';
           result += '  turbidity ' + light.turbidity + '\n';
-          result += '  samples ' + light.samples + '\n';
+          if (this.override.samples.enabled) {
+            result += '  samples ' + this.override.samples.value + '\n';
+          } else {
+            result += '  samples ' + light.samples + '\n';
+          }
           result += '}\n\n';
         } else if (light instanceof THREEFLOW.PointLight) {
           result += 'light {\n';
@@ -774,7 +784,11 @@
           result += '  name ' + light.uuid + '\n';
           result += '  emit ' + this.exportColorTHREE(light.color) + '\n';
           result += '  radiance ' + light.radiance + ' \n';
-          result += '  samples ' + light.samples + ' \n';
+          if (this.override.samples.enabled) {
+            result += '  samples ' + this.override.samples.value + '\n';
+          } else {
+            result += '  samples ' + light.samples + '\n';
+          }
           result += '  points ' + light.geometry.vertices.length + '\n';
           _ref = light.geometry.vertices;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -946,8 +960,8 @@
       TraceDepthsExporter.__super__.constructor.call(this, exporter);
       this.enabled = false;
       this.diffusion = 1;
-      this.reflection = 4;
-      this.refraction = 4;
+      this.reflection = 1;
+      this.refraction = 1;
     }
 
     TraceDepthsExporter.prototype.addToIndex = function(object3d) {

@@ -33,11 +33,12 @@ window.onload = ()->
         combine: THREE.MixOperation
         reflectivity: 0.3
 
-      Chrome: new THREE.MeshPhongMaterial
+      Chrome: new THREEFLOW.ShinyMaterial
         color: 0xffffff
         specular:0xffffff
         #envMap: textureCube
-        combine: THREE.MultiplyOperation
+        combine: THREE.MixOperation
+        reflectivity: 0.3
 
     chrome: new THREEFLOW.MirrorMaterial
       color: 0xffffff
@@ -49,9 +50,18 @@ window.onload = ()->
       reflection: 0x444444
       #envMap: textureCube
 
+    ###
     glass: new THREEFLOW.GlassMaterial
       color: 0x223344
       #envMap: textureCube
+      opacity: 0.25
+      combine: THREE.MixOperation
+      reflectivity: 0.25
+      transparent: true
+    ###
+
+    glass: new THREEFLOW.ShinyMaterial
+      color: 0x223344
       opacity: 0.25
       combine: THREE.MixOperation
       reflectivity: 0.25
@@ -79,7 +89,7 @@ window.onload = ()->
 
 
     # TODO : Errors when using the GlassMaterial
-    m.materials[ 4 ] = materials.black #materials.glass # windshield
+    m.materials[ 4 ] = materials.glass # windshield
     m.materials[ 5 ] = materials.black ##materials.interior # interior
     m.materials[ 6 ] = materials.tire # tire
     m.materials[ 7 ] = materials.black # tireling
@@ -91,6 +101,7 @@ window.onload = ()->
     geometry.computeBoundingBox()
     mesh.position.set 0,-geometry.boundingBox.min.y*s,0
     mesh.scale.set s,s,s
+    mesh.rotation.y = Math.PI/4
 
     scene.add mesh
 

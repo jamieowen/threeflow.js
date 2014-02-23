@@ -19,26 +19,47 @@ window.onload = ()->
 
   rig         = new THREEFLOW.LightingRig()
 
-  geom = new THREE.SphereGeometry(50,50)
-  material = new THREEFLOW.ShinyMaterial
-    color: 0xff0000
-
-  mesh = new THREE.Mesh(geom,material)
-  mesh.position.set( -50,50,0 )
-  scene.add mesh
-
-  mesh = new THREE.Mesh(geom,material)
-  mesh.position.set( 50,50,0 )
-  scene.add mesh
-
-  normals = new THREE.VertexNormalsHelper(mesh,10)
-  scene.add normals
-
-  # add to scene
   scene.add rig
   scene.add camera
 
-  camera.position.set 0,0,4000
+
+  size = 30
+  geom = new THREE.SphereGeometry(size,size)
+  geom.computeBoundingBox()
+  count = 16
+  radius = ((size*2)*(count+4))/(Math.PI*2)
+
+  for i in [0...count]
+    material = new THREEFLOW.ShinyMaterial()
+    material.color.setHSL(i/count,.7,.5)
+    mesh = new THREE.Mesh(geom,material)
+    theta = ((Math.PI*2)/count)*i
+    mesh.position.x = radius * Math.cos(theta)
+    mesh.position.y = -geom.boundingBox.min.y
+    mesh.position.z = radius * Math.sin(theta)
+    scene.add mesh
+
+  loader = new THREE.JSONLoader()
+  loader.load "models/suzanne.json",(geometry)=>
+    subdiv = new THREE.SubdivisionModifier(2)
+    subdiv.modify geometry
+
+    geometry.computeBoundingBox()
+    material = new THREEFLOW.ShinyMaterial()
+    mesh = new THREE.Mesh geometry,material
+    # scale to desired height
+    scale = 200 / ( geometry.boundingBox.max.y - geometry.boundingBox.min.y )
+    mesh.scale.set(scale,scale,scale)
+    mesh.position.y = (geometry.boundingBox.max.y*0.535)*scale
+    mesh.rotation.order = "YXZ"
+    mesh.rotation.x = -(Math.PI/5)
+    mesh.rotation.y = Math.PI/4
+    scene.add mesh
+
+
+
+  camera.position.set 0,400,2000
+
 
   # create the sunflow renderer and connect.
   threeflow = new THREEFLOW.SunflowRenderer

@@ -1,5 +1,5 @@
 (function() {
-  var DatGUI, LightingBox, LightingRig,
+  var DatGUI, LightingBox, LightingRig, LightingRigLight,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   window.THREEFLOW = window.THREEFLOW || {};
@@ -30,6 +30,7 @@
       this.traceDepthsFolder = this.gui.addFolder("Trace Depths");
       this.causticsFolder = this.gui.addFolder("Caustics");
       this.giFolder = this.gui.addFolder("Global Illumination");
+      this.overridesFolder = this.gui.addFolder("Overrides");
       this.otherFolder = this.gui.addFolder("Other Options");
       this.imageFolder.add(this.renderer.image, "antialiasMin");
       this.imageFolder.add(this.renderer.image, "antialiasMax");
@@ -49,6 +50,8 @@
       this.causticsFolder.add(this.renderer.caustics, "photons");
       this.causticsFolder.add(this.renderer.caustics, "kdEstimate");
       this.causticsFolder.add(this.renderer.caustics, "kdRadius");
+      this.overridesFolder.add(this.renderer.lights.override.samples, "enabled").name("light_samples");
+      this.overridesFolder.add(this.renderer.lights.override.samples, "value").name("light_value");
       this.otherFolder.add(this.renderer.meshes, "convertPrimitives");
       this.otherFolder.add(this.renderer.geometry, "normals").name("geomNormals");
       this.otherFolder.add(this.renderer.bufferGeometry, "normals").name("bufferGeomNormals");
@@ -203,46 +206,86 @@
 
   THREEFLOW.LightingRig = LightingRig = (function() {
     function LightingRig(params) {
-      var focus, geometry, light1, light2, material, mesh;
+      var basePitch, baseYaw, geometry, keyRadiance, light, toRADIANS, _i, _len, _ref;
       if (params == null) {
         params = {};
       }
       THREE.Object3D.call(this);
+      this.target = params.target || new THREE.Vector3();
       params.backdropWall = params.backdropWall || 600;
       params.backdropFloor = params.backdropFloor || 1500;
       params.backdropCurve = params.backdropCurve || 400;
       params.backdropCurveSteps = params.backdropCurveSteps || 20;
-      focus = new THREE.Vector3();
-      geometry = this.createBackdropGeometry(params.backdropWall, params.backdropFloor, params.backdropCurve, params.backdropCurveSteps);
-      material = new THREE.MeshLambertMaterial({
+      params.backdropMaterial = params.backdropMaterial || new THREEFLOW.DiffuseMaterial({
         color: 0xefefef,
         ambient: 0xffffff,
         side: THREE.DoubleSide
       });
-      mesh = new THREE.Mesh(geometry, material);
-      mesh.rotation.x = -(Math.PI / 2);
-      mesh.position.z = params.backdropFloor / 2;
-      this.add(mesh);
-      light1 = new THREEFLOW.AreaLight({
-        radiance: 5,
-        geometry: new THREE.PlaneGeometry(200, 200)
-      });
-      light1.position.set(-200, 200, 200);
-      light1.lookAt(focus);
-      light2 = new THREEFLOW.AreaLight({
-        radiance: 5,
-        geometry: new THREE.PlaneGeometry(200, 200)
-      });
-      light2.position.set(200, 400, 200);
-      light2.lookAt(focus);
-      this.add(light1);
-      this.add(light2);
+      this.createBackdrop(params.backdropWall, params.backdropFloor, params.backdropCurve, params.backdropCurveSteps, params.backdropMaterial);
+      geometry = new THREE.PlaneGeometry(400, 400);
+      keyRadiance = 5.5;
+      baseYaw = Math.PI / 2;
+      basePitch = Math.PI / 2;
+      toRADIANS = Math.PI / 180;
+      this.lights = params.lights || [
+        new THREEFLOW.LightingRigLight({
+          target: this.target,
+          pitch: basePitch - (30 * toRADIANS),
+          yaw: baseYaw + (45 * toRADIANS),
+          distance: 700,
+          light: new THREEFLOW.AreaLight({
+            color: 0xffffef,
+            geometry: geometry,
+            intensity: .5,
+            radiance: keyRadiance
+          })
+        }), new THREEFLOW.LightingRigLight({
+          target: this.target,
+          pitch: basePitch - (16 * toRADIANS),
+          yaw: baseYaw - (60 * toRADIANS),
+          distance: 700,
+          light: new THREEFLOW.AreaLight({
+            color: 0xffffef,
+            geometry: geometry,
+            intensity: .5,
+            radiance: keyRadiance / 5
+          })
+        }), new THREEFLOW.LightingRigLight({
+          target: new THREE.Vector3(0, 0, -((params.backdropFloor / 2) + params.backdropCurve)),
+          pitch: basePitch - (20 * toRADIANS),
+          yaw: baseYaw + (135 * toRADIANS),
+          distance: 900,
+          light: new THREEFLOW.AreaLight({
+            color: 0xffffef,
+            geometry: geometry,
+            intensity: .5,
+            radiance: keyRadiance / 2
+          })
+        }), new THREEFLOW.LightingRigLight({
+          target: new THREE.Vector3(0, 0, -((params.backdropFloor / 2) + params.backdropCurve)),
+          pitch: basePitch - (20 * toRADIANS),
+          yaw: baseYaw - (120 * toRADIANS),
+          distance: 900,
+          light: new THREEFLOW.AreaLight({
+            color: 0xffffef,
+            geometry: geometry,
+            intensity: .5,
+            radiance: keyRadiance / 4
+          })
+        })
+      ];
+      _ref = this.lights;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        light = _ref[_i];
+        this.add(light);
+      }
+      this.update();
     }
 
     LightingRig.prototype = Object.create(THREE.Object3D.prototype);
 
-    LightingRig.prototype.createBackdropGeometry = function(wall, floor, curve, curveSteps) {
-      var PI2, angle, geometry, points, x, z, _i, _ref, _ref1, _ref2;
+    LightingRig.prototype.createBackdrop = function(wall, floor, curve, curveSteps, material) {
+      var PI2, angle, geometry, mesh, points, x, z, _i, _ref, _ref1, _ref2;
       points = [];
       points.push(new THREE.Vector3());
       PI2 = Math.PI / 2;
@@ -253,10 +296,104 @@
       }
       points.push(new THREE.Vector3(floor + curve, 0, curve + wall));
       geometry = new THREE.LatheGeometry(points, 12, 0, Math.PI);
-      return geometry;
+      mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = -(Math.PI / 2);
+      mesh.position.z = floor / 2;
+      this.add(mesh);
+      return null;
+    };
+
+    LightingRig.prototype.update = function() {
+      var light, _i, _len, _ref, _results;
+      _ref = this.lights;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        light = _ref[_i];
+        _results.push(light.update());
+      }
+      return _results;
     };
 
     return LightingRig;
+
+  })();
+
+  /*
+  # parameter options.
+  rig = new THREEFLOW.LightingRigLight
+    target: target.position
+    rotateX: 90
+    rotateY: 0
+    rotateZ: 0
+    distance: 400
+    color: 0xff0000 # shorthand for light color
+    light: new THREEFLOW.AreaLight
+      color: 0xffffff
+      geometry: new THREE.SphereGeometry()
+    bounce:
+      rotateX:-90
+      distance: 50
+      color: 0xffffff # another shorthand for material color
+      material: new THREEFLOW.ShinyMaterial
+        color: 0xff0000
+      geometry: new THREE.PlaneGeometry()
+  */
+
+
+  THREEFLOW.LightingRigLight = LightingRigLight = (function() {
+    function LightingRigLight(params) {
+      var geometry, material;
+      if (params == null) {
+        params = {};
+      }
+      THREE.Object3D.call(this);
+      this.target = params.target || new THREE.Vector3();
+      console.log(this.target);
+      this._pitchPhi = params.pitch || 0;
+      this._yawTheta = params.yaw || 0;
+      this._distance = params.distance || 500;
+      this.rotateDirty = true;
+      this.light = params.light || new THREEFLOW.AreaLight({
+        color: params.color,
+        geometry: new THREE.PlaneGeometry(200, 200)
+      });
+      this.add(this.light);
+      params.bounce = params.bounce || null;
+      if (typeof params.bounce === "boolean") {
+        params.bounce = {};
+      }
+      if (params.bounce) {
+        this.bouncePitchPhi = params.bounce.pitch || 0;
+        this.bounceYawTheta = params.bounce.yaw || 0;
+        material = params.bounce.material || new THREEFLOW.DiffuseMaterial({
+          color: params.bounce.color
+        });
+        geometry = params.bounce.geometry || new THREE.PlaneGeometry();
+        this.bounce = new THREE.Mesh(geometry, material);
+        this.add(this.bounce);
+        this.bounceDirty = true;
+      }
+      this.update();
+    }
+
+    LightingRigLight.prototype = Object.create(THREE.Object3D.prototype);
+
+    LightingRigLight.prototype.update = function() {
+      if (this.rotateDirty) {
+        this.rotateDirty = false;
+        this.light.position.x = this._distance * Math.sin(this._pitchPhi) * Math.cos(this._yawTheta);
+        this.light.position.y = this._distance * Math.cos(this._pitchPhi);
+        this.light.position.z = this._distance * Math.sin(this._pitchPhi) * Math.sin(this._yawTheta);
+        this.light.lookAt(this.target);
+        this.bounceDirty = true;
+      }
+      if (this.bounceDirty) {
+        this.bounceDirty = false;
+      }
+      return null;
+    };
+
+    return LightingRigLight;
 
   })();
 

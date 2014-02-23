@@ -34,6 +34,8 @@ THREEFLOW.DatGui = class DatGUI
     @traceDepthsFolder  = @gui.addFolder "Trace Depths"
     @causticsFolder     = @gui.addFolder "Caustics"
     @giFolder           = @gui.addFolder "Global Illumination"
+
+    @overridesFolder    = @gui.addFolder "Overrides"
     @otherFolder        = @gui.addFolder "Other Options"
 
     @imageFolder.add @renderer.image,"antialiasMin"
@@ -57,6 +59,9 @@ THREEFLOW.DatGui = class DatGUI
     @causticsFolder.add @renderer.caustics,"photons"
     @causticsFolder.add @renderer.caustics,"kdEstimate"
     @causticsFolder.add @renderer.caustics,"kdRadius"
+
+    @overridesFolder.add(@renderer.lights.override.samples, "enabled" ).name("light_samples")
+    @overridesFolder.add(@renderer.lights.override.samples, "value" ).name("light_value")
 
     @otherFolder.add @renderer.meshes,"convertPrimitives"
     @otherFolder.add(@renderer.geometry,"normals").name("geomNormals")

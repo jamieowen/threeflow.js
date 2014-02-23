@@ -21,11 +21,6 @@ module.exports = (grunt)->
           rename:(destBase,destPath)->
             destBase + destPath.replace(".coffee",".js")
           )
-      extras:
-        options:
-          join:true
-        files:
-          "build/threeflow_extras.js":"src/extras/**/*.coffee"
       server:
         options:
           bare:true
@@ -41,7 +36,6 @@ module.exports = (grunt)->
       main:
         files:
           "build/threeflow.min.js":"build/threeflow.js"
-          "build/threeflow_extras.min.js":"build/threeflow_extras.js"
     copy:
       examples:
         expand:true
@@ -61,7 +55,7 @@ module.exports = (grunt)->
 
     watch:
       main:
-        files:[ "src/client/**/*.coffee","src/server/**/*.coffee", "src/examples/*.coffee","src/examples/*.html.eco","src/extras/**/*.coffee" ]
+        files:[ "src/client/**/*.coffee","src/server/**/*.coffee", "src/examples/*.coffee","src/examples/*.html.eco" ]
         tasks:["coffee","copy","examples-html","bin-shebang"]
 
 

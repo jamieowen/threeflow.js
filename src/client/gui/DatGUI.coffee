@@ -1,19 +1,9 @@
 
-window.THREEFLOW = window.THREEFLOW || {}
-
 THREEFLOW.DatGui = class DatGUI
 
   constructor:(@renderer)->
     if not window.dat and not window.dat.GUI
       throw new Error "No dat.GUI found."
-
-    dat.GUI.prototype.removeFolder =(name)->
-      console.log "REMOVE", @, name
-      @__folders[name].close()
-      @__ul.removeChild this.__folders[name].li
-      dom.removeClass this.__folders[name].li,'folder'
-      @__folders[name] = undefined
-      @onResize()
 
     @gui = new dat.GUI()
     #@gui.remember @renderer.image

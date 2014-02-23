@@ -4,12 +4,20 @@ THREEFLOW.LightingRigGui = class LightingRigGui
 
     @gui = new dat.GUI()
 
+    @backdropFolder = @gui.addFolder("Backdrop")
+    @backdropFolder.add(@rig.backdropMaterial,"wireframe")
+    @backdropFolder.add(@rig.backdropMaterial,"transparent")
+    @backdropFolder.add(@rig.backdropMaterial,"opacity",0,1)
+
+    @backdropFolder.open()
+
     for light in @rig.lights
       @addRigLight light
 
-
   addRigLight:(rigLight)->
     folder = @gui.addFolder rigLight.name
+
+    folder.add rigLight,"enabled"
 
     # convert to degrees.
     rotate =
@@ -32,6 +40,8 @@ THREEFLOW.LightingRigGui = class LightingRigGui
       console.log hex
 
     folder.add rigLight,"radiance",0,100
+
+    folder.add rigLight,"geometryType",THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES
 
 
 

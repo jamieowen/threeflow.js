@@ -89,7 +89,7 @@ window.onload = ()->
 
 
     # TODO : Errors when using the GlassMaterial
-    m.materials[ 4 ] = materials.glass # windshield
+    m.materials[ 4 ] = materials.black #materials.glass # windshield
     m.materials[ 5 ] = materials.black ##materials.interior # interior
     m.materials[ 6 ] = materials.tire # tire
     m.materials[ 7 ] = materials.black # tireling

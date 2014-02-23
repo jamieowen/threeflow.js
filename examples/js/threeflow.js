@@ -1142,6 +1142,11 @@
       var light, _i, _len, _ref;
       this.rig = rig;
       this.gui = new dat.GUI();
+      this.backdropFolder = this.gui.addFolder("Backdrop");
+      this.backdropFolder.add(this.rig.backdropMaterial, "wireframe");
+      this.backdropFolder.add(this.rig.backdropMaterial, "transparent");
+      this.backdropFolder.add(this.rig.backdropMaterial, "opacity", 0, 1);
+      this.backdropFolder.open();
       _ref = this.rig.lights;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         light = _ref[_i];
@@ -1152,6 +1157,7 @@
     LightingRigGui.prototype.addRigLight = function(rigLight) {
       var folder, rotate;
       folder = this.gui.addFolder(rigLight.name);
+      folder.add(rigLight, "enabled");
       rotate = {
         yaw: rigLight.yaw * (180 / Math.PI),
         pitch: rigLight.pitch * (180 / Math.PI)
@@ -1171,6 +1177,7 @@
         return console.log(hex);
       });
       folder.add(rigLight, "radiance", 0, 100);
+      folder.add(rigLight, "geometryType", THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES);
       return null;
     };
 
@@ -1200,7 +1207,7 @@
 
   THREEFLOW.AreaLight = AreaLight = (function() {
     function AreaLight(params) {
-      var material;
+      var lineGeometry;
       if (params == null) {
         params = {};
       }
@@ -1214,14 +1221,21 @@
       this._color = new THREE.Color(params.color);
       this._radiance = params.radiance || 100.0;
       this.samples = params.samples || 16;
-      this.geometry = params.geometry || new THREE.PlaneGeometry(10, 10);
+      this._geometry = params.geometry || new THREE.PlaneGeometry(10, 10);
       if (this.markers) {
-        material = new THREE.MeshBasicMaterial({
+        this.material = new THREE.MeshBasicMaterial({
           wireframe: true
         });
-        material.color = this._color;
-        this.mesh = new THREE.Mesh(this.geometry, material);
+        this.material.color = this._color;
+        this.mesh = new THREE.Mesh(this._geometry, this.material);
         this.add(this.mesh);
+        lineGeometry = new THREE.Geometry();
+        lineGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
+        lineGeometry.vertices.push(new THREE.Vector3(0, 0, 100));
+        this.line = new THREE.Line(lineGeometry, new THREE.LineBasicMaterial({
+          color: this._color.getHex()
+        }));
+        this.add(this.line);
       }
       if (this.simulate) {
         this.light = new THREE.PointLight(params.color, params.intensity);
@@ -1247,6 +1261,20 @@
         },
         set: function(value) {
           return this._radiance = value;
+        }
+      },
+      geometry: {
+        get: function() {
+          return this._geometry;
+        },
+        set: function(value) {
+          if (this._geometry === value) {
+            return;
+          }
+          this._geometry = value;
+          this.remove(this.mesh);
+          this.mesh = new THREE.Mesh(this._geometry, this.material);
+          return this.add(this.mesh);
         }
       }
     });
@@ -1575,7 +1603,7 @@
 
   THREEFLOW.LightingRig = LightingRig = (function() {
     function LightingRig(params) {
-      var basePitch, baseYaw, geometry, keyRadiance, light, toRADIANS, _i, _len, _ref;
+      var basePitch, baseYaw, keyRadiance, toRADIANS;
       if (params == null) {
         params = {};
       }
@@ -1588,70 +1616,70 @@
       params.backdropMaterial = params.backdropMaterial || new THREEFLOW.DiffuseMaterial({
         color: 0xefefef,
         ambient: 0xffffff,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.5
       });
+      this.backdropMaterial = params.backdropMaterial;
       this.createBackdrop(params.backdropWall, params.backdropFloor, params.backdropCurve, params.backdropCurveSteps, params.backdropMaterial);
-      geometry = new THREE.PlaneGeometry(400, 400);
       keyRadiance = 5.5;
       baseYaw = Math.PI / 2;
       basePitch = Math.PI / 2;
       toRADIANS = Math.PI / 180;
       this.lights = params.lights || [
-        new THREEFLOW.LightingRigLight({
+        new THREEFLOW.LightingRigLight(this, {
           name: "Key Light",
           target: this.target,
           pitch: basePitch - (30 * toRADIANS),
           yaw: baseYaw + (45 * toRADIANS),
           distance: 700,
-          light: new THREEFLOW.AreaLight({
+          light: {
             color: 0xffffef,
-            geometry: geometry,
+            geometryType: "Plane",
             intensity: .5,
             radiance: keyRadiance
-          })
-        }), new THREEFLOW.LightingRigLight({
+          }
+        }), new THREEFLOW.LightingRigLight(this, {
           name: "Fill Light",
           target: this.target,
           pitch: basePitch - (16 * toRADIANS),
           yaw: baseYaw - (60 * toRADIANS),
           distance: 700,
-          light: new THREEFLOW.AreaLight({
+          light: {
             color: 0xffffef,
-            geometry: geometry,
+            geometryType: "Plane",
             intensity: .5,
             radiance: keyRadiance / 5
-          })
-        }), new THREEFLOW.LightingRigLight({
+          }
+        }), new THREEFLOW.LightingRigLight(this, {
           name: "Back/Rim Light",
           target: new THREE.Vector3(0, 0, -((params.backdropFloor / 2) + params.backdropCurve)),
           pitch: basePitch - (20 * toRADIANS),
           yaw: baseYaw + (135 * toRADIANS),
           distance: 900,
-          light: new THREEFLOW.AreaLight({
+          light: {
             color: 0xffffef,
-            geometry: geometry,
+            geometryType: "Plane",
             intensity: .5,
             radiance: keyRadiance / 2
-          })
-        }), new THREEFLOW.LightingRigLight({
+          }
+        }), new THREEFLOW.LightingRigLight(this, {
+          enabled: false,
           name: "Background Light",
           target: new THREE.Vector3(0, 0, -((params.backdropFloor / 2) + params.backdropCurve)),
           pitch: basePitch - (20 * toRADIANS),
           yaw: baseYaw - (120 * toRADIANS),
           distance: 900,
-          light: new THREEFLOW.AreaLight({
+          light: {
             color: 0xffffef,
-            geometry: geometry,
+            geometryType: "Plane",
             intensity: .5,
             radiance: keyRadiance / 4
-          })
+          }
         })
       ];
-      _ref = this.lights;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        light = _ref[_i];
-        this.add(light);
-      }
+      this.enabledLights = [];
+      this.lightsDirty = true;
       this.update();
     }
 
@@ -1677,11 +1705,28 @@
     };
 
     LightingRig.prototype.update = function() {
-      var light, _i, _len, _ref, _results;
-      _ref = this.lights;
+      var light, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
+      if (this.lightsDirty) {
+        this.lightsDirty = false;
+        _ref = this.enabledLights;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          light = _ref[_i];
+          this.remove(light);
+        }
+        this.enabledLights.splice(0);
+        _ref1 = this.lights;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          light = _ref1[_j];
+          if (light.enabled) {
+            this.add(light);
+            this.enabledLights.push(light);
+          }
+        }
+      }
+      _ref2 = this.enabledLights;
       _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        light = _ref[_i];
+      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+        light = _ref2[_k];
         _results.push(light.update());
       }
       return _results;
@@ -1714,22 +1759,42 @@
 
 
   THREEFLOW.LightingRigLight = LightingRigLight = (function() {
-    function LightingRigLight(params) {
-      var geometry, material;
+    LightingRigLight.LIGHT_GEOMETRY_TYPES = ["Plane", "Circle", "Box", "Sphere", "Ring"];
+
+    LightingRigLight.DEFAULT_LIGHT_GEOMETRY_TYPE = "Circle";
+
+    function LightingRigLight(rig, params) {
+      var geometry, lightParams, material;
+      this.rig = rig;
       if (params == null) {
         params = {};
       }
       THREE.Object3D.call(this);
       this.name = params.name || "RigLight";
+      if (typeof params.enabled === "boolean") {
+        this._enabled = params.enabled;
+      } else {
+        this._enabled = true;
+      }
+      console.log("ENABLED,", this._enabled, this.enabled);
       this.target = params.target || new THREE.Vector3();
       this._pitchPhi = params.pitch || 0;
       this._yawTheta = params.yaw || 0;
       this._distance = params.distance || 500;
       this.rotateDirty = true;
-      this.light = params.light || new THREEFLOW.AreaLight({
-        color: params.color,
-        geometry: new THREE.PlaneGeometry(200, 200)
-      });
+      this.lightGeomPlane = null;
+      this.lightGeomCircle = null;
+      this.lightGeomBox = null;
+      this.lightGeomSphere = null;
+      this.lightGeomRing = null;
+      lightParams = params.light || {};
+      if (lightParams.geometryType) {
+        this._geometryType = lightParams.geometryType;
+      } else {
+        this._geometryType = THREEFLOW.LightingRigLight.DEFAULT_LIGHT_GEOMETRY_TYPE;
+      }
+      lightParams.geometry = this.getGeometry(this._geometryType);
+      this.light = new THREEFLOW.AreaLight(lightParams);
       this.add(this.light);
       params.bounce = params.bounce || null;
       if (typeof params.bounce === "boolean") {
@@ -1803,6 +1868,32 @@
         set: function(value) {
           return this.light.radiance = value;
         }
+      },
+      geometryType: {
+        get: function() {
+          return this._geometryType;
+        },
+        set: function(value) {
+          var geometry;
+          if (this._geometryType === value) {
+            return;
+          }
+          geometry = this.getGeometry(value);
+          if (geometry) {
+            return this.light.geometry = geometry;
+          }
+        }
+      },
+      enabled: {
+        get: function() {
+          return this._enabled;
+        },
+        set: function(value) {
+          this._enabled = value;
+          if (this.rig) {
+            return this.rig.lightsDirty = true;
+          }
+        }
       }
     });
 
@@ -1820,6 +1911,38 @@
         this.bounceDirty = false;
       }
       return null;
+    };
+
+    LightingRigLight.prototype.getGeometry = function(type) {
+      var geometry;
+      geometry = null;
+      switch (type) {
+        case "Plane":
+          if (this.lightGeomPlane === null) {
+            geometry = this.lightGeomPlane = new THREE.PlaneGeometry(400, 400);
+          }
+          break;
+        case "Circle":
+          if (this.lightGeomCircle === null) {
+            geometry = this.lightGeomCircle = new THREE.CircleGeometry(200, 12);
+          }
+          break;
+        case "Box":
+          if (this.lightGeomBox === null) {
+            geometry = this.lightGeomBox = new THREE.BoxGeometry(200, 200, 200);
+          }
+          break;
+        case "Sphere":
+          if (this.lightGeomSphere === null) {
+            geometry = this.lightGeomSphere = new THREE.SphereGeometry(200);
+          }
+          break;
+        case "Ring":
+          if (this.lightGeomRing === null) {
+            geometry = this.lightGeomRing = new THREE.RingGeometry(100, 200, 12, 12);
+          }
+      }
+      return geometry;
     };
 
     return LightingRigLight;

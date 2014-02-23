@@ -22,12 +22,29 @@ rig = new THREEFLOW.LightingRigLight
 
 THREEFLOW.LightingRigLight = class LightingRigLight
 
-  constructor:( params={} )->
+  # some test light geometry types.
+  @LIGHT_GEOMETRY_TYPES = [
+    "Plane"
+    "Circle"
+    "Box"
+    "Sphere"
+    "Ring"
+  ]
+
+  @DEFAULT_LIGHT_GEOMETRY_TYPE = "Circle"
+
+  constructor:( @rig,params={} )->
 
     THREE.Object3D.call @
 
     @name = params.name || "RigLight"
 
+    if typeof params.enabled is "boolean"
+      @_enabled = params.enabled
+    else
+      @_enabled = true
+
+    console.log "ENABLED,",@_enabled, @enabled
     # rotation, distance and target
     @target = params.target || new THREE.Vector3()
 
@@ -38,10 +55,22 @@ THREEFLOW.LightingRigLight = class LightingRigLight
 
     @rotateDirty = true
 
-    @light = params.light || new THREEFLOW.AreaLight
-      color: params.color
-      geometry: new THREE.PlaneGeometry 200,200
+    @lightGeomPlane = null
+    @lightGeomCircle = null
+    @lightGeomBox = null
+    @lightGeomSphere = null
+    @lightGeomRing = null
 
+    lightParams = params.light || {}
+
+    if lightParams.geometryType
+      @_geometryType = lightParams.geometryType
+    else
+      @_geometryType =  THREEFLOW.LightingRigLight.DEFAULT_LIGHT_GEOMETRY_TYPE
+
+    lightParams.geometry = @getGeometry(@_geometryType)
+
+    @light = new THREEFLOW.AreaLight lightParams
     @add @light
 
     params.bounce = params.bounce || null
@@ -107,6 +136,26 @@ THREEFLOW.LightingRigLight = class LightingRigLight
       set: (value) ->
         @light.radiance = value
 
+    geometryType:
+      get: ->
+        @_geometryType
+      set: (value) ->
+        if @_geometryType is value
+          return
+
+        geometry = @getGeometry(value)
+
+        if geometry
+          @light.geometry = geometry
+
+    enabled:
+      get: ->
+        @_enabled
+      set: (value) ->
+        @_enabled = value
+        if @rig
+          @rig.lightsDirty = true
+
   update:()->
     if @rotateDirty
       @rotateDirty = false
@@ -125,6 +174,25 @@ THREEFLOW.LightingRigLight = class LightingRigLight
       @bounceDirty = false
 
     null
+
+
+  getGeometry:(type)->
+
+    geometry = null
+    switch type
+      when "Plane"
+        geometry = @lightGeomPlane = new THREE.PlaneGeometry 400,400 if @lightGeomPlane is null
+      when "Circle"
+        geometry =  @lightGeomCircle = new THREE.CircleGeometry 200,12 if @lightGeomCircle is null
+      when "Box"
+        geometry = @lightGeomBox = new THREE.BoxGeometry 200,200,200 if @lightGeomBox is null
+      when "Sphere"
+        geometry = @lightGeomSphere = new THREE.SphereGeometry 200 if @lightGeomSphere is null
+      when "Ring"
+        geometry = @lightGeomRing = new THREE.RingGeometry 100,200,12,12 if @lightGeomRing is null
+
+    geometry
+
 
 
 

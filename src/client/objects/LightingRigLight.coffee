@@ -44,7 +44,6 @@ THREEFLOW.LightingRigLight = class LightingRigLight
     else
       @_enabled = true
 
-    console.log "ENABLED,",@_enabled, @enabled
     # rotation, distance and target
     @target = params.target || new THREE.Vector3()
 
@@ -159,8 +158,6 @@ THREEFLOW.LightingRigLight = class LightingRigLight
   update:()->
     if @rotateDirty
       @rotateDirty = false
-
-      console.log "update light"
 
       @light.position.x = @_distance * Math.sin(@_pitchPhi) * Math.cos(@_yawTheta)
       @light.position.y = @_distance * Math.cos(@_pitchPhi)

@@ -1776,7 +1776,6 @@
       } else {
         this._enabled = true;
       }
-      console.log("ENABLED,", this._enabled, this.enabled);
       this.target = params.target || new THREE.Vector3();
       this._pitchPhi = params.pitch || 0;
       this._yawTheta = params.yaw || 0;
@@ -1900,7 +1899,6 @@
     LightingRigLight.prototype.update = function() {
       if (this.rotateDirty) {
         this.rotateDirty = false;
-        console.log("update light");
         this.light.position.x = this._distance * Math.sin(this._pitchPhi) * Math.cos(this._yawTheta);
         this.light.position.y = this._distance * Math.cos(this._pitchPhi);
         this.light.position.z = this._distance * Math.sin(this._pitchPhi) * Math.sin(this._yawTheta);

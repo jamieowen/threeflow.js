@@ -1,5 +1,5 @@
 window.onload = function() {
-  var ambient, camera, controls, count, geom, gui, height, i, loader, material, mesh, radius, render, rig, scene, size, theta, threeflow, webgl, width, _i,
+  var ambient, camera, controls, count, geom, height, i, loader, material, mesh, radius, render, renderGui, rig, rigGui, scene, size, theta, threeflow, webgl, width, _i,
     _this = this;
   webgl = new THREE.WebGLRenderer({
     antialias: true,
@@ -52,12 +52,14 @@ window.onload = function() {
     scPath: "examples/renders/extras_lighting_rig.sc"
   });
   threeflow.connect();
-  gui = new THREEFLOW.DatGui(threeflow);
-  gui.onRender = function() {
+  renderGui = new THREEFLOW.DatGui(threeflow);
+  renderGui.onRender = function() {
     return threeflow.render(scene, camera, width, height);
   };
+  rigGui = new THREEFLOW.LightingRigGui(rig);
   render = function() {
     controls.update();
+    rig.update();
     webgl.render(scene, camera);
     requestAnimationFrame(render);
     return null;

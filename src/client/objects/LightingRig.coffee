@@ -32,6 +32,7 @@ THREEFLOW.LightingRig = class LightingRig
     @lights = params.lights || [
       # key light
       new THREEFLOW.LightingRigLight
+        name: "Key Light"
         target: @target
         pitch: basePitch - ( 30*toRADIANS )
         yaw: baseYaw + ( 45*toRADIANS )
@@ -45,6 +46,7 @@ THREEFLOW.LightingRig = class LightingRig
       # fill light
 
       new THREEFLOW.LightingRigLight
+        name: "Fill Light"
         target: @target
         pitch: basePitch - ( 16*toRADIANS )
         yaw: baseYaw - ( 60*toRADIANS )
@@ -58,6 +60,7 @@ THREEFLOW.LightingRig = class LightingRig
       # back light
       new THREEFLOW.LightingRigLight
         # target the back wall
+        name: "Back/Rim Light"
         target: new THREE.Vector3(0,0,-((params.backdropFloor/2)+params.backdropCurve))
         pitch: basePitch - ( 20*toRADIANS )
         yaw: baseYaw + ( 135*toRADIANS )
@@ -72,6 +75,7 @@ THREEFLOW.LightingRig = class LightingRig
       # background light
       new THREEFLOW.LightingRigLight
         # target the back wall
+        name: "Background Light"
         target: new THREE.Vector3(0,0,-((params.backdropFloor/2)+params.backdropCurve))
         pitch: basePitch - ( 20*toRADIANS )
         yaw: baseYaw - ( 120*toRADIANS )

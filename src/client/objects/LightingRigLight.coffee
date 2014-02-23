@@ -26,9 +26,10 @@ THREEFLOW.LightingRigLight = class LightingRigLight
 
     THREE.Object3D.call @
 
+    @name = params.name || "RigLight"
+
     # rotation, distance and target
     @target = params.target || new THREE.Vector3()
-    console.log @target
 
     @_pitchPhi = params.pitch || 0
     @_yawTheta = params.yaw || 0
@@ -65,9 +66,52 @@ THREEFLOW.LightingRigLight = class LightingRigLight
 
   @:: = Object.create THREE.Object3D::
 
+  # getters / setters
+  Object.defineProperties @::,
+    yaw:
+      get: ->
+        @_yawTheta
+      set: (value) ->
+        if @_yawTheta is value
+          return
+
+        @_yawTheta = value
+        @rotateDirty = true
+    pitch:
+      get: ->
+        @_pitchPhi
+      set: (value) ->
+        if @_pitchPhi is value
+          return
+
+        @_pitchPhi = value
+        @rotateDirty = true
+    distance:
+      get: ->
+        @_distance
+      set: (value) ->
+        if @_distance is value
+          return
+
+        @_distance = value
+        @rotateDirty = true
+    color:
+      get: ->
+        @light.color.getHex()
+      set: (value) ->
+        @light.color.setHex(value)
+
+    radiance:
+      get: ->
+        @light.radiance
+      set: (value) ->
+        @light.radiance = value
+
   update:()->
     if @rotateDirty
       @rotateDirty = false
+
+      console.log "update light"
 
       @light.position.x = @_distance * Math.sin(@_pitchPhi) * Math.cos(@_yawTheta)
       @light.position.y = @_distance * Math.cos(@_pitchPhi)

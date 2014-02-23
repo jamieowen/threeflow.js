@@ -56,8 +56,6 @@ window.onload = ()->
     mesh.rotation.y = Math.PI/4
     scene.add mesh
 
-
-
   camera.position.set 0,400,2000
 
 
@@ -69,13 +67,16 @@ window.onload = ()->
   threeflow.connect()
 
   # gui
-  gui = new THREEFLOW.DatGui threeflow
-  gui.onRender=()=>
+  renderGui = new THREEFLOW.DatGui threeflow
+  renderGui.onRender=()=>
     threeflow.render scene,camera,width,height
+
+  rigGui = new THREEFLOW.LightingRigGui(rig)
 
   # render
   render = ()->
     controls.update()
+    rig.update()
     webgl.render(scene,camera)
     requestAnimationFrame render
     null

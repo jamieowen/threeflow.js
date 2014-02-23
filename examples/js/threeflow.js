@@ -1139,10 +1139,40 @@
 
   THREEFLOW.LightingRigGui = LightingRigGui = (function() {
     function LightingRigGui(rig) {
+      var light, _i, _len, _ref;
       this.rig = rig;
       this.gui = new dat.GUI();
-      this.gui.addFolder("lighting");
+      _ref = this.rig.lights;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        light = _ref[_i];
+        this.addRigLight(light);
+      }
     }
+
+    LightingRigGui.prototype.addRigLight = function(rigLight) {
+      var folder, rotate;
+      folder = this.gui.addFolder(rigLight.name);
+      rotate = {
+        yaw: rigLight.yaw * (180 / Math.PI),
+        pitch: rigLight.pitch * (180 / Math.PI)
+      };
+      folder.add(rotate, "yaw", 0, 360).onChange(function(value) {
+        rotate.yaw = value;
+        return rigLight.yaw = value * (Math.PI / 180);
+      });
+      folder.add(rotate, "pitch", 0, 360).onChange(function(value) {
+        rotate.pitch = value;
+        return rigLight.pitch = value * (Math.PI / 180);
+      });
+      folder.add(rigLight, "distance", 300, 2000);
+      folder.addColor(rigLight, "color").onChange(function(value) {
+        var hex;
+        hex = parseInt(value, 16);
+        return console.log(hex);
+      });
+      folder.add(rigLight, "radiance", 0, 100);
+      return null;
+    };
 
     return LightingRigGui;
 
@@ -1568,6 +1598,7 @@
       toRADIANS = Math.PI / 180;
       this.lights = params.lights || [
         new THREEFLOW.LightingRigLight({
+          name: "Key Light",
           target: this.target,
           pitch: basePitch - (30 * toRADIANS),
           yaw: baseYaw + (45 * toRADIANS),
@@ -1579,6 +1610,7 @@
             radiance: keyRadiance
           })
         }), new THREEFLOW.LightingRigLight({
+          name: "Fill Light",
           target: this.target,
           pitch: basePitch - (16 * toRADIANS),
           yaw: baseYaw - (60 * toRADIANS),
@@ -1590,6 +1622,7 @@
             radiance: keyRadiance / 5
           })
         }), new THREEFLOW.LightingRigLight({
+          name: "Back/Rim Light",
           target: new THREE.Vector3(0, 0, -((params.backdropFloor / 2) + params.backdropCurve)),
           pitch: basePitch - (20 * toRADIANS),
           yaw: baseYaw + (135 * toRADIANS),
@@ -1601,6 +1634,7 @@
             radiance: keyRadiance / 2
           })
         }), new THREEFLOW.LightingRigLight({
+          name: "Background Light",
           target: new THREE.Vector3(0, 0, -((params.backdropFloor / 2) + params.backdropCurve)),
           pitch: basePitch - (20 * toRADIANS),
           yaw: baseYaw - (120 * toRADIANS),
@@ -1686,8 +1720,8 @@
         params = {};
       }
       THREE.Object3D.call(this);
+      this.name = params.name || "RigLight";
       this.target = params.target || new THREE.Vector3();
-      console.log(this.target);
       this._pitchPhi = params.pitch || 0;
       this._yawTheta = params.yaw || 0;
       this._distance = params.distance || 500;
@@ -1717,9 +1751,65 @@
 
     LightingRigLight.prototype = Object.create(THREE.Object3D.prototype);
 
+    Object.defineProperties(LightingRigLight.prototype, {
+      yaw: {
+        get: function() {
+          return this._yawTheta;
+        },
+        set: function(value) {
+          if (this._yawTheta === value) {
+            return;
+          }
+          this._yawTheta = value;
+          return this.rotateDirty = true;
+        }
+      },
+      pitch: {
+        get: function() {
+          return this._pitchPhi;
+        },
+        set: function(value) {
+          if (this._pitchPhi === value) {
+            return;
+          }
+          this._pitchPhi = value;
+          return this.rotateDirty = true;
+        }
+      },
+      distance: {
+        get: function() {
+          return this._distance;
+        },
+        set: function(value) {
+          if (this._distance === value) {
+            return;
+          }
+          this._distance = value;
+          return this.rotateDirty = true;
+        }
+      },
+      color: {
+        get: function() {
+          return this.light.color.getHex();
+        },
+        set: function(value) {
+          return this.light.color.setHex(value);
+        }
+      },
+      radiance: {
+        get: function() {
+          return this.light.radiance;
+        },
+        set: function(value) {
+          return this.light.radiance = value;
+        }
+      }
+    });
+
     LightingRigLight.prototype.update = function() {
       if (this.rotateDirty) {
         this.rotateDirty = false;
+        console.log("update light");
         this.light.position.x = this._distance * Math.sin(this._pitchPhi) * Math.cos(this._yawTheta);
         this.light.position.y = this._distance * Math.cos(this._pitchPhi);
         this.light.position.z = this._distance * Math.sin(this._pitchPhi) * Math.sin(this._yawTheta);

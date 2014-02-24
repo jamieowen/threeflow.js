@@ -1,17 +1,19 @@
 path    = require 'path'
-clc     = require 'cli-color'
 
-#console.log __dirname
 
-# check for existence of threeflow options file.
-# output: renders
-# saving: true if output is set, false otherwise
-# multiple:
+args =
+  start: true
 
-threeflow = require( path.join(__dirname,"../lib/server") ).create()
-threeflow.options
-  saving:false
-  multiple:false
-  output:null
+for arg in process.argv
+  args[arg] = arg
 
-threeflow.startup()
+if args.init
+  console.log "init--"
+
+else if args.update
+  console.log "update--"
+
+else if args.start
+  threeflow = require( path.join(__dirname,"../lib/server") ).create()
+  threeflow.optionsJSON( process.cwd() )
+  threeflow.startup()

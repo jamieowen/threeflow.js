@@ -61,8 +61,8 @@ window.onload = ()->
     mesh.rotation.x = -(Math.PI/5)
     mesh.rotation.y = Math.PI/4
 
-    mesh = new THREE.Mesh( new THREE.SphereGeometry(100), material )
-    mesh.position.y = 100
+    #mesh = new THREE.Mesh( new THREE.SphereGeometry(100), material )
+    #mesh.position.y = 100
     scene.add mesh
 
   camera.position.set 0,400,2000
@@ -80,7 +80,7 @@ window.onload = ()->
   renderGui.onRender=()=>
     threeflow.render scene,camera,width,height
 
-  rigGui = new THREEFLOW.LightingRigGui(rig)
+  new THREEFLOW.LightingRigGui(rig)
 
   # render
   render = ()->

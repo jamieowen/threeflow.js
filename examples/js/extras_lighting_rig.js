@@ -1,5 +1,5 @@
 window.onload = function() {
-  var ambient, camera, controls, count, geom, height, i, loader, material, mesh, radius, render, renderGui, rig, rigGui, scene, size, spheres, theta, threeflow, webgl, width, _i,
+  var ambient, camera, controls, count, geom, height, i, loader, material, mesh, radius, render, renderGui, rig, scene, size, spheres, theta, threeflow, webgl, width, _i,
     _this = this;
   webgl = new THREE.WebGLRenderer({
     antialias: true,
@@ -47,8 +47,6 @@ window.onload = function() {
     mesh.rotation.order = "YXZ";
     mesh.rotation.x = -(Math.PI / 5);
     mesh.rotation.y = Math.PI / 4;
-    mesh = new THREE.Mesh(new THREE.SphereGeometry(100), material);
-    mesh.position.y = 100;
     return scene.add(mesh);
   });
   camera.position.set(0, 400, 2000);
@@ -61,7 +59,7 @@ window.onload = function() {
   renderGui.onRender = function() {
     return threeflow.render(scene, camera, width, height);
   };
-  rigGui = new THREEFLOW.LightingRigGui(rig);
+  new THREEFLOW.LightingRigGui(rig);
   render = function() {
     controls.update();
     rig.update();

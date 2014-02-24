@@ -611,8 +611,8 @@
       };
       this.fake = {
         up: new THREE.Vector3(0, 1, 0),
-        sky: 0x000000,
-        ground: 0xffffff
+        sky: 0xa0a0ef,
+        ground: 0xefefef
       };
     }
 
@@ -657,9 +657,9 @@
         result += '  samples ' + this.ambOcc.samples + '\n';
         result += '  maxdist ' + this.ambOcc.maxDistance + '\n';
       } else if (this.type === 'fake') {
-        result += '  up ' + this.exportVector(this.fake.up + '\n');
-        result += '  sky { "sRGB nonlinear" 0 0 0 }' + '\n';
-        result += '  ground { "sRGB nonlinear" 1 1 1 }' + '\n';
+        result += '  up ' + this.exportVector(this.fake.up) + '\n';
+        result += '  sky ' + this.exportColorHex(this.fake.sky) + '\n';
+        result += '  ground ' + this.exportColorHex(this.fake.ground) + '\n';
       }
       result += '}\n\n';
       return result;
@@ -1086,7 +1086,7 @@
       ];
       this.giSubFolder = null;
       updateFolder = function(type) {
-        var controller, controllers, property, _i, _len;
+        var controller, controllers, fake, giType, giTypeProperty, property, _i, _len;
         if (!_this.giSubFolder) {
           _this.giSubFolder = _this.giFolder.addFolder(type.name);
         } else {
@@ -1098,15 +1098,32 @@
           _this.giSubFolder.__controllers.splice(0);
           _this.giSubFolder.__ul.firstChild.innerHTML = type.name;
         }
-        for (property in _this.renderer.gi[type.property]) {
-          if (type.type === "irr-cache" && property === "globalMap") {
+        giType = type.type;
+        giTypeProperty = type.property;
+        for (property in _this.renderer.gi[giTypeProperty]) {
+          if (giType === "irr-cache" && property === "globalMap") {
             _this.giSubFolder.add(_this.renderer.gi.irrCache, "globalMap", _this.renderer.gi.globalMapTypes);
-          } else if (type.type === "ambocc" && (property === "bright" || property === "dark")) {
-            _this.giSubFolder.addColor(_this.renderer.gi[type.property], property);
-          } else if (type.type === "fake") {
-            console.log("SKIPPED FAKE AMBIENT TERM GI(TODO)");
+          } else if (giType === "ambocc" && (property === "bright" || property === "dark")) {
+            _this.giSubFolder.addColor(_this.renderer.gi.ambOcc, property);
+          } else if (giType === "fake" && property === "up") {
+            fake = {
+              upX: _this.renderer.gi.fake.up.x,
+              upY: _this.renderer.gi.fake.up.y,
+              upZ: _this.renderer.gi.fake.up.z
+            };
+            _this.giSubFolder.add(fake, "upX").onChange(function(value) {
+              return this.renderer.gi.fake.up.x = value;
+            });
+            _this.giSubFolder.add(fake, "upY").onChange(function(value) {
+              return this.renderer.gi.fake.up.y = value;
+            });
+            _this.giSubFolder.add(fake, "upZ").onChange(function(value) {
+              return this.renderer.gi.fake.up.z = value;
+            });
+          } else if (giType === "fake" && (property === "sky" || property === "ground")) {
+            _this.giSubFolder.addColor(_this.renderer.gi.fake, property);
           } else {
-            _this.giSubFolder.add(_this.renderer.gi[type.property], property);
+            _this.giSubFolder.add(_this.renderer.gi[giTypeProperty], property);
           }
         }
         return null;

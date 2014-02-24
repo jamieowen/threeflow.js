@@ -44,8 +44,8 @@ class GiExporter extends BlockExporter
 
     @fake =
       up: new THREE.Vector3 0,1,0
-      sky: 0x000000
-      ground: 0xffffff
+      sky: 0xa0a0ef
+      ground: 0xefefef
 
   addToIndex:(object3d)->
     null
@@ -91,10 +91,9 @@ class GiExporter extends BlockExporter
       result += '  maxdist ' + @ambOcc.maxDistance + '\n'
 
     else if @type is 'fake'
-      result += '  up ' + @exportVector @fake.up + '\n'
-      # TODO : Color parsing.
-      result += '  sky { "sRGB nonlinear" 0 0 0 }' + '\n'
-      result += '  ground { "sRGB nonlinear" 1 1 1 }' + '\n'
+      result += '  up ' + @exportVector(@fake.up) + '\n'
+      result += '  sky ' + @exportColorHex(@fake.sky) + '\n'
+      result += '  ground ' + @exportColorHex(@fake.ground) + '\n'
 
     result += '}\n\n'
 

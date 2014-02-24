@@ -84,18 +84,38 @@ THREEFLOW.DatGui = class DatGUI
         @giSubFolder.__controllers.splice(0)
         @giSubFolder.__ul.firstChild.innerHTML = type.name
 
-      for property of @renderer.gi[type.property]
-        if type.type is "irr-cache" and property is "globalMap"
+      # gi sunflow type name
+      giType = type.type
+
+      # gi exporter property name for the type
+      giTypeProperty = type.property
+
+      # handle alternative property types
+      for property of @renderer.gi[giTypeProperty]
+
+        if giType is "irr-cache" and property is "globalMap"
           @giSubFolder.add @renderer.gi.irrCache,"globalMap",@renderer.gi.globalMapTypes
-        else if type.type is "ambocc" and ( property is "bright" or property is "dark" )
-          @giSubFolder.addColor @renderer.gi[type.property],property
-        else if type.type is "fake"
 
-          # TODO Fake Ambient - THREE.Vector3 Controller for Dat.GUI??
-          console.log "SKIPPED FAKE AMBIENT TERM GI(TODO)"
+        else if giType is "ambocc" and ( property is "bright" or property is "dark" )
+          @giSubFolder.addColor @renderer.gi.ambOcc,property
 
+        else if giType is "fake" and property is "up"
+          fake =
+            upX: @renderer.gi.fake.up.x
+            upY: @renderer.gi.fake.up.y
+            upZ: @renderer.gi.fake.up.z
+
+          @giSubFolder.add(fake,"upX").onChange (value)->
+            @renderer.gi.fake.up.x = value
+          @giSubFolder.add(fake,"upY").onChange (value)->
+            @renderer.gi.fake.up.y = value
+          @giSubFolder.add(fake,"upZ").onChange (value)->
+            @renderer.gi.fake.up.z = value
+
+        else if giType is "fake" and ( property is "sky" or property is "ground" )
+          @giSubFolder.addColor @renderer.gi.fake,property
         else
-          @giSubFolder.add @renderer.gi[type.property],property
+          @giSubFolder.add @renderer.gi[giTypeProperty],property
 
       null
 

@@ -3,6 +3,17 @@ window.THREEFLOW = window.THREEFLOW || {}
 
 THREEFLOW.SunflowRenderer = class SunflowRenderer
 
+  # connection status
+  @CONNECTING       = "connecting"
+  @CONNECTED        = "connected"
+  @ERROR            = "error"
+
+  # render status
+  @RENDER_START     = "render-start"
+  @RENDER_PROGRESS  = "render-progress"
+  @RENDER_COMPLETE  = "render-complete"
+  @RENDER_ERROR     = "render-error"
+
   constructor:(options)->
     options = options || {}
 
@@ -14,25 +25,33 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     @exporter = new Exporter()
 
     # map block exporters for shorthand access
-    @image            = @exporter.image
-    @bucket           = @exporter.bucket
-    @traceDepths      = @exporter.traceDepths
-    @caustics         = @exporter.caustics
-    @gi               = @exporter.gi
+    @image              = @exporter.image
+    @bucket             = @exporter.bucket
+    @traceDepths        = @exporter.traceDepths
+    @caustics           = @exporter.caustics
+    @gi                 = @exporter.gi
 
-    @cameras          = @exporter.cameras
-    @lights           = @exporter.lights
-    @materials        = @exporter.materials
-    @geometry         = @exporter.geometry
-    @bufferGeometry   = @exporter.bufferGeometry
-    @meshes           = @exporter.meshes
+    @cameras            = @exporter.cameras
+    @lights             = @exporter.lights
+    @materials          = @exporter.materials
+    @geometry           = @exporter.geometry
+    @bufferGeometry     = @exporter.bufferGeometry
+    @meshes             = @exporter.meshes
 
-    @connected = false
-    @rendering = false
+    @connectionStatus   = ""
+    @connected          = false
+    @rendering          = false
+
+    # signals
+    @onRenderStatus     = new THREEFLOW.Signal()
+    @onConnectionStatus = new THREEFLOW.Signal()
 
   connect:()->
     if @connected
       return
+
+    @setConnectionStatus SunflowRenderer.CONNECTING
+
     @socket = io.connect @host
 
     @socket.on 'connected',@onConnected
@@ -48,10 +67,10 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
       throw new Error "[SunflowRenderer] Call connect() before rendering."
     else if not @rendering
 
+      @onRenderStatus.dispatch
+        status: SunflowRenderer.RENDER_START
 
       @rendering = true
-      console.log "RENDER"
-
 
       @exporter.image.resolutionX = width*@scale
       @exporter.image.resolutionY = height*@scale
@@ -70,27 +89,51 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
 
     null
 
+  setConnectionStatus:(status)->
+    if @connectionStatus is status
+      return
+
+    @connectionStatus = status
+    @onConnectionStatus.dispatch
+      status: status
+
+    null
+
   onConnected:(data)=>
-    console.log "Threeflow conected."
+    console.log "THREEFLOW " + THREEFLOW.VERSION + " [Connected]"
     @connected = true
+    @setConnectionStatus SunflowRenderer.CONNECTED
     null
 
   onRenderStart:(data)=>
-    console.log "onRenderStart"
+    # TODO : Need better status - in sync with server / queued / parsing / etc...
+    @onRenderStatus.dispatch
+      status: SunflowRenderer.RENDER_START
+
     null
 
   onRenderProgress:(data)=>
-    console.log "onRenderProgress",data
+
+    @onRenderStatus.dispatch
+      status: SunflowRenderer.RENDER_PROGRESS
+      progress: data.data
+
     null
 
   onRenderComplete:(data)=>
     @rendering = false
-    console.log "onRenderComplete",data
+    @onRenderStatus.dispatch
+      status: SunflowRenderer.RENDER_COMPLETE
+      duration: data
+
     null
 
   onRenderError:(data)=>
     @rendering = false
-    console.log "onRenderError",data
+    @onRenderStatus.dispatch
+      status: SunflowRenderer.RENDER_ERROR
+      message: data
+
     null
 
 

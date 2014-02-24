@@ -6,18 +6,35 @@ THREEFLOW.RendererGui = class RendererGui
       throw new Error "No dat.GUI found."
 
     @gui = new dat.GUI()
-    #@gui.remember @renderer.image
-    #@gui.remember @renderer.traceDepths
-    #@gui.remember @renderer.caustics
 
-    # user can add custom handlers by setting these properties.
+    # TODO Should change to signals
     @onRender = null
     #@onPreview = null
 
+    updateDisplay = ()=>
+      for controller in @gui.__controllers
+        controller.updateDisplay()
+
+    statusObject =
+      status: ''
+
+    @renderer.onConnectionStatus.add (event)=>
+      statusObject.status = event.status
+      updateDisplay()
+
+    @renderer.onRenderStatus.add (event)=>
+      if event.status is THREEFLOW.SunflowRenderer.RENDER_PROGRESS
+        statusObject.status = "rendering / " + event.progress + "%"
+      else
+        statusObject.status = event.status
+      updateDisplay()
+
+    @gui.add(THREEFLOW,"VERSION").name("THREEFLOW")
+    @gui.add(statusObject, "status").name("Status")
+
     # add render and preview buttons.
     @gui.add(@,"_onRender").name("Render")
-    #@gui.add(@,"_onPreview").name("Render Preview")
-    @gui.add @renderer,"scale"
+
 
     @imageFolder        = @gui.addFolder "Image"
     @bucketFolder       = @gui.addFolder "Bucket Size/Order"
@@ -27,6 +44,9 @@ THREEFLOW.RendererGui = class RendererGui
 
     @overridesFolder    = @gui.addFolder "Overrides"
     @otherFolder        = @gui.addFolder "Other Options"
+
+    # add scale in the image folder - although it is not sunflow related
+    @imageFolder.add @renderer,"scale"
 
     @imageFolder.add @renderer.image,"antialiasMin"
     @imageFolder.add @renderer.image,"antialiasMax"
@@ -131,13 +151,6 @@ THREEFLOW.RendererGui = class RendererGui
   _onRender:()=>
     if @onRender
       @onRender()
-
-  ###
-  _onPreview:()=>
-    if @onPreview
-      @onPreview()
-
-  ###
 
 
 

@@ -13,7 +13,6 @@ class CameraExporter extends BlockExporter
 
     if object3d instanceof THREE.PerspectiveCamera
       @camera = object3d
-      console.log "SET CAMERA", @camera
 
     null
 
@@ -27,6 +26,7 @@ class CameraExporter extends BlockExporter
     result = ''
 
     if not @camera
+      throw new Error "No camera found.."
       return result
 
     result += 'camera {\n'

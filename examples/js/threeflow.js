@@ -1,5 +1,5 @@
 (function() {
-  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightingBox, LightingRig, LightingRigGui, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, RendererGui, ShinyMaterial, SunflowRenderer, SunskyLight, TraceDepthsExporter,
+  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightingBox, LightingRig, LightingRigGui, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, RendererGui, ShinyMaterial, Signal, SunflowRenderer, SunskyLight, TraceDepthsExporter,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7,6 +7,20 @@
   window.THREEFLOW = window.THREEFLOW || {};
 
   THREEFLOW.SunflowRenderer = SunflowRenderer = (function() {
+    SunflowRenderer.CONNECTING = "connecting";
+
+    SunflowRenderer.CONNECTED = "connected";
+
+    SunflowRenderer.ERROR = "error";
+
+    SunflowRenderer.RENDER_START = "render-start";
+
+    SunflowRenderer.RENDER_PROGRESS = "render-progress";
+
+    SunflowRenderer.RENDER_COMPLETE = "render-complete";
+
+    SunflowRenderer.RENDER_ERROR = "render-error";
+
     function SunflowRenderer(options) {
       this.onRenderError = __bind(this.onRenderError, this);
       this.onRenderComplete = __bind(this.onRenderComplete, this);
@@ -30,14 +44,18 @@
       this.geometry = this.exporter.geometry;
       this.bufferGeometry = this.exporter.bufferGeometry;
       this.meshes = this.exporter.meshes;
+      this.connectionStatus = "";
       this.connected = false;
       this.rendering = false;
+      this.onRenderStatus = new THREEFLOW.Signal();
+      this.onConnectionStatus = new THREEFLOW.Signal();
     }
 
     SunflowRenderer.prototype.connect = function() {
       if (this.connected) {
         return;
       }
+      this.setConnectionStatus(SunflowRenderer.CONNECTING);
       this.socket = io.connect(this.host);
       this.socket.on('connected', this.onConnected);
       this.socket.on('render-start', this.onRenderStart);
@@ -52,8 +70,10 @@
       if (!this.connected) {
         throw new Error("[SunflowRenderer] Call connect() before rendering.");
       } else if (!this.rendering) {
+        this.onRenderStatus.dispatch({
+          status: SunflowRenderer.RENDER_START
+        });
         this.rendering = true;
-        console.log("RENDER");
         this.exporter.image.resolutionX = width * this.scale;
         this.exporter.image.resolutionY = height * this.scale;
         this.exporter.indexScene(scene);
@@ -70,37 +90,64 @@
       return null;
     };
 
+    SunflowRenderer.prototype.setConnectionStatus = function(status) {
+      if (this.connectionStatus === status) {
+        return;
+      }
+      this.connectionStatus = status;
+      this.onConnectionStatus.dispatch({
+        status: status
+      });
+      return null;
+    };
+
     SunflowRenderer.prototype.onConnected = function(data) {
-      console.log("Threeflow conected.");
+      console.log("THREEFLOW " + THREEFLOW.VERSION + " [Connected]");
       this.connected = true;
+      this.setConnectionStatus(SunflowRenderer.CONNECTED);
       return null;
     };
 
     SunflowRenderer.prototype.onRenderStart = function(data) {
-      console.log("onRenderStart");
+      this.onRenderStatus.dispatch({
+        status: SunflowRenderer.RENDER_START
+      });
       return null;
     };
 
     SunflowRenderer.prototype.onRenderProgress = function(data) {
-      console.log("onRenderProgress", data);
+      this.onRenderStatus.dispatch({
+        status: SunflowRenderer.RENDER_PROGRESS,
+        progress: data.data
+      });
       return null;
     };
 
     SunflowRenderer.prototype.onRenderComplete = function(data) {
       this.rendering = false;
-      console.log("onRenderComplete", data);
+      this.onRenderStatus.dispatch({
+        status: SunflowRenderer.RENDER_COMPLETE,
+        duration: data
+      });
       return null;
     };
 
     SunflowRenderer.prototype.onRenderError = function(data) {
       this.rendering = false;
-      console.log("onRenderError", data);
+      this.onRenderStatus.dispatch({
+        status: SunflowRenderer.RENDER_ERROR,
+        message: data
+      });
       return null;
     };
 
     return SunflowRenderer;
 
   })();
+
+  THREEFLOW.VERSION = '0.6.0.1';
+
+  THREEFLOW.COMMIT = 'c8d7f10';
 
   BlockExporter = (function() {
     function BlockExporter(exporter) {
@@ -321,7 +368,6 @@
       }
       if (object3d instanceof THREE.PerspectiveCamera) {
         this.camera = object3d;
-        console.log("SET CAMERA", this.camera);
       }
       return null;
     };
@@ -334,6 +380,7 @@
       var result;
       result = '';
       if (!this.camera) {
+        throw new Error("No camera found..");
         return result;
       }
       result += 'camera {\n';
@@ -1064,7 +1111,7 @@
 
   THREEFLOW.RendererGui = RendererGui = (function() {
     function RendererGui(renderer) {
-      var updateFolder, updateType,
+      var statusObject, updateDisplay, updateFolder, updateType,
         _this = this;
       this.renderer = renderer;
       this._onRender = __bind(this._onRender, this);
@@ -1073,8 +1120,34 @@
       }
       this.gui = new dat.GUI();
       this.onRender = null;
+      updateDisplay = function() {
+        var controller, _i, _len, _ref, _results;
+        _ref = _this.gui.__controllers;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          controller = _ref[_i];
+          _results.push(controller.updateDisplay());
+        }
+        return _results;
+      };
+      statusObject = {
+        status: ''
+      };
+      this.renderer.onConnectionStatus.add(function(event) {
+        statusObject.status = event.status;
+        return updateDisplay();
+      });
+      this.renderer.onRenderStatus.add(function(event) {
+        if (event.status === THREEFLOW.SunflowRenderer.RENDER_PROGRESS) {
+          statusObject.status = "rendering / " + event.progress + "%";
+        } else {
+          statusObject.status = event.status;
+        }
+        return updateDisplay();
+      });
+      this.gui.add(THREEFLOW, "VERSION").name("THREEFLOW");
+      this.gui.add(statusObject, "status").name("Status");
       this.gui.add(this, "_onRender").name("Render");
-      this.gui.add(this.renderer, "scale");
       this.imageFolder = this.gui.addFolder("Image");
       this.bucketFolder = this.gui.addFolder("Bucket Size/Order");
       this.traceDepthsFolder = this.gui.addFolder("Trace Depths");
@@ -1082,6 +1155,7 @@
       this.giFolder = this.gui.addFolder("Global Illumination");
       this.overridesFolder = this.gui.addFolder("Overrides");
       this.otherFolder = this.gui.addFolder("Other Options");
+      this.imageFolder.add(this.renderer, "scale");
       this.imageFolder.add(this.renderer.image, "antialiasMin");
       this.imageFolder.add(this.renderer.image, "antialiasMax");
       this.imageFolder.add(this.renderer.image, "samples");
@@ -1190,13 +1264,6 @@
         return this.onRender();
       }
     };
-
-    /*
-    _onPreview:()=>
-      if @onPreview
-        @onPreview()
-    */
-
 
     return RendererGui;
 
@@ -1961,6 +2028,62 @@
     };
 
     return LightingRigLight;
+
+  })();
+
+  THREEFLOW.Signal = Signal = (function() {
+    function Signal() {
+      this.listeners = null;
+    }
+
+    Signal.prototype.add = function(listener) {
+      if (typeof listener !== "function") {
+        false;
+      }
+      if (!this.listeners) {
+        this.listeners = [];
+      }
+      if (this.listeners.indexOf(listener) !== -1) {
+        return false;
+      } else {
+        this.listeners.push(listener);
+        return true;
+      }
+    };
+
+    Signal.prototype.remove = function(listener) {
+      var idx;
+      if (!this.listeners) {
+        false;
+      }
+      idx = this.listeners.indexOf(listener);
+      if (idx === -1) {
+        return false;
+      } else {
+        this.listeners.splice(idx, 1);
+        return true;
+      }
+    };
+
+    Signal.prototype.removeAll = function() {
+      this.listeners.splice(0);
+      return null;
+    };
+
+    Signal.prototype.dispatch = function(event) {
+      var listener, _i, _len, _ref;
+      if (!this.listeners) {
+        return null;
+      }
+      _ref = this.listeners;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        listener = _ref[_i];
+        listener(event);
+      }
+      return null;
+    };
+
+    return Signal;
 
   })();
 

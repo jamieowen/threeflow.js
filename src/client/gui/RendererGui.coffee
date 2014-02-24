@@ -1,5 +1,5 @@
 
-THREEFLOW.DatGui = class DatGUI
+THREEFLOW.RendererGui = class RendererGui
 
   constructor:(@renderer)->
     if not window.dat and not window.dat.GUI

@@ -79,7 +79,7 @@ window.onload = ()->
   threeflow.image.filter = "mitchell"
 
   # gui
-  gui = new THREEFLOW.DatGui threeflow
+  gui = new THREEFLOW.RendererGui threeflow
   gui.onRender=()=>
     threeflow.render scene,camera,width,height
 

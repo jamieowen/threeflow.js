@@ -58,7 +58,7 @@ window.onload = function() {
   threeflow.gi.type = "path";
   threeflow.traceDepths.enabled = true;
   threeflow.traceDepths.diffusion = 4;
-  gui = new THREEFLOW.DatGui(threeflow);
+  gui = new THREEFLOW.RendererGui(threeflow);
   gui.onRender = function() {
     return threeflow.render(scene, camera, width, height);
   };

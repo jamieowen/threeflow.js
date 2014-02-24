@@ -45,7 +45,7 @@ window.onload = function() {
     scPath: "examples/renders/materials_shiny.sc"
   });
   threeflow.connect();
-  gui = new THREEFLOW.DatGui(threeflow);
+  gui = new THREEFLOW.RendererGui(threeflow);
   gui.onRender = function() {
     return threeflow.render(scene, camera, width, height);
   };

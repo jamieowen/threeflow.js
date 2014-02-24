@@ -61,7 +61,7 @@ window.onload = function() {
   });
   threeflow.connect();
   threeflow.image.filter = "mitchell";
-  gui = new THREEFLOW.DatGui(threeflow);
+  gui = new THREEFLOW.RendererGui(threeflow);
   gui.onRender = function() {
     return threeflow.render(scene, camera, width, height);
   };

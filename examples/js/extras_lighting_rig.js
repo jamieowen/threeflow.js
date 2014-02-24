@@ -55,7 +55,7 @@ window.onload = function() {
     scPath: "examples/renders/extras_lighting_rig.sc"
   });
   threeflow.connect();
-  renderGui = new THREEFLOW.DatGui(threeflow);
+  renderGui = new THREEFLOW.RendererGui(threeflow);
   renderGui.onRender = function() {
     return threeflow.render(scene, camera, width, height);
   };

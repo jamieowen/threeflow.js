@@ -76,7 +76,7 @@ window.onload = ()->
   threeflow.connect()
 
   # gui
-  renderGui = new THREEFLOW.DatGui threeflow
+  renderGui = new THREEFLOW.RendererGui threeflow
   renderGui.onRender=()=>
     threeflow.render scene,camera,width,height
 

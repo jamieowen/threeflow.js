@@ -149,7 +149,7 @@ window.onload = function() {
   threeflow.image.filter = "mitchell";
   threeflow.image.antialiasMin = 1;
   threeflow.image.antialiasMax = 2;
-  gui = new THREEFLOW.DatGui(threeflow);
+  gui = new THREEFLOW.RendererGui(threeflow);
   gui.onRender = function() {
     return threeflow.render(scene, camera, width, height);
   };

@@ -1,5 +1,5 @@
 (function() {
-  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DatGUI, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightingBox, LightingRig, LightingRigGui, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, SunflowRenderer, SunskyLight, TraceDepthsExporter,
+  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightingBox, LightingRig, LightingRigGui, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, RendererGui, ShinyMaterial, SunflowRenderer, SunskyLight, TraceDepthsExporter,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1014,8 +1014,56 @@
 
   THREEFLOW.InfinitePlaneGeometry.prototype = Object.create(THREE.PlaneGeometry.prototype);
 
-  THREEFLOW.DatGui = DatGUI = (function() {
-    function DatGUI(renderer) {
+  THREEFLOW.LightingRigGui = LightingRigGui = (function() {
+    function LightingRigGui(rig) {
+      var light, _i, _len, _ref;
+      this.rig = rig;
+      this.gui = new dat.GUI();
+      this.backdropFolder = this.gui.addFolder("Backdrop");
+      this.backdropFolder.add(this.rig.backdropMaterial, "wireframe");
+      this.backdropFolder.add(this.rig.backdropMaterial, "transparent");
+      this.backdropFolder.add(this.rig.backdropMaterial, "opacity", 0, 1);
+      this.backdropFolder.open();
+      _ref = this.rig.lights;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        light = _ref[_i];
+        this.addRigLight(light);
+      }
+    }
+
+    LightingRigGui.prototype.addRigLight = function(rigLight) {
+      var folder, rotate;
+      folder = this.gui.addFolder(rigLight.name);
+      folder.add(rigLight, "enabled");
+      rotate = {
+        yaw: rigLight.yaw * (180 / Math.PI),
+        pitch: rigLight.pitch * (180 / Math.PI)
+      };
+      folder.add(rotate, "yaw", 0, 360).onChange(function(value) {
+        rotate.yaw = value;
+        return rigLight.yaw = value * (Math.PI / 180);
+      });
+      folder.add(rotate, "pitch", 0, 360).onChange(function(value) {
+        rotate.pitch = value;
+        return rigLight.pitch = value * (Math.PI / 180);
+      });
+      folder.add(rigLight, "distance", 300, 2000);
+      folder.addColor(rigLight, "color").onChange(function(value) {
+        var hex;
+        hex = parseInt(value, 16);
+        return console.log(hex);
+      });
+      folder.add(rigLight, "radiance", 0, 100);
+      folder.add(rigLight, "geometryType", THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES);
+      return null;
+    };
+
+    return LightingRigGui;
+
+  })();
+
+  THREEFLOW.RendererGui = RendererGui = (function() {
+    function RendererGui(renderer) {
       var updateFolder, updateType,
         _this = this;
       this.renderer = renderer;
@@ -1137,7 +1185,7 @@
       null;
     }
 
-    DatGUI.prototype._onRender = function() {
+    RendererGui.prototype._onRender = function() {
       if (this.onRender) {
         return this.onRender();
       }
@@ -1150,55 +1198,7 @@
     */
 
 
-    return DatGUI;
-
-  })();
-
-  THREEFLOW.LightingRigGui = LightingRigGui = (function() {
-    function LightingRigGui(rig) {
-      var light, _i, _len, _ref;
-      this.rig = rig;
-      this.gui = new dat.GUI();
-      this.backdropFolder = this.gui.addFolder("Backdrop");
-      this.backdropFolder.add(this.rig.backdropMaterial, "wireframe");
-      this.backdropFolder.add(this.rig.backdropMaterial, "transparent");
-      this.backdropFolder.add(this.rig.backdropMaterial, "opacity", 0, 1);
-      this.backdropFolder.open();
-      _ref = this.rig.lights;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        light = _ref[_i];
-        this.addRigLight(light);
-      }
-    }
-
-    LightingRigGui.prototype.addRigLight = function(rigLight) {
-      var folder, rotate;
-      folder = this.gui.addFolder(rigLight.name);
-      folder.add(rigLight, "enabled");
-      rotate = {
-        yaw: rigLight.yaw * (180 / Math.PI),
-        pitch: rigLight.pitch * (180 / Math.PI)
-      };
-      folder.add(rotate, "yaw", 0, 360).onChange(function(value) {
-        rotate.yaw = value;
-        return rigLight.yaw = value * (Math.PI / 180);
-      });
-      folder.add(rotate, "pitch", 0, 360).onChange(function(value) {
-        rotate.pitch = value;
-        return rigLight.pitch = value * (Math.PI / 180);
-      });
-      folder.add(rigLight, "distance", 300, 2000);
-      folder.addColor(rigLight, "color").onChange(function(value) {
-        var hex;
-        hex = parseInt(value, 16);
-        return console.log(hex);
-      });
-      folder.add(rigLight, "radiance", 0, 100);
-      folder.add(rigLight, "geometryType", THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES);
-      return null;
-    };
-
-    return LightingRigGui;
+    return RendererGui;
 
   })();
 

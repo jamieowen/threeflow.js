@@ -11,10 +11,10 @@ module.exports =
   info_color:   clc.cyan
 
   __log: (args,color)->
-    doIt = ()->
-      console.log color.apply(@,args)
+    #doIt = ()->
+    console.log color.apply(@,args)
 
-    setTimeout doIt,@LOG_DELAY
+    #setTimeout doIt,@LOG_DELAY
 
   error: ()->
     @__log arguments,@error_color

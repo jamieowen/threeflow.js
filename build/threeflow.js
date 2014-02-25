@@ -13,6 +13,8 @@
 
     SunflowRenderer.ERROR = "error";
 
+    SunflowRenderer.RENDER_ADDED = "render-added";
+
     SunflowRenderer.RENDER_START = "render-start";
 
     SunflowRenderer.RENDER_PROGRESS = "render-progress";
@@ -22,16 +24,31 @@
     SunflowRenderer.RENDER_ERROR = "render-error";
 
     function SunflowRenderer(options) {
+      if (options == null) {
+        options = {};
+      }
       this.onRenderError = __bind(this.onRenderError, this);
       this.onRenderComplete = __bind(this.onRenderComplete, this);
       this.onRenderProgress = __bind(this.onRenderProgress, this);
       this.onRenderStart = __bind(this.onRenderStart, this);
+      this.onRenderAdded = __bind(this.onRenderAdded, this);
       this.onConnected = __bind(this.onConnected, this);
-      options = options || {};
-      this.pngPath = options.pngPath || null;
-      this.scPath = options.scPath || null;
-      this.scSave = options.scSave || false;
-      this.scale = options.scale || 1;
+      if (typeof options === "string") {
+        this.name = options;
+        this.scale = 1;
+        this.overwrite = false;
+        this.savesc = false;
+      } else {
+        this.name = options.name || null;
+        this.scale = options.scale || 1;
+        this.overwrite = options.overwrite || false;
+        this.savesc = options.savesc || false;
+      }
+      this.sunflow_cl = {
+        nogui: false,
+        ipr: false,
+        hipri: false
+      };
       this.exporter = new Exporter();
       this.image = this.exporter.image;
       this.bucket = this.exporter.bucket;
@@ -58,15 +75,16 @@
       this.setConnectionStatus(SunflowRenderer.CONNECTING);
       this.socket = io.connect(this.host);
       this.socket.on('connected', this.onConnected);
-      this.socket.on('render-start', this.onRenderStart);
-      this.socket.on('render-progress', this.onRenderProgress);
-      this.socket.on('render-complete', this.onRenderComplete);
-      this.socket.on('render-error', this.onRenderError);
+      this.socket.on(SunflowRenderer.RENDER_ADDED, this.onRenderAdded);
+      this.socket.on(SunflowRenderer.RENDER_START, this.onRenderStart);
+      this.socket.on(SunflowRenderer.RENDER_PROGRESS, this.onRenderProgress);
+      this.socket.on(SunflowRenderer.RENDER_COMPLETE, this.onRenderComplete);
+      this.socket.on(SunflowRenderer.RENDER_ERROR, this.onRenderError);
       return null;
     };
 
     SunflowRenderer.prototype.render = function(scene, camera, width, height) {
-      var scContents;
+      var source;
       if (!this.connected) {
         throw new Error("[SunflowRenderer] Call connect() before rendering.");
       } else if (!this.rendering) {
@@ -77,12 +95,16 @@
         this.exporter.image.resolutionX = width * this.scale;
         this.exporter.image.resolutionY = height * this.scale;
         this.exporter.indexScene(scene);
-        scContents = this.exporter.exportCode();
+        source = this.exporter.exportCode();
         this.socket.emit("render", {
-          scContents: scContents,
-          scPath: this.scPath,
-          scSave: this.scSave,
-          pngPath: this.pngPath
+          source: source,
+          options: {
+            name: this.name,
+            scale: this.scale,
+            overwrite: this.overwrite,
+            savesc: this.savesc
+          },
+          sunflow_cl: this.sunflow_cl
         });
       } else {
         console.log("[Render in Progress]");
@@ -105,6 +127,14 @@
       console.log("THREEFLOW " + THREEFLOW.VERSION + " [Connected]");
       this.connected = true;
       this.setConnectionStatus(SunflowRenderer.CONNECTED);
+      return null;
+    };
+
+    SunflowRenderer.prototype.onRenderAdded = function(data) {
+      console.log("ADDED", data);
+      this.onRenderStatus.dispatch({
+        status: SunflowRenderer.RENDER_ADDED
+      });
       return null;
     };
 

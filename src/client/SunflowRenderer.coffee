@@ -8,19 +8,34 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
   @CONNECTED        = "connected"
   @ERROR            = "error"
 
-  # render status
+  # render status / socket event
+  @RENDER_ADDED     = "render-added"
   @RENDER_START     = "render-start"
   @RENDER_PROGRESS  = "render-progress"
   @RENDER_COMPLETE  = "render-complete"
   @RENDER_ERROR     = "render-error"
 
-  constructor:(options)->
-    options = options || {}
+  # pass either a render name, or an options object.
+  constructor:(options={})->
 
-    @pngPath  = options.pngPath || null
-    @scPath   = options.scPath || null
-    @scSave   = options.scSave || false
-    @scale    = options.scale || 1
+    if typeof options is "string"
+      @name       = options
+      @scale      = 1
+      @overwrite  = false
+      @savesc     = false
+    else
+      @name       = options.name || null
+      @scale      = options.scale || 1
+      @overwrite  = options.overwrite || false
+      @savesc     = options.savesc || false
+
+
+    # sunflow command line options
+    @sunflow_cl =
+      nogui: false    # do not show sunflow gui
+      ipr: false      # progressive rendering
+      hipri: false    # high thread priority
+      # ...loads more, but will add later.
 
     @exporter = new Exporter()
 
@@ -55,10 +70,12 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     @socket = io.connect @host
 
     @socket.on 'connected',@onConnected
-    @socket.on 'render-start',@onRenderStart
-    @socket.on 'render-progress',@onRenderProgress
-    @socket.on 'render-complete',@onRenderComplete
-    @socket.on 'render-error',@onRenderError
+
+    @socket.on SunflowRenderer.RENDER_ADDED,@onRenderAdded
+    @socket.on SunflowRenderer.RENDER_START,@onRenderStart
+    @socket.on SunflowRenderer.RENDER_PROGRESS,@onRenderProgress
+    @socket.on SunflowRenderer.RENDER_COMPLETE,@onRenderComplete
+    @socket.on SunflowRenderer.RENDER_ERROR,@onRenderError
 
     null
 
@@ -76,13 +93,16 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
       @exporter.image.resolutionY = height*@scale
 
       @exporter.indexScene scene
-      scContents = @exporter.exportCode()
+      source = @exporter.exportCode()
 
       @socket.emit "render",
-         scContents:scContents
-         scPath:@scPath
-         scSave:@scSave
-         pngPath:@pngPath
+        source: source
+        options:
+          name: @name
+          scale: @scale
+          overwrite: @overwrite
+          savesc: @savesc
+        sunflow_cl: @sunflow_cl
 
     else
       console.log "[Render in Progress]"
@@ -105,8 +125,14 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     @setConnectionStatus SunflowRenderer.CONNECTED
     null
 
+  onRenderAdded:(data)=>
+    console.log "ADDED",data
+    @onRenderStatus.dispatch
+      status: SunflowRenderer.RENDER_ADDED
+
+    null
+
   onRenderStart:(data)=>
-    # TODO : Need better status - in sync with server / queued / parsing / etc...
     @onRenderStatus.dispatch
       status: SunflowRenderer.RENDER_START
 

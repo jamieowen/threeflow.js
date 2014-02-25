@@ -13,10 +13,10 @@ module.exports =
      # clear terminal
     log.clear()
 
-    instance = new @ThreeflowServer()
+    instance = new @Server()
     instance
 
-  ThreeflowServer: class ThreeflowServer
+  Server: class Server
 
     constructor:()->
       log.notice "[ THREEFLOW " + version.number + " ]"
@@ -26,6 +26,10 @@ module.exports =
       @server   = null
       @io       = null
 
+      # connected clients
+      @clients  = {} # hash of client it to client object.
+      @renderQ  = render.createQueue @
+
     javaDetect:()->
       return true
 
@@ -34,6 +38,7 @@ module.exports =
         server:
           port: 3710
           debug: false
+          static: "/examples"
 
         sunflow:
           version: "-version"
@@ -48,9 +53,9 @@ module.exports =
           multipleRenders: false
           allowSave: false
           allowQueue: false
+          cancelRendersOnDisconnect: false
 
         folders:
-          serve: "/examples"
           renders: "/examples/renders"
           textures: "/examples/textures"
           models: "/examples/models"
@@ -95,53 +100,94 @@ module.exports =
         @opts = @defaults()
 
       if not @cwd
-        log.notice "Starting up without config. [Renders won't be saved]"
+        log.notice "Starting up without config for now... (Renders won't be saved!)"
         # use node modules folder
+        # shouldn't need to set allowSave = false, as this should be the default
         @cwd = path.join(__dirname, "..")
       else
-        log.notice "Starting up with config."
+        log.notice "Starting up with config..."
 
+      # TODO: should validate / create folder paths
+      # convert to absolute paths
+      for folder of @opts.folders
+        absFolder = path.join @cwd,@opts.folders[folder]
+        @opts.folders[folder] =  absFolder
 
-      # if all is good.
       @app      = express()
       @server   = http.createServer @app
       @io       = io.listen @server,
         log: @opts.server.debug
 
       @io.sockets.on 'connection', @onConnection
-      @io.sockets.on 'disconnect', @onDisconnect
-
 
       @server.listen @opts.server.port
       log.info "Listening on localhost:" + @opts.server.port
 
-      @app.use '/', express.static( path.join(@cwd,@opts.folders.serve) )
+      @app.use '/', express.static( path.join(@cwd,@opts.server.static) )
+
       log.info "Serving " + @opts.folders.serve
-      log.info "Waiting for connection... "
+      log.notice "Waiting for connection... "
 
     # when we receive a connection
     onConnection:(socket)=>
-      log.info "Connection with :" + socket.id
+      client = new Client(socket,@)
+      @clients[ client.id ] = client
 
-      socket.emit 'connected',
-        event:'connected'
-        data: {}
+      log.info "Client Connected : " + client.id
 
-      socket.on 'render',@onRender
-      socket.on 'disconnect',()->
-        console.log "DISCONNECTED ", socket.id
+    # removes a client and cleans up.
+    disconnectClient:(client)->
+      log.info "Client Disconnected : " + client.id
 
-    onDisconnect:(socket)->
+      @clients[ client.id ] = null
+      delete @clients[ client.id ]
+
+      @renderQ.removeAllByClient client
+      client.dispose()
+
+  ###
+  Client Object.
+  ###
+
+  Client: class Client
+    constructor:(@socket,@server)->
+      @id = @socket.id
+      @socket.emit 'connected',
+        id: @socket.id
+
+      @socket.on 'render',@onRender
+      @socket.on 'disconnect',@onDisconnect
+
+      @renderID = 0
 
 
-    onRender:(data)=>
-      console.log "RENDER"
-      console.log data
+    generateRenderID:()->
+      @renderID++
+      @id + @renderID
 
+    onRender:(renderData)=>
+      log.notice "Received Render..."
 
+      source      = renderData.source
+      options     = renderData.options
+      sunflow_cl  = renderData.sunflow_cl
 
+      ren = render.createRender @,source,options,sunflow_cl
+      @server.renderQ.add ren
 
+      @socket.emit 'render-added',
+        id: ren.id
+        status: ren.status
+        message: ren.message
 
+      @server.renderQ.process()
 
+      null
 
+    onDisconnect:()=>
+      # remove self.
+      @server.disconnectClient @
 
+    dispose:()->
+      @socket = null
+      null

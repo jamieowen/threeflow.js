@@ -16,7 +16,7 @@ module.exports = (grunt)->
       examples:
         options:
           bare:true
-        files: grunt.file.expandMapping("src/examples/*.coffee","examples/js/",
+        files: grunt.file.expandMapping("src/examples/*.coffee","examples/deploy/js/",
           flatten:true
           rename:(destBase,destPath)->
             destBase + destPath.replace(".coffee",".js")
@@ -43,19 +43,23 @@ module.exports = (grunt)->
         expand:true
         flatten:true
         src:"src/examples/js/vendor/*.*"
-        dest: "examples/js/vendor"
+        dest: "examples/deploy/js/vendor"
 
       examples_models:
         expand:true
         flatten:true
         src:"src/examples/models/*.*"
-        dest: "examples/models"
+        dest: "examples/deploy/models"
 
       examples_build:
         expand:true
         flatten:true
         src:"build/*.*"
-        dest: "examples/js/vendor"
+        dest: "examples/deploy/js/vendor"
+
+      examples_json:
+        src:"src/examples/threeflow.json"
+        dest: "examples/threeflow.json"
 
       templates:
         expand:true
@@ -135,7 +139,7 @@ module.exports = (grunt)->
     null
 
   grunt.registerTask "examples-html",()->
-    examples = grunt.file.expandMapping "src/examples/*.coffee","examples/",
+    examples = grunt.file.expandMapping "src/examples/*.coffee","examples/deploy/",
       flatten:true
       rename:(destBase,destPath)->
         destBase + destPath.replace(".coffee",".html")
@@ -156,7 +160,7 @@ module.exports = (grunt)->
       grunt.file.write example.dest,rendered
 
     # write index.html
-    index = "examples/index.html"
+    index = "examples/deploy/index.html"
     template = grunt.file.read "src/examples/index.html.eco"
     grunt.file.write index,eco.render(template,{examples:examples})
     console.log "Written ", index

@@ -121,12 +121,12 @@ module.exports =
       else
         log.notice "Starting up with config..."
 
-      # TODO: should validate / create folder paths
-      # convert to absolute paths
-
       for folder of @opts.folders
         absFolder = path.join @cwd,@opts.folders[folder]
         @opts.folders[folder] =  absFolder
+        # validate and create.
+        console.log absFolder
+
 
       @app      = express()
       @server   = http.createServer @app

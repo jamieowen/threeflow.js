@@ -16,7 +16,8 @@
   "dependencies": {
     "express": "~3.4.8",
     "socket.io": "~0.9.16",
-    "cli-color": "~0.2.3"
+    "cli-color": "~0.2.3",
+    "wrench": "~1.5.7"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

@@ -37,11 +37,26 @@ module.exports = (grunt)->
         files:
           "build/threeflow.min.js":"build/threeflow.js"
     copy:
-      examples:
+
+      # prepare examples.
+      examples_vendor:
+        expand:true
+        flatten:true
+        src:"src/examples/js/vendor/*.*"
+        dest: "examples/js/vendor"
+
+      examples_models:
+        expand:true
+        flatten:true
+        src:"src/examples/models/*.*"
+        dest: "examples/models"
+
+      examples_build:
         expand:true
         flatten:true
         src:"build/*.*"
-        dest: "examples/js/"
+        dest: "examples/js/vendor"
+
       templates:
         expand:true
         flatten:true
@@ -74,11 +89,42 @@ module.exports = (grunt)->
   grunt.registerTask "deploy",["version-output","coffee","uglify","copy","examples-html","bin-shebang"]
   grunt.registerTask "dev",["watch"]
 
-  grunt.registerTask "server",()->
+  grunt.registerTask "server-default",()->
     done = @async()
-    child = child_process.exec "coffee src/server/server.coffee",done
+    child = child_process.exec "node bin/threeflow.bin.js",done
     child.stdout.pipe process.stdout
     child.stderr.pipe process.stderr
+    null
+
+  spawnAndPipe = ( command, args, options, done)->
+    sprocess = child_process.spawn command,args,options
+    sprocess.on "close",(code)->
+      done()
+      null
+    sprocess.stdout.on "data",(buffer)->
+      process.stdout.write buffer
+    null
+
+  grunt.registerTask "server",( template )->
+    done = @async()
+    command = "node"
+
+    if template is "examples"
+      cwd = "./examples"
+      bin = "../bin/threeflow.bin.js"
+    else
+      cwd = "./templates/default"
+      bin = "../../bin/threeflow.bin.js"
+
+    args = [ bin,"start" ]
+    spawnAndPipe( command, args,
+      cwd: cwd,
+      done )
+    null
+
+  grunt.registerTask "clean",()->
+    done = @async()
+    child_process.exec "rm -rf ./examples/",done
     null
 
   grunt.registerTask "bin-shebang",()->
@@ -116,7 +162,7 @@ module.exports = (grunt)->
     console.log "Written ", index
     null
 
-
+  ###
   grunt.registerTask "convert-obj",()->
     files = grunt.file.expand "src/models/*.obj"
     done = @async()
@@ -126,12 +172,13 @@ module.exports = (grunt)->
         inFile = obj
         outFile = "examples/models/" + obj.split("/").pop().replace("obj","json")
 
-        command = "python src/models/convert_obj_three.py -i " + inFile + " -o " + outFile
+        command = "python src/utils/convert_obj_three.py -i " + inFile + " -o " + outFile
         child_process.exec command,next
       else
         done()
 
     next()
+  ###
 
   grunt.registerTask 'version-output', ()->
     done = @async()

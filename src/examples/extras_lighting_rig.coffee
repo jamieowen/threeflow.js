@@ -69,15 +69,13 @@ window.onload = ()->
 
 
   # create the sunflow renderer and connect.
-  threeflow = new THREEFLOW.SunflowRenderer("testing")
-  threeflow.connect()
+  threeflow = new THREEFLOW.SunflowRenderer()
+  threeflow.setSize width,height
 
   # gui
-  renderGui = new THREEFLOW.RendererGui threeflow
-  renderGui.onRender=()=>
-    threeflow.render scene,camera,width,height
-
-  new THREEFLOW.LightingRigGui(rig)
+  renderGui = new THREEFLOW.Gui threeflow,rig
+  renderGui.onRender.add ()=>
+    threeflow.render scene,camera,"extras_lighting_rig"
 
   # render
   render = ()->

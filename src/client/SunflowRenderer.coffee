@@ -6,12 +6,14 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
   # connection status
   @CONNECTING       = "connecting"
   @CONNECTED        = "connected"
+  @DISCONNECTED     = "disconnected"
   @ERROR            = "error"
 
   # render status / socket event
   @RENDER_ADDED     = "render-added"
   @RENDER_START     = "render-start"
   @RENDER_PROGRESS  = "render-progress"
+  @RENDER_CANCELLED = "render-cancelled"
   @RENDER_COMPLETE  = "render-complete"
   @RENDER_ERROR     = "render-error"
 
@@ -22,19 +24,18 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
       @name       = options
       @scale      = 1
       @overwrite  = false
-      @savesc     = false
+      @deleteSc   = true
     else
       @name       = options.name || null
       @scale      = options.scale || 1
       @overwrite  = options.overwrite || false
-      @savesc     = options.savesc || false
-
+      @deleteSc   = ( typeof options.deleteSc is 'boolean' and options.deleteSc ) || false
 
     # sunflow command line options
-    @sunflow_cl =
-      nogui: false    # do not show sunflow gui
-      ipr: false      # progressive rendering
-      hipri: false    # high thread priority
+    @sunflowCl =
+      noGui: false     # do not show sunflow gui
+      ipr: true       # progressive rendering
+      hiPri: false     # high thread priority
       # ...loads more, but will add later.
 
     @exporter = new Exporter()
@@ -70,11 +71,13 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     @socket = io.connect @host
 
     @socket.on 'connected',@onConnected
+    @socket.on 'disconnected',@onDisconnected
 
     @socket.on SunflowRenderer.RENDER_ADDED,@onRenderAdded
     @socket.on SunflowRenderer.RENDER_START,@onRenderStart
     @socket.on SunflowRenderer.RENDER_PROGRESS,@onRenderProgress
     @socket.on SunflowRenderer.RENDER_COMPLETE,@onRenderComplete
+    @socket.on SunflowRenderer.RENDER_CANCELLED,@onRenderCancelled
     @socket.on SunflowRenderer.RENDER_ERROR,@onRenderError
 
     null
@@ -101,8 +104,8 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
           name: @name
           scale: @scale
           overwrite: @overwrite
-          savesc: @savesc
-        sunflow_cl: @sunflow_cl
+          deleteSc: @deleteSc
+        sunflowCl: @sunflowCl
 
     else
       console.log "[Render in Progress]"
@@ -125,6 +128,14 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     @setConnectionStatus SunflowRenderer.CONNECTED
     null
 
+  onDisconnected:(data)=>
+    console.log "THREEFLOW " + THREEFLOW.VERSION + " [Disconnected]"
+    @connected = false
+    @rendering = false # reset as we assume we are not anymore..
+
+    @setConnectionStatus SunflowRenderer.DISCONNECTED
+    null
+
   onRenderAdded:(data)=>
     console.log "ADDED",data
     @onRenderStatus.dispatch
@@ -142,7 +153,7 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
 
     @onRenderStatus.dispatch
       status: SunflowRenderer.RENDER_PROGRESS
-      progress: data.data
+      progress: data.progress
 
     null
 
@@ -153,6 +164,15 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
       duration: data
 
     null
+
+  onRenderCancelled:(data)=>
+    @rendering = false
+    @onRenderStatus.dispatch
+      status: SunflowRenderer.RENDER_CANCELLED
+
+    null
+
+
 
   onRenderError:(data)=>
     @rendering = false

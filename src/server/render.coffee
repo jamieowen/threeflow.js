@@ -50,38 +50,179 @@ module.exports =
       null
 
   Render: class Render
-    constructor:(@client,source,options={},sunflow_cl={})->
+
+    # reg ex to match stdout from sunflow
+    @MATCH_PROGRESS: /\[\d{1,2}%\]/
+    @MATCH_PROGRESS_INT: /\d{1,2}/
+    @MATCH_RENDER_TIME: /Render time: \d*:\d{1,2}:\d{1,2}\.\d*/
+    @MATCH_DONE: /Done\./
+
+    constructor:(@client,source,@options={},@sunflowCl={})->
 
       @id = @client.generateRenderID()
 
-      if not source
-        @status = "error"
-        @message = "No scene source given."
+      # if we add queuing.. ( for some reason )
+      @status = "queued"
+
+      # determine pre render / post render flags.
+      flags = @client.server.opts.flags
+      folders = renderPath = @client.server.opts.folders
+
+      if not @options.name or not flags.allowSave
+        @filename = "." + @id
+      else if flags.overwrite
+        @filename = @options.name
       else
-        # if we add queuing.. ( for some reason )
-        @status = "queued"
-        @message = "Queued"
+        # calculate index num for file.
+        num = @getSuffixInt( @options.name,folders.renders )
+        @filename = @options.name + "-" + num
 
-        @writeSource options.name,source
+      # write sunflow scene file.
+      @writeSource source,folders.renders
 
-    writeSource:(name,source)->
-      # write scene file
-      if not name
-        filename = ".tmp.render.sc"
-      else
-        filename = name + ".sc"
+      # some props to be populated during render
+      @progress = null
+      @renderTime = null
 
-      server = @client.server
-      path = path.join server.opts.folders.renders,filename
 
-      log.info "Writing scene file: " + path
-      fs.writeFileSync path
+    getSuffixInt:(name,renderPath)->
+      # read the contents of the render path
+      # to determine the usable integer
+      files = fs.readdirSync renderPath
+      #regExp = new RegExp( name + "-[0-9]*\.((sc)|(png))", "g" )
+      matchName = new RegExp( "^" + name + "-[0-9]*\.((sc)|(png))", "g" )
+      matchNum = new RegExp("[0-9]+","g")
+
+      maxInt = 0
+      for filename in files
+        matchName.lastIndex = 0
+        if matchName.test(filename)
+          matchNum.lastIndex = 0
+          num = matchNum.exec filename
+          num = parseInt( num[num.length-1][0],10 )
+          maxInt = num if num > maxInt
+
+      maxInt+1
+
+    writeSource:(source,renderPath)->
+      writePath = path.join( renderPath,@filename + ".sc" )
+      log.info "Writing scene file : " + writePath
+      fs.writeFileSync writePath,source
+      null
 
     dispose:()->
       # handle
+      log.error "Need to handle dispose..."
+      null
+
+    # clean up after render
+    cleanUp:()->
+      flags = @client.server.opts.flags
+      renders = @client.server.opts.folders.renders
+
+      log.info "Cleaning up..."
+      if (flags.deleteSc and @options.deleteSc) or (not flags.deleteSc and @options.deleteSc)
+        fs.unlinkSync path.join(renders,@filename + ".sc")
+
+      null
+
+
+    isComplete:()->
+      @status is "complete"
 
     render:()->
-      console.log "start rendering....."
+      log.info "Starting Sunflow..."
+
+      @status = "started"
+
+      sunflow = @client.server.opts.sunflow
+      flags   = @client.server.opts.flags
+      renders = @client.server.opts.folders.renders
+
+      command = sunflow.command
+      args    = [sunflow.memory].concat( sunflow.args )
+
+      args.push "-jar",sunflow.jar
+
+      args.push "-no-gui" if @sunflowCl.noGui
+      args.push "-ipr" if @sunflowCl.ipr
+      args.push "-hipri" if @sunflowCl.hiPri
+
+      if flags.allowSave
+        args.push "-o",path.join(renders,@filename + ".png")
+
+      args.push path.join(renders,@filename + ".sc")
+
+      sfProcess = child_process.spawn command,args
+      sfProcess.on "close",@onProcessClose
+      sfProcess.stderr.on "data",@onProcessData
+
+      @client.socket.emit 'render-start',
+        event:'render-start'
+        command: [command].concat(args).join(" ")
+
+      null
+
+    onProcessClose:(code)=>
+      if not code # exit status is not 0
+        if @isComplete()
+
+
+        else
+          @status = "cancelled"
+          log.notice "" # otherwise trails on the end of sunflow output
+          log.notice "Render Cancelled."
+          @cleanUp()
+
+          if @client.connected
+            @client.socket.emit 'render-cancelled',
+              event:'render-cancelled'
+              data:null
+
+      else if @client.connected
+        @client.socket.emit 'render-error',
+          event:'render-error'
+          data:code
+
+      null
+
+    onProcessData:(buffer)=>
+      # write to standard out
+      process.stdout.write buffer
+
+      progressMatched = Render.MATCH_PROGRESS.exec buffer
+
+      if progressMatched
+        intMatch = Render.MATCH_PROGRESS_INT.exec progressMatched[0]
+        @progress = parseInt(intMatch[0])
+
+        if @client.connected
+          @client.socket.emit 'render-progress',
+            event:'render-progress'
+            progress: @progress
+
+      else if not @isComplete()
+        # check render time.
+        if not @renderTime
+          time = Render.MATCH_RENDER_TIME.exec buffer
+          if time
+            @renderTime = time[0]
+
+        doneMatched = Render.MATCH_DONE.exec buffer
+        if doneMatched
+          @status = "complete"
+
+          log.notice "" # otherwise trails on the end of sunflow output
+          log.notice "Render Complete."
+          @cleanUp()
+
+          if @client.connected
+            @client.socket.emit 'render-complete',
+              event:'render-complete'
+              time:@renderTime
+
+
+
 
 
 

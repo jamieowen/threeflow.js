@@ -9,7 +9,6 @@ THREEFLOW.RendererGui = class RendererGui
 
     # TODO Should change to signals
     @onRender = null
-    #@onPreview = null
 
     updateDisplay = ()=>
       for controller in @gui.__controllers
@@ -34,7 +33,7 @@ THREEFLOW.RendererGui = class RendererGui
 
     # add render and preview buttons.
     @gui.add(@,"_onRender").name("Render")
-
+    @gui.add(@,"_onRenderIPR").name("Render IPR")
 
     @imageFolder        = @gui.addFolder "Image"
     @bucketFolder       = @gui.addFolder "Bucket Size/Order"
@@ -43,7 +42,7 @@ THREEFLOW.RendererGui = class RendererGui
     @giFolder           = @gui.addFolder "Global Illumination"
 
     @overridesFolder    = @gui.addFolder "Overrides"
-    @otherFolder        = @gui.addFolder "Other Options"
+    @otherFolder        = @gui.addFolder "Other"
 
     # add scale in the image folder - although it is not sunflow related
     @imageFolder.add @renderer,"scale"
@@ -70,8 +69,8 @@ THREEFLOW.RendererGui = class RendererGui
     @causticsFolder.add @renderer.caustics,"kdEstimate"
     @causticsFolder.add @renderer.caustics,"kdRadius"
 
-    @overridesFolder.add(@renderer.lights.override.samples, "enabled" ).name("light_samples")
-    @overridesFolder.add(@renderer.lights.override.samples, "value" ).name("light_value")
+    @overridesFolder.add(@renderer.lights.override.samples, "enabled" ).name("lightSamples")
+    @overridesFolder.add(@renderer.lights.override.samples, "value" ).name("lightValue")
 
     @otherFolder.add @renderer.meshes,"convertPrimitives"
     @otherFolder.add(@renderer.geometry,"normals").name("geomNormals")
@@ -137,6 +136,8 @@ THREEFLOW.RendererGui = class RendererGui
         else
           @giSubFolder.add @renderer.gi[giTypeProperty],property
 
+      @giSubFolder.open()
+
       null
 
     updateType = (type)=>
@@ -150,6 +151,12 @@ THREEFLOW.RendererGui = class RendererGui
 
   _onRender:()=>
     if @onRender
+      @renderer.sunflowCl.ipr = false
+      @onRender()
+
+  _onRenderIPR:()=>
+    if @onRender
+      @renderer.sunflowCl.ipr = true
       @onRender()
 
 

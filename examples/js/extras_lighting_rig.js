@@ -50,10 +50,7 @@ window.onload = function() {
     return scene.add(mesh);
   });
   camera.position.set(0, 400, 2000);
-  threeflow = new THREEFLOW.SunflowRenderer({
-    pngPath: "examples/renders/extras_lighting_rig.png",
-    scPath: "examples/renders/extras_lighting_rig.sc"
-  });
+  threeflow = new THREEFLOW.SunflowRenderer("testing");
   threeflow.connect();
   renderGui = new THREEFLOW.RendererGui(threeflow);
   renderGui.onRender = function() {

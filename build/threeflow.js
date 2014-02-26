@@ -11,6 +11,8 @@
 
     SunflowRenderer.CONNECTED = "connected";
 
+    SunflowRenderer.DISCONNECTED = "disconnected";
+
     SunflowRenderer.ERROR = "error";
 
     SunflowRenderer.RENDER_ADDED = "render-added";
@@ -18,6 +20,8 @@
     SunflowRenderer.RENDER_START = "render-start";
 
     SunflowRenderer.RENDER_PROGRESS = "render-progress";
+
+    SunflowRenderer.RENDER_CANCELLED = "render-cancelled";
 
     SunflowRenderer.RENDER_COMPLETE = "render-complete";
 
@@ -28,26 +32,28 @@
         options = {};
       }
       this.onRenderError = __bind(this.onRenderError, this);
+      this.onRenderCancelled = __bind(this.onRenderCancelled, this);
       this.onRenderComplete = __bind(this.onRenderComplete, this);
       this.onRenderProgress = __bind(this.onRenderProgress, this);
       this.onRenderStart = __bind(this.onRenderStart, this);
       this.onRenderAdded = __bind(this.onRenderAdded, this);
+      this.onDisconnected = __bind(this.onDisconnected, this);
       this.onConnected = __bind(this.onConnected, this);
       if (typeof options === "string") {
         this.name = options;
         this.scale = 1;
         this.overwrite = false;
-        this.savesc = false;
+        this.deleteSc = true;
       } else {
         this.name = options.name || null;
         this.scale = options.scale || 1;
         this.overwrite = options.overwrite || false;
-        this.savesc = options.savesc || false;
+        this.deleteSc = (typeof options.deleteSc === 'boolean' && options.deleteSc) || false;
       }
-      this.sunflow_cl = {
-        nogui: false,
-        ipr: false,
-        hipri: false
+      this.sunflowCl = {
+        noGui: false,
+        ipr: true,
+        hiPri: false
       };
       this.exporter = new Exporter();
       this.image = this.exporter.image;
@@ -75,10 +81,12 @@
       this.setConnectionStatus(SunflowRenderer.CONNECTING);
       this.socket = io.connect(this.host);
       this.socket.on('connected', this.onConnected);
+      this.socket.on('disconnected', this.onDisconnected);
       this.socket.on(SunflowRenderer.RENDER_ADDED, this.onRenderAdded);
       this.socket.on(SunflowRenderer.RENDER_START, this.onRenderStart);
       this.socket.on(SunflowRenderer.RENDER_PROGRESS, this.onRenderProgress);
       this.socket.on(SunflowRenderer.RENDER_COMPLETE, this.onRenderComplete);
+      this.socket.on(SunflowRenderer.RENDER_CANCELLED, this.onRenderCancelled);
       this.socket.on(SunflowRenderer.RENDER_ERROR, this.onRenderError);
       return null;
     };
@@ -102,9 +110,9 @@
             name: this.name,
             scale: this.scale,
             overwrite: this.overwrite,
-            savesc: this.savesc
+            deleteSc: this.deleteSc
           },
-          sunflow_cl: this.sunflow_cl
+          sunflowCl: this.sunflowCl
         });
       } else {
         console.log("[Render in Progress]");
@@ -130,6 +138,14 @@
       return null;
     };
 
+    SunflowRenderer.prototype.onDisconnected = function(data) {
+      console.log("THREEFLOW " + THREEFLOW.VERSION + " [Disconnected]");
+      this.connected = false;
+      this.rendering = false;
+      this.setConnectionStatus(SunflowRenderer.DISCONNECTED);
+      return null;
+    };
+
     SunflowRenderer.prototype.onRenderAdded = function(data) {
       console.log("ADDED", data);
       this.onRenderStatus.dispatch({
@@ -148,7 +164,7 @@
     SunflowRenderer.prototype.onRenderProgress = function(data) {
       this.onRenderStatus.dispatch({
         status: SunflowRenderer.RENDER_PROGRESS,
-        progress: data.data
+        progress: data.progress
       });
       return null;
     };
@@ -158,6 +174,14 @@
       this.onRenderStatus.dispatch({
         status: SunflowRenderer.RENDER_COMPLETE,
         duration: data
+      });
+      return null;
+    };
+
+    SunflowRenderer.prototype.onRenderCancelled = function(data) {
+      this.rendering = false;
+      this.onRenderStatus.dispatch({
+        status: SunflowRenderer.RENDER_CANCELLED
       });
       return null;
     };
@@ -783,6 +807,7 @@
       result += '  filter ' + this.filter + '\n';
       result += '  jitter ' + this.jitter + '\n';
       result += '}\n\n';
+      result += "accel kdtree\n\n";
       return result;
     };
 
@@ -1144,6 +1169,7 @@
       var statusObject, updateDisplay, updateFolder, updateType,
         _this = this;
       this.renderer = renderer;
+      this._onRenderIPR = __bind(this._onRenderIPR, this);
       this._onRender = __bind(this._onRender, this);
       if (!window.dat && !window.dat.GUI) {
         throw new Error("No dat.GUI found.");
@@ -1178,13 +1204,14 @@
       this.gui.add(THREEFLOW, "VERSION").name("THREEFLOW");
       this.gui.add(statusObject, "status").name("Status");
       this.gui.add(this, "_onRender").name("Render");
+      this.gui.add(this, "_onRenderIPR").name("Render IPR");
       this.imageFolder = this.gui.addFolder("Image");
       this.bucketFolder = this.gui.addFolder("Bucket Size/Order");
       this.traceDepthsFolder = this.gui.addFolder("Trace Depths");
       this.causticsFolder = this.gui.addFolder("Caustics");
       this.giFolder = this.gui.addFolder("Global Illumination");
       this.overridesFolder = this.gui.addFolder("Overrides");
-      this.otherFolder = this.gui.addFolder("Other Options");
+      this.otherFolder = this.gui.addFolder("Other");
       this.imageFolder.add(this.renderer, "scale");
       this.imageFolder.add(this.renderer.image, "antialiasMin");
       this.imageFolder.add(this.renderer.image, "antialiasMax");
@@ -1204,8 +1231,8 @@
       this.causticsFolder.add(this.renderer.caustics, "photons");
       this.causticsFolder.add(this.renderer.caustics, "kdEstimate");
       this.causticsFolder.add(this.renderer.caustics, "kdRadius");
-      this.overridesFolder.add(this.renderer.lights.override.samples, "enabled").name("light_samples");
-      this.overridesFolder.add(this.renderer.lights.override.samples, "value").name("light_value");
+      this.overridesFolder.add(this.renderer.lights.override.samples, "enabled").name("lightSamples");
+      this.overridesFolder.add(this.renderer.lights.override.samples, "value").name("lightValue");
       this.otherFolder.add(this.renderer.meshes, "convertPrimitives");
       this.otherFolder.add(this.renderer.geometry, "normals").name("geomNormals");
       this.otherFolder.add(this.renderer.bufferGeometry, "normals").name("bufferGeomNormals");
@@ -1278,6 +1305,7 @@
             _this.giSubFolder.add(_this.renderer.gi[giTypeProperty], property);
           }
         }
+        _this.giSubFolder.open();
         return null;
       };
       updateType = function(type) {
@@ -1291,6 +1319,14 @@
 
     RendererGui.prototype._onRender = function() {
       if (this.onRender) {
+        this.renderer.sunflowCl.ipr = false;
+        return this.onRender();
+      }
+    };
+
+    RendererGui.prototype._onRenderIPR = function() {
+      if (this.onRender) {
+        this.renderer.sunflowCl.ipr = true;
         return this.onRender();
       }
     };

@@ -44,8 +44,8 @@ module.exports =
           version: "-version"
           command: "java"
           jar: path.join( __dirname, "../sunflow/sunflow.jar")
+          memory: "-Xmx1G"
           args: [
-            "-Xmx1G"
             "-server"
           ]
 
@@ -53,6 +53,7 @@ module.exports =
           multipleRenders: false
           allowSave: false
           allowQueue: false
+          deleteSc: true
           cancelRendersOnDisconnect: false
 
         folders:
@@ -65,7 +66,7 @@ module.exports =
       opts
 
     options:( options={} )->
-      @opts = defaults()
+      @opts = @defaults()
 
       for opt of options.server
         @opts.server[opt] = options[opt]
@@ -88,7 +89,15 @@ module.exports =
         log.info "Using " + jsonPath
       catch error
         @setCwd null
+        @options()
+
         log.warn "No config found.  Use 'threeflow init' to start a project."
+
+      null
+
+    forceSave:(value)->
+      if value
+        @opts.flags.allowSave = true
 
       null
 
@@ -125,7 +134,7 @@ module.exports =
 
       @app.use '/', express.static( path.join(@cwd,@opts.server.static) )
 
-      log.info "Serving " + @opts.folders.serve
+      log.info "Serving " + @opts.server.static
       log.notice "Waiting for connection... "
 
     # when we receive a connection
@@ -158,21 +167,24 @@ module.exports =
       @socket.on 'render',@onRender
       @socket.on 'disconnect',@onDisconnect
 
+      @connected = true
       @renderID = 0
 
 
     generateRenderID:()->
       @renderID++
-      @id + @renderID
+      @id + "-" + @renderID
 
     onRender:(renderData)=>
       log.notice "Received Render..."
 
       source      = renderData.source
       options     = renderData.options
-      sunflow_cl  = renderData.sunflow_cl
+      sunflowCl   = renderData.sunflowCl
 
-      ren = render.createRender @,source,options,sunflow_cl
+      # TODO: need to validate input here .
+
+      ren = render.createRender @,source,options,sunflowCl
       @server.renderQ.add ren
 
       @socket.emit 'render-added',
@@ -186,6 +198,7 @@ module.exports =
 
     onDisconnect:()=>
       # remove self.
+      @connected = false
       @server.disconnectClient @
 
     dispose:()->

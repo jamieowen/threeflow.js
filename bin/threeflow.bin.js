@@ -20,5 +20,6 @@ if (args.init) {
 } else if (args.start) {
   threeflow = require(path.join(__dirname, "../lib/server")).create();
   threeflow.optionsJSON(process.cwd());
+  threeflow.forceSave(args["--force-save"]);
   threeflow.startup();
 }

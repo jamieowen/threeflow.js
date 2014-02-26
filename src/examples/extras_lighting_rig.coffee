@@ -69,10 +69,7 @@ window.onload = ()->
 
 
   # create the sunflow renderer and connect.
-  threeflow = new THREEFLOW.SunflowRenderer
-    pngPath:"examples/renders/extras_lighting_rig.png"
-    scPath:"examples/renders/extras_lighting_rig.sc"
-
+  threeflow = new THREEFLOW.SunflowRenderer("testing")
   threeflow.connect()
 
   # gui

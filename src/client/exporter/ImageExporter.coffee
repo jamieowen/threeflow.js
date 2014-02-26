@@ -46,6 +46,9 @@ class ImageExporter extends BlockExporter
     result += '  jitter ' + @jitter + '\n'
     result += '}\n\n'
 
+    # putting some extras here for now..
+    result += "accel kdtree\n\n"
+
     return result
 
 

@@ -1,5 +1,5 @@
 (function() {
-  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, Gui, ImageExporter, LightingBox, LightingRig, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, Signal, SunflowRenderer, SunskyLight, TraceDepthsExporter,
+  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, Gui, ImageExporter, LightingRig, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, Signal, SunflowRenderer, SunskyLight, TraceDepthsExporter,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -1667,75 +1667,6 @@
     ShinyMaterial.prototype = Object.create(THREE.MeshPhongMaterial.prototype);
 
     return ShinyMaterial;
-
-  })();
-
-  THREEFLOW.LightingBox = LightingBox = (function() {
-    function LightingBox(params) {
-      var backward, blue, down, forward, geometry, green, left, materials, red, right, scaleX, scaleY, scaleZ, segments, size, size2, up, white, yellow;
-      if (params == null) {
-        params = {};
-      }
-      THREE.Object3D.call(this);
-      size = params.size || 100;
-      segments = params.segments || 2;
-      scaleX = params.scaleX || 1;
-      scaleY = params.scaleY || 1;
-      scaleZ = params.scaleZ || 1;
-      materials = params.materials || null;
-      if (!materials || materials.length < 6) {
-        red = new THREEFLOW.DiffuseMaterial({
-          color: 0xff0000,
-          side: THREE.DoubleSide
-        });
-        green = new THREEFLOW.DiffuseMaterial({
-          color: 0x00ff00,
-          side: THREE.DoubleSide
-        });
-        blue = new THREEFLOW.DiffuseMaterial({
-          color: 0x0000ff,
-          side: THREE.DoubleSide
-        });
-        yellow = new THREEFLOW.DiffuseMaterial({
-          color: 0xffff00,
-          side: THREE.DoubleSide
-        });
-        white = new THREEFLOW.DiffuseMaterial({
-          color: 0xfafafa,
-          side: THREE.DoubleSide
-        });
-        materials = [white, white, red, green, blue, yellow];
-      }
-      geometry = new THREE.PlaneGeometry(size, size, segments, segments);
-      up = new THREE.Mesh(geometry, materials[0]);
-      down = new THREE.Mesh(geometry, materials[1]);
-      left = new THREE.Mesh(geometry, materials[2]);
-      right = new THREE.Mesh(geometry, materials[3]);
-      forward = new THREE.Mesh(geometry, materials[4]);
-      backward = new THREE.Mesh(geometry, materials[5]);
-      size2 = size / 2;
-      up.position.set(0, size, 0);
-      up.rotation.x = down.rotation.x = Math.PI / 2;
-      down.position.set(0, 0, 0);
-      left.position.set(-size2, size2, 0);
-      right.position.set(size2, size2, 0);
-      left.rotation.y = right.rotation.y = Math.PI / 2;
-      forward.position.set(0, size2, size2);
-      backward.position.set(0, size2, -size2);
-      this.add(up);
-      this.add(down);
-      this.add(left);
-      this.add(right);
-      this.add(forward);
-      this.add(backward);
-      this.scale.x = scaleX;
-      this.scale.y = scaleY;
-      this.scale.z = scaleZ;
-    }
-
-    LightingBox.prototype = Object.create(THREE.Object3D.prototype);
-
-    return LightingBox;
 
   })();
 

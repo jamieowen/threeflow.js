@@ -67,12 +67,18 @@ THREEFLOW.AreaLight = class AreaLight
         @_color
       set: (value) ->
         @_color = value
+
     radiance:
       get: ->
         @_radiance
       set: (value) ->
+        if @_radiance is value
+          return
+
         # TODO : Set the three.js PointLight intensity when simulating?
+
         @_radiance = value
+
     geometry:
       get: ->
         @_geometry

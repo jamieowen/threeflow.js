@@ -42,15 +42,14 @@ THREEFLOW.Gui = class Gui
 
     if @lightingRig
       @lightingRigFolder = @gui.addFolder "Lighting Rig"
+
+      for light in @lightingRig.lights
+        @addRigLight @lightingRigFolder,light
+
       @backdropFolder = @lightingRigFolder.addFolder("Backdrop")
       @backdropFolder.add(@lightingRig.backdropMaterial,"wireframe")
       @backdropFolder.add(@lightingRig.backdropMaterial,"transparent")
       @backdropFolder.add(@lightingRig.backdropMaterial,"opacity",0,1)
-
-      #@backdropFolder.open()
-
-      for light in @lightingRig.lights
-        @addRigLight @lightingRigFolder,light
 
     @overridesFolder    = @gui.addFolder "Overrides"
     @otherFolder        = @gui.addFolder "Other"
@@ -166,26 +165,31 @@ THREEFLOW.Gui = class Gui
     folder.add rigLight,"enabled"
 
     # convert to degrees.
-    rotate =
-      yaw: rigLight.yaw*(180/Math.PI)
-      pitch: rigLight.pitch*(180/Math.PI)
+    #rotate =
+    #  yaw: rigLight.yaw*(180/Math.PI)
+    #  pitch: rigLight.pitch*(180/Math.PI)
 
     # convert back to radians and set the light
-    folder.add( rotate,"yaw",0,360).onChange (value)->
-      rotate.yaw = value
-      rigLight.yaw = value*(Math.PI/180)
+    #folder.add( rotate,"yaw",0,360).onChange (value)->
+    #  rotate.yaw = value
+    #  rigLight.yaw = value*(Math.PI/180)
 
-    folder.add( rotate,"pitch",0,360).onChange (value)->
-      rotate.pitch = value
-      rigLight.pitch = value*(Math.PI/180)
+    #folder.add( rotate,"pitch",0,360).onChange (value)->
+    #  rotate.pitch = value
+    #  rigLight.pitch = value*(Math.PI/180)
 
-    folder.add rigLight,"distance",300,3000
+    #folder.add rigLight,"distance",300,3000
+
+    if rigLight.isKey
+      folder.open()
+      folder.add(rigLight,"radiance",0,200)
+    else
+      folder.add rigLight, "keyRatio",0,16
+      folder.add(rigLight,"radiance",0,100).listen()
 
     folder.addColor(rigLight,"color").onChange (value)->
       hex = parseInt value, 16
       console.log hex
-
-    folder.add rigLight,"radiance",0,100
 
     folder.add rigLight,"geometryType",THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES
 

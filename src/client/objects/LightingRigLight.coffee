@@ -33,7 +33,7 @@ THREEFLOW.LightingRigLight = class LightingRigLight
 
   @DEFAULT_LIGHT_GEOMETRY_TYPE = "Circle"
 
-  constructor:( @rig,params={} )->
+  constructor:( @rig,@isKey,params={} )->
 
     THREE.Object3D.call @
 
@@ -44,15 +44,16 @@ THREEFLOW.LightingRigLight = class LightingRigLight
     else
       @_enabled = true
 
-    # rotation, distance and target
     @target = params.target || new THREE.Vector3()
+    @_keyRatio = params.keyRatio || 0
 
+    ###
     @_pitchPhi = params.pitch || 0
     @_yawTheta = params.yaw || 0
-
     @_distance = params.distance || 500
 
     @rotateDirty = true
+    ###
 
     @lightGeomPlane = null
     @lightGeomCircle = null
@@ -72,6 +73,7 @@ THREEFLOW.LightingRigLight = class LightingRigLight
     @light = new THREEFLOW.AreaLight lightParams
     @add @light
 
+    ###
     params.bounce = params.bounce || null
     params.bounce = {} if typeof(params.bounce) is "boolean"
 
@@ -90,12 +92,15 @@ THREEFLOW.LightingRigLight = class LightingRigLight
 
       @bounceDirty = true
 
+    ###
+
     @update()
 
   @:: = Object.create THREE.Object3D::
 
   # getters / setters
   Object.defineProperties @::,
+    ###
     yaw:
       get: ->
         @_yawTheta
@@ -123,6 +128,7 @@ THREEFLOW.LightingRigLight = class LightingRigLight
 
         @_distance = value
         @rotateDirty = true
+    ###
     color:
       get: ->
         @light.color.getHex()
@@ -133,7 +139,22 @@ THREEFLOW.LightingRigLight = class LightingRigLight
       get: ->
         @light.radiance
       set: (value) ->
+        if @light.radiance is value
+          return
+
+        if @isKey
+          @rig.keyRadiance = value
+
         @light.radiance = value
+
+
+    keyRatio:
+      get: ->
+        @_keyRatio
+      set: (value) ->
+        if not @isKey
+          @rig.keyRadianceDirty = true
+          @_keyRatio = value
 
     geometryType:
       get: ->
@@ -156,6 +177,7 @@ THREEFLOW.LightingRigLight = class LightingRigLight
           @rig.lightsDirty = true
 
   update:()->
+    ###
     if @rotateDirty
       @rotateDirty = false
 
@@ -166,6 +188,7 @@ THREEFLOW.LightingRigLight = class LightingRigLight
       @light.lookAt @target
 
       @bounceDirty = true
+    ###
 
     if @bounceDirty
       @bounceDirty = false

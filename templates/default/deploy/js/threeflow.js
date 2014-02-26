@@ -1166,15 +1166,15 @@
       this.giFolder = this.gui.addFolder("Global Illumination");
       if (this.lightingRig) {
         this.lightingRigFolder = this.gui.addFolder("Lighting Rig");
-        this.backdropFolder = this.lightingRigFolder.addFolder("Backdrop");
-        this.backdropFolder.add(this.lightingRig.backdropMaterial, "wireframe");
-        this.backdropFolder.add(this.lightingRig.backdropMaterial, "transparent");
-        this.backdropFolder.add(this.lightingRig.backdropMaterial, "opacity", 0, 1);
         _ref = this.lightingRig.lights;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           light = _ref[_i];
           this.addRigLight(this.lightingRigFolder, light);
         }
+        this.backdropFolder = this.lightingRigFolder.addFolder("Backdrop");
+        this.backdropFolder.add(this.lightingRig.backdropMaterial, "wireframe");
+        this.backdropFolder.add(this.lightingRig.backdropMaterial, "transparent");
+        this.backdropFolder.add(this.lightingRig.backdropMaterial, "opacity", 0, 1);
       }
       this.overridesFolder = this.gui.addFolder("Overrides");
       this.otherFolder = this.gui.addFolder("Other");
@@ -1284,28 +1284,21 @@
     }
 
     Gui.prototype.addRigLight = function(gui, rigLight) {
-      var folder, rotate;
+      var folder;
       folder = gui.addFolder(rigLight.name);
       folder.add(rigLight, "enabled");
-      rotate = {
-        yaw: rigLight.yaw * (180 / Math.PI),
-        pitch: rigLight.pitch * (180 / Math.PI)
-      };
-      folder.add(rotate, "yaw", 0, 360).onChange(function(value) {
-        rotate.yaw = value;
-        return rigLight.yaw = value * (Math.PI / 180);
-      });
-      folder.add(rotate, "pitch", 0, 360).onChange(function(value) {
-        rotate.pitch = value;
-        return rigLight.pitch = value * (Math.PI / 180);
-      });
-      folder.add(rigLight, "distance", 300, 3000);
+      if (rigLight.isKey) {
+        folder.open();
+        folder.add(rigLight, "radiance", 0, 200);
+      } else {
+        folder.add(rigLight, "keyRatio", 0, 16);
+        folder.add(rigLight, "radiance", 0, 100).listen();
+      }
       folder.addColor(rigLight, "color").onChange(function(value) {
         var hex;
         hex = parseInt(value, 16);
         return console.log(hex);
       });
-      folder.add(rigLight, "radiance", 0, 100);
       return folder.add(rigLight, "geometryType", THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES);
     };
 
@@ -1398,6 +1391,9 @@
           return this._radiance;
         },
         set: function(value) {
+          if (this._radiance === value) {
+            return;
+          }
           return this._radiance = value;
         }
       },
@@ -1671,13 +1667,13 @@
   })();
 
   THREEFLOW.LightingRig = LightingRig = (function() {
-    function LightingRig(params) {
-      var basePitch, baseYaw, keyRadiance, toRADIANS;
-      if (params == null) {
-        params = {};
-      }
+    function LightingRig(camera, domElement) {
+      this.onPointerUp = __bind(this.onPointerUp, this);
+      this.onPointerDown = __bind(this.onPointerDown, this);
+      this.onTransformChange = __bind(this.onTransformChange, this);
+      var light, params, _i, _len, _ref;
       THREE.Object3D.call(this);
-      this.target = params.target || new THREE.Vector3();
+      params = {};
       params.backdropWall = params.backdropWall || 600;
       params.backdropFloor = params.backdropFloor || 1500;
       params.backdropCurve = params.backdropCurve || 400;
@@ -1691,68 +1687,135 @@
       });
       this.backdropMaterial = params.backdropMaterial;
       this.createBackdrop(params.backdropWall, params.backdropFloor, params.backdropCurve, params.backdropCurveSteps, params.backdropMaterial);
-      keyRadiance = 5.5;
-      baseYaw = Math.PI / 2;
-      basePitch = Math.PI / 2;
-      toRADIANS = Math.PI / 180;
-      this.lights = params.lights || [
-        new THREEFLOW.LightingRigLight(this, {
+      this._keyRadiance = 5.5;
+      this.lights = [
+        new THREEFLOW.LightingRigLight(this, true, {
           name: "Key Light",
-          target: this.target,
-          pitch: basePitch - (30 * toRADIANS),
-          yaw: baseYaw + (45 * toRADIANS),
-          distance: 700,
+          keyRatio: 0,
           light: {
             color: 0xffffef,
             geometryType: "Plane",
-            intensity: .5,
-            radiance: keyRadiance
+            radiance: this.keyRadiance
           }
-        }), new THREEFLOW.LightingRigLight(this, {
+        }), new THREEFLOW.LightingRigLight(this, false, {
           name: "Fill Light",
-          target: this.target,
-          pitch: basePitch - (16 * toRADIANS),
-          yaw: baseYaw - (60 * toRADIANS),
-          distance: 700,
+          keyRatio: 5,
           light: {
             color: 0xffffef,
-            geometryType: "Plane",
-            intensity: .5,
-            radiance: keyRadiance / 5
+            geometryType: "Plane"
           }
-        }), new THREEFLOW.LightingRigLight(this, {
+        }), new THREEFLOW.LightingRigLight(this, false, {
           name: "Back/Rim Light",
-          target: new THREE.Vector3(0, 0, -((params.backdropFloor / 2) + params.backdropCurve)),
-          pitch: basePitch - (20 * toRADIANS),
-          yaw: baseYaw + (135 * toRADIANS),
-          distance: 900,
+          keyRatio: 2,
           light: {
             color: 0xffffef,
-            geometryType: "Plane",
-            intensity: .5,
-            radiance: keyRadiance / 2
+            geometryType: "Plane"
           }
-        }), new THREEFLOW.LightingRigLight(this, {
+        }), new THREEFLOW.LightingRigLight(this, false, {
           enabled: false,
           name: "Background Light",
-          target: new THREE.Vector3(0, 0, -((params.backdropFloor / 2) + params.backdropCurve)),
-          pitch: basePitch - (20 * toRADIANS),
-          yaw: baseYaw - (120 * toRADIANS),
-          distance: 900,
+          keyRatio: 8,
           light: {
             color: 0xffffef,
-            geometryType: "Plane",
-            intensity: .5,
-            radiance: keyRadiance / 4
+            geometryType: "Plane"
           }
         })
       ];
+      this.transformControls = new THREE.TransformControls(camera, domElement);
+      this.transformControls.addEventListener("change", this.onTransformChange);
+      this.orbitControls = new THREE.OrbitControls(camera, domElement);
+      this.orbitControls.enabled = false;
+      this.pointerDown = false;
+      domElement.addEventListener("mousedown", this.onPointerDown, false);
+      domElement.addEventListener("mouseup", this.onPointerUp, false);
+      domElement.addEventListener("mouseout", this.onPointerUp, false);
+      this.add(this.transformControls);
+      _ref = this.lights;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        light = _ref[_i];
+        light.position.set(Math.random() * 500, Math.random() * 500, Math.random() * 500);
+      }
       this.enabledLights = [];
       this.lightsDirty = true;
+      this.keyRadianceDirty = true;
       this.update();
     }
 
     LightingRig.prototype = Object.create(THREE.Object3D.prototype);
+
+    Object.defineProperties(LightingRig.prototype, {
+      keyRadiance: {
+        get: function() {
+          return this._keyRadiance;
+        },
+        set: function(value) {
+          if (this._keyRadiance === value) {
+            return;
+          }
+          this._keyRadiance = value;
+          return this.keyRadianceDirty = true;
+        }
+      }
+    });
+
+    LightingRig.prototype.onTransformChange = function(event) {
+      if ((event.state === "pointer-down" || event.state === "pointer-hover") && this.orbitControls.enabled) {
+        return this.orbitControls.enabled = false;
+      } else if (event.state === "pointer-up" && !this.orbitControls.enabled) {
+        return this.orbitControls.enabled = true;
+      }
+    };
+
+    LightingRig.prototype.onPointerDown = function(event) {
+      return null;
+    };
+
+    LightingRig.prototype.onPointerUp = function(event) {
+      return null;
+    };
+
+    LightingRig.prototype.update = function() {
+      var light, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3, _results;
+      if (this.lightsDirty) {
+        this.lightsDirty = false;
+        _ref = this.enabledLights;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          light = _ref[_i];
+          this.remove(light);
+        }
+        this.enabledLights.splice(0);
+        _ref1 = this.lights;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          light = _ref1[_j];
+          if (light.enabled) {
+            this.add(light);
+            this.enabledLights.push(light);
+          }
+        }
+      }
+      if (this.keyRadianceDirty) {
+        this.keyRadianceDirty = false;
+        _ref2 = this.lights;
+        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+          light = _ref2[_k];
+          if (light.keyRatio) {
+            light.radiance = this.keyRadiance / light.keyRatio;
+          }
+          if (light.isKey) {
+            light.light.radiance = this.keyRadiance;
+          }
+        }
+      }
+      this.orbitControls.update();
+      this.transformControls.update();
+      _ref3 = this.enabledLights;
+      _results = [];
+      for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
+        light = _ref3[_l];
+        _results.push(light.update());
+      }
+      return _results;
+    };
 
     LightingRig.prototype.createBackdrop = function(wall, floor, curve, curveSteps, material) {
       var PI2, angle, geometry, mesh, points, x, z, _i, _ref, _ref1, _ref2;
@@ -1771,34 +1834,6 @@
       mesh.position.z = floor / 2;
       this.add(mesh);
       return null;
-    };
-
-    LightingRig.prototype.update = function() {
-      var light, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
-      if (this.lightsDirty) {
-        this.lightsDirty = false;
-        _ref = this.enabledLights;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          light = _ref[_i];
-          this.remove(light);
-        }
-        this.enabledLights.splice(0);
-        _ref1 = this.lights;
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          light = _ref1[_j];
-          if (light.enabled) {
-            this.add(light);
-            this.enabledLights.push(light);
-          }
-        }
-      }
-      _ref2 = this.enabledLights;
-      _results = [];
-      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-        light = _ref2[_k];
-        _results.push(light.update());
-      }
-      return _results;
     };
 
     return LightingRig;
@@ -1832,9 +1867,10 @@
 
     LightingRigLight.DEFAULT_LIGHT_GEOMETRY_TYPE = "Circle";
 
-    function LightingRigLight(rig, params) {
-      var geometry, lightParams, material;
+    function LightingRigLight(rig, isKey, params) {
+      var lightParams;
       this.rig = rig;
+      this.isKey = isKey;
       if (params == null) {
         params = {};
       }
@@ -1846,10 +1882,15 @@
         this._enabled = true;
       }
       this.target = params.target || new THREE.Vector3();
-      this._pitchPhi = params.pitch || 0;
-      this._yawTheta = params.yaw || 0;
-      this._distance = params.distance || 500;
-      this.rotateDirty = true;
+      this._keyRatio = params.keyRatio || 0;
+      /*
+      @_pitchPhi = params.pitch || 0
+      @_yawTheta = params.yaw || 0
+      @_distance = params.distance || 500
+      
+      @rotateDirty = true
+      */
+
       this.lightGeomPlane = null;
       this.lightGeomCircle = null;
       this.lightGeomBox = null;
@@ -1864,63 +1905,62 @@
       lightParams.geometry = this.getGeometry(this._geometryType);
       this.light = new THREEFLOW.AreaLight(lightParams);
       this.add(this.light);
-      params.bounce = params.bounce || null;
-      if (typeof params.bounce === "boolean") {
-        params.bounce = {};
-      }
-      if (params.bounce) {
-        this.bouncePitchPhi = params.bounce.pitch || 0;
-        this.bounceYawTheta = params.bounce.yaw || 0;
-        material = params.bounce.material || new THREEFLOW.DiffuseMaterial({
+      /*
+      params.bounce = params.bounce || null
+      params.bounce = {} if typeof(params.bounce) is "boolean"
+      
+      if params.bounce
+      
+        @bouncePitchPhi = params.bounce.pitch || 0
+        @bounceYawTheta = params.bounce.yaw || 0
+      
+        material = params.bounce.material || new THREEFLOW.DiffuseMaterial
           color: params.bounce.color
-        });
-        geometry = params.bounce.geometry || new THREE.PlaneGeometry();
-        this.bounce = new THREE.Mesh(geometry, material);
-        this.add(this.bounce);
-        this.bounceDirty = true;
-      }
+      
+        geometry = params.bounce.geometry || new THREE.PlaneGeometry()
+      
+        @bounce = new THREE.Mesh geometry,material
+        @add @bounce
+      
+        @bounceDirty = true
+      */
+
       this.update();
     }
 
     LightingRigLight.prototype = Object.create(THREE.Object3D.prototype);
 
     Object.defineProperties(LightingRigLight.prototype, {
-      yaw: {
-        get: function() {
-          return this._yawTheta;
-        },
-        set: function(value) {
-          if (this._yawTheta === value) {
-            return;
-          }
-          this._yawTheta = value;
-          return this.rotateDirty = true;
-        }
-      },
-      pitch: {
-        get: function() {
-          return this._pitchPhi;
-        },
-        set: function(value) {
-          if (this._pitchPhi === value) {
-            return;
-          }
-          this._pitchPhi = value;
-          return this.rotateDirty = true;
-        }
-      },
-      distance: {
-        get: function() {
-          return this._distance;
-        },
-        set: function(value) {
-          if (this._distance === value) {
-            return;
-          }
-          this._distance = value;
-          return this.rotateDirty = true;
-        }
-      },
+      /*
+      yaw:
+        get: ->
+          @_yawTheta
+        set: (value) ->
+          if @_yawTheta is value
+            return
+      
+          @_yawTheta = value
+          @rotateDirty = true
+      pitch:
+        get: ->
+          @_pitchPhi
+        set: (value) ->
+          if @_pitchPhi is value
+            return
+      
+          @_pitchPhi = value
+          @rotateDirty = true
+      distance:
+        get: ->
+          @_distance
+        set: (value) ->
+          if @_distance is value
+            return
+      
+          @_distance = value
+          @rotateDirty = true
+      */
+
       color: {
         get: function() {
           return this.light.color.getHex();
@@ -1934,7 +1974,24 @@
           return this.light.radiance;
         },
         set: function(value) {
+          if (this.light.radiance === value) {
+            return;
+          }
+          if (this.isKey) {
+            this.rig.keyRadiance = value;
+          }
           return this.light.radiance = value;
+        }
+      },
+      keyRatio: {
+        get: function() {
+          return this._keyRatio;
+        },
+        set: function(value) {
+          if (!this.isKey) {
+            this.rig.keyRadianceDirty = true;
+            return this._keyRatio = value;
+          }
         }
       },
       geometryType: {
@@ -1966,14 +2023,19 @@
     });
 
     LightingRigLight.prototype.update = function() {
-      if (this.rotateDirty) {
-        this.rotateDirty = false;
-        this.light.position.x = this._distance * Math.sin(this._pitchPhi) * Math.cos(this._yawTheta);
-        this.light.position.y = this._distance * Math.cos(this._pitchPhi);
-        this.light.position.z = this._distance * Math.sin(this._pitchPhi) * Math.sin(this._yawTheta);
-        this.light.lookAt(this.target);
-        this.bounceDirty = true;
-      }
+      /*
+      if @rotateDirty
+        @rotateDirty = false
+      
+        @light.position.x = @_distance * Math.sin(@_pitchPhi) * Math.cos(@_yawTheta)
+        @light.position.y = @_distance * Math.cos(@_pitchPhi)
+        @light.position.z = @_distance * Math.sin(@_pitchPhi) * Math.sin(@_yawTheta)
+      
+        @light.lookAt @target
+      
+        @bounceDirty = true
+      */
+
       if (this.bounceDirty) {
         this.bounceDirty = false;
       }

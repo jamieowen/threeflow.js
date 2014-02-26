@@ -1,13 +1,11 @@
 
 THREEFLOW.LightingRig = class LightingRig
-  constructor:(params = {})->
+  constructor:(camera,domElement)->
 
     THREE.Object3D.call @
 
-    # target
-    @target                   = params.target || new THREE.Vector3()
-
     # backdrop
+    params = {}
     params.backdropWall       = params.backdropWall || 600
     params.backdropFloor      = params.backdropFloor  || 1500
     params.backdropCurve      = params.backdropCurve || 400
@@ -23,79 +21,126 @@ THREEFLOW.LightingRig = class LightingRig
 
     @createBackdrop params.backdropWall,params.backdropFloor,params.backdropCurve,params.backdropCurveSteps,params.backdropMaterial
 
-    keyRadiance = 5.5
+    @_keyRadiance = 5.5
 
-    baseYaw = Math.PI/2
-    basePitch = Math.PI/2
-
-    toRADIANS = Math.PI/180
-
-    # lights
-    @lights = params.lights || [
-      # key light
-      new THREEFLOW.LightingRigLight @,
+    @lights = [
+      new THREEFLOW.LightingRigLight @,true,
         name: "Key Light"
-        target: @target
-        pitch: basePitch - ( 30*toRADIANS )
-        yaw: baseYaw + ( 45*toRADIANS )
-        distance: 700
+        keyRatio:0
         light:
           color: 0xffffef
           geometryType: "Plane"
-          intensity: .5
-          radiance: keyRadiance
+          radiance: @keyRadiance
 
-      # fill light
-
-      new THREEFLOW.LightingRigLight @,
+      new THREEFLOW.LightingRigLight @,false,
         name: "Fill Light"
-        target: @target
-        pitch: basePitch - ( 16*toRADIANS )
-        yaw: baseYaw - ( 60*toRADIANS )
-        distance: 700
+        keyRatio:5
         light:
           color: 0xffffef
           geometryType: "Plane"
-          intensity: .5
-          radiance: keyRadiance / 5
 
-      # back light
-      new THREEFLOW.LightingRigLight @,
+      new THREEFLOW.LightingRigLight @,false,
         # target the back wall
         name: "Back/Rim Light"
-        target: new THREE.Vector3(0,0,-((params.backdropFloor/2)+params.backdropCurve))
-        pitch: basePitch - ( 20*toRADIANS )
-        yaw: baseYaw + ( 135*toRADIANS )
-        distance: 900
+        keyRatio:2
         light:
           color: 0xffffef
           geometryType: "Plane"
-          intensity: .5
-          radiance: keyRadiance / 2
 
-
-      # background light
-      new THREEFLOW.LightingRigLight @,
-        # target the back wall
+      new THREEFLOW.LightingRigLight @,false,
         enabled: false
         name: "Background Light"
-        target: new THREE.Vector3(0,0,-((params.backdropFloor/2)+params.backdropCurve))
-        pitch: basePitch - ( 20*toRADIANS )
-        yaw: baseYaw - ( 120*toRADIANS )
-        distance: 900
+        keyRatio:8
         light:
           color: 0xffffef
           geometryType: "Plane"
-          intensity: .5
-          radiance: keyRadiance / 4
     ]
+
+
+    @transformControls = new THREE.TransformControls( camera, domElement )
+    @transformControls.addEventListener "change", @onTransformChange
+
+    @orbitControls = new THREE.OrbitControls( camera, domElement )
+    @orbitControls.enabled = false
+
+    @pointerDown = false
+
+    domElement.addEventListener "mousedown", @onPointerDown, false
+    domElement.addEventListener "mouseup", @onPointerUp, false
+    domElement.addEventListener "mouseout", @onPointerUp, false
+
+    @add @transformControls
+
+    for light in @lights
+      light.position.set(Math.random()*500, Math.random()*500, Math.random()*500)
 
     @enabledLights = []
     @lightsDirty = true
+    @keyRadianceDirty = true
 
     @update()
 
   @:: = Object.create THREE.Object3D::
+
+  Object.defineProperties @::,
+    keyRadiance:
+      get: ->
+        @_keyRadiance
+      set: (value) ->
+        if @_keyRadiance is value
+          return
+
+        @_keyRadiance = value
+        @keyRadianceDirty = true
+
+  onTransformChange:(event)=>
+    # disable orbit controls because of interaction conflicts
+    if (event.state is "pointer-down" or event.state is "pointer-hover") and @orbitControls.enabled
+      @orbitControls.enabled = false
+    else if event.state is "pointer-up" and not @orbitControls.enabled
+      @orbitControls.enabled = true
+
+  onPointerDown:(event)=>
+    #event.preventDefault()
+    null
+
+
+  onPointerUp:(event)=>
+    #event.preventDefault()
+    null
+
+  update:()->
+    if @lightsDirty
+      @lightsDirty = false
+      for light in @enabledLights
+        @remove light
+
+      @enabledLights.splice(0)
+
+      for light in @lights
+        if light.enabled
+          @add light
+
+          @enabledLights.push light
+
+    if @keyRadianceDirty
+      @keyRadianceDirty = false
+      for light in @lights
+        if light.keyRatio
+          light.radiance = @keyRadiance / light.keyRatio
+
+        if light.isKey
+          light.light.radiance = @keyRadiance
+
+    @orbitControls.update()
+    @transformControls.update()
+
+    for light in @enabledLights
+      light.update()
+
+    #if not @orbitControls.enabled and not @pointerDown
+    #  @orbitControls.enabled = true
+
 
   createBackdrop:(wall,floor,curve,curveSteps,material)->
     points = []
@@ -118,23 +163,6 @@ THREEFLOW.LightingRig = class LightingRig
 
     @add mesh
     null
-
-  update:()->
-    if @lightsDirty
-      @lightsDirty = false
-      for light in @enabledLights
-        @remove light
-
-      @enabledLights.splice(0)
-
-      for light in @lights
-        if light.enabled
-          @add light
-          @enabledLights.push light
-
-
-    for light in @enabledLights
-      light.update()
 
 
 

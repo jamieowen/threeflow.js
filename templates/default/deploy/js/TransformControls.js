@@ -280,7 +280,7 @@
 		this.setActivePlane = function ( axis, eye ) {
 
 			var tempMatrix = new THREE.Matrix4();
-			eye.applyProjection( tempMatrix.getInverse( tempMatrix.extractRotation( this.planes[ "XY" ].matrixWorld ) ) );
+			eye.applyMatrix4( tempMatrix.getInverse( tempMatrix.extractRotation( this.planes[ "XY" ].matrixWorld ) ) );
 
 			if ( axis == "X" ) {
 				this.activePlane = this.planes[ "XY" ];
@@ -408,7 +408,7 @@
 			tempQuaternion.setFromEuler( worldRotation );
 
 			tempMatrix.makeRotationFromQuaternion( tempQuaternion ).getInverse( tempMatrix );
-			eye.applyProjection( tempMatrix );
+			eye.applyMatrix4( tempMatrix );
 
 			this.traverse(function(child) {
 
@@ -496,7 +496,7 @@
 		this.setActivePlane = function ( axis, eye ) {
 
 			var tempMatrix = new THREE.Matrix4();
-			eye.applyProjection( tempMatrix.getInverse( tempMatrix.extractRotation( this.planes[ "XY" ].matrixWorld ) ) );
+			eye.applyMatrix4( tempMatrix.getInverse( tempMatrix.extractRotation( this.planes[ "XY" ].matrixWorld ) ) );
 
 			if ( axis == "X" ) {
 				this.activePlane = this.planes[ "XY" ];
@@ -653,6 +653,7 @@
 			this.gizmo[_mode].show();
 
 			this.update();
+      changeEvent.state = "transform-mode";
 			scope.dispatchEvent( changeEvent );
 
 		};
@@ -667,7 +668,8 @@
 
 			scope.size = size;
 			this.update();
-			scope.dispatchEvent( changeEvent );
+      changeEvent.state = "transform-size";
+      scope.dispatchEvent( changeEvent );
 			
 		};
 
@@ -675,6 +677,7 @@
 
 			scope.space = space;
 			this.update();
+      changeEvent.state = "transform-space";
 			scope.dispatchEvent( changeEvent );
 
 		};
@@ -721,12 +724,14 @@
 
 				scope.axis = intersect.object.name;
 				scope.update();
+        changeEvent.state = "pointer-hover";
 				scope.dispatchEvent( changeEvent );
 
 			} else if ( scope.axis !== null ) {
 
 				scope.axis = null;
 				scope.update();
+        changeEvent.state = "pointer-up";
 				scope.dispatchEvent( changeEvent );
 
 			}
@@ -941,6 +946,7 @@
 			}
 
 			scope.update();
+      changeEvent.state = "pointer-moved";
 			scope.dispatchEvent( changeEvent );
 
 		}
@@ -949,6 +955,9 @@
 
 			_dragging = false;
 			onPointerHover( event );
+
+      changeEvent.state = "pointer-up";
+      scope.dispatchEvent( changeEvent );
 
 		}
 

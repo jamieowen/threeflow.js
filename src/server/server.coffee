@@ -6,6 +6,7 @@ fs                = require 'fs'
 log               = require './log'
 version           = require './version'
 render            = require './render'
+wrench            = require 'wrench'
 
 module.exports =
 
@@ -57,11 +58,11 @@ module.exports =
           cancelRendersOnDisconnect: false
 
         folders:
-          renders: "/examples/renders"
-          textures: "/examples/textures"
-          models: "/examples/models"
-          hdr: "/hdr"
-          bakes: "/bakes"
+          renders: "/deploy/renders"
+          #textures: "/deploy/textures"
+          #models: "/deploy/models"
+          #hdr: "/hdr"
+          #bakes: "/bakes"
 
       opts
 
@@ -89,7 +90,7 @@ module.exports =
 
         @opts.flags.allowSave = true
         @setCwd cwd
-        log.info "Found config :" + jsonPath
+        log.info "Found config..."
       catch error
         @setCwd null
         @options()
@@ -121,12 +122,13 @@ module.exports =
       else
         log.notice "Starting up with config..."
 
+      # check all renders/textures folders.
       for folder of @opts.folders
         absFolder = path.join @cwd,@opts.folders[folder]
         @opts.folders[folder] =  absFolder
         # validate and create.
-        console.log absFolder
-
+        if not fs.existsSync absFolder
+          wrench.mkdirSyncRecursive absFolder
 
       @app      = express()
       @server   = http.createServer @app
@@ -138,7 +140,11 @@ module.exports =
       @server.listen @opts.server.port
       log.info "Listening on localhost:" + @opts.server.port
 
-      @app.use '/', express.static( path.join(@cwd,@opts.server.static) )
+      staticFolder = path.join(@cwd,@opts.server.static)
+      if not fs.existsSync staticFolder
+        wrench.mkdirSyncRecursive staticFolder
+
+      @app.use '/', express.static( staticFolder )
 
       log.info "Serving " + @opts.server.static
       log.notice "Waiting for connection... "

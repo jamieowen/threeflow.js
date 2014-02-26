@@ -212,7 +212,7 @@
 
   THREEFLOW.VERSION = '0.6.0-1';
 
-  THREEFLOW.COMMIT = 'ff5eee4';
+  THREEFLOW.COMMIT = '5189dd8';
 
   BlockExporter = (function() {
     function BlockExporter(exporter) {

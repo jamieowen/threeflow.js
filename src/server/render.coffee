@@ -64,6 +64,9 @@ module.exports =
       # if we add queuing.. ( for some reason )
       @status = "queued"
 
+      # double check this as we defintely want to delete in no save mode.
+      @options.deleteSc = true if @options.deleteSc is undefined or @options.deleteSc is null
+
       # determine pre render / post render flags.
       flags = @client.server.opts.flags
       folders = renderPath = @client.server.opts.folders
@@ -121,7 +124,7 @@ module.exports =
       renders = @client.server.opts.folders.renders
 
       log.info "Cleaning up..."
-      if (flags.deleteSc and @options.deleteSc) or (not flags.deleteSc and @options.deleteSc)
+      if not flags.allowSave or (flags.deleteSc and @options.deleteSc) or (not flags.deleteSc and @options.deleteSc)
         fs.unlinkSync path.join(renders,@filename + ".sc")
 
       null
@@ -220,22 +223,3 @@ module.exports =
             @client.socket.emit 'render-complete',
               event:'render-complete'
               time:@renderTime
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

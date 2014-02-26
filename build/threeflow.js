@@ -48,7 +48,11 @@
         this.name = options.name || null;
         this.scale = options.scale || 1;
         this.overwrite = options.overwrite || false;
-        this.deleteSc = (typeof options.deleteSc === 'boolean' && options.deleteSc) || false;
+        if (options.deleteSc === void 0 || options.deleteSc === null || (typeof options.deleteSc !== "boolean")) {
+          this.deleteSc = true;
+        } else {
+          this.delteSc = false;
+        }
       }
       this.sunflowCl = {
         noGui: false,
@@ -134,6 +138,7 @@
     SunflowRenderer.prototype.onConnected = function(data) {
       console.log("THREEFLOW " + THREEFLOW.VERSION + " [Connected]");
       this.connected = true;
+      this.rendering = false;
       this.setConnectionStatus(SunflowRenderer.CONNECTED);
       return null;
     };

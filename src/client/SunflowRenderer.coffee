@@ -29,7 +29,11 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
       @name       = options.name || null
       @scale      = options.scale || 1
       @overwrite  = options.overwrite || false
-      @deleteSc   = ( typeof options.deleteSc is 'boolean' and options.deleteSc ) || false
+
+      if options.deleteSc is undefined or options.deleteSc is null or ( typeof options.deleteSc isnt "boolean" )
+        @deleteSc = true
+      else
+        @delteSc = false
 
     # sunflow command line options
     @sunflowCl =
@@ -125,6 +129,7 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
   onConnected:(data)=>
     console.log "THREEFLOW " + THREEFLOW.VERSION + " [Connected]"
     @connected = true
+    @rendering = false
     @setConnectionStatus SunflowRenderer.CONNECTED
     null
 

@@ -25,7 +25,9 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     @name       = options.name || null
     @scale      = options.scale || 1
     @overwrite  = options.overwrite || false
-    @deleteSc = if options.deleteSc is false then false else true
+    @deleteSc   = if options.deleteSc is false then false else true
+    @width      = options.width || 800
+    @height     = options.height || 600
 
     # sunflow command line options
     @sunflowCl =
@@ -61,6 +63,9 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     if autoConnect
       @connect()
 
+  setSize:(@width,@height)->
+    null
+
   connect:()->
     if @connected
       return
@@ -81,9 +86,13 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
 
     null
 
-  render:(scene,camera,width,height)->
+  render:(scene,camera,name)->
     if not @connected
-      throw new Error "[SunflowRenderer] Call connect() before rendering."
+      throw new Error "[Threeflow] Call connect() before rendering."
+    else if not camera instanceof THREE.PerspectiveCamera
+      throw new Error "[Threeflow] Only use THREE.PerspectiveCamera."
+    else if isNaN(@width) or isNaN(@height) or isNaN(@scale)
+      throw new Error "[Threeflow] Error with width/height or scale."
     else if not @rendering
 
       @onRenderStatus.dispatch
@@ -91,8 +100,11 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
 
       @rendering = true
 
-      @exporter.image.resolutionX = width*@scale
-      @exporter.image.resolutionY = height*@scale
+      @name = if name then name else @name
+
+      @exporter.image.resolutionX = @width*@scale
+      @exporter.image.resolutionY = @height*@scale
+      @exporter.camera.camera = camera
 
       @exporter.indexScene scene
       source = @exporter.exportCode()
@@ -101,11 +113,9 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
         source: source
         options:
           name: @name
-          scale: @scale
           overwrite: @overwrite
           deleteSc: @deleteSc
         sunflowCl: @sunflowCl
-
     else
       console.log "[Render in Progress]"
 

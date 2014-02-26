@@ -86,6 +86,8 @@ module.exports =
         jsonFile = fs.readFileSync(jsonPath)
         jsonOpts = JSON.parse jsonFile
         @options jsonOpts
+
+        @opts.flags.allowSave = true
         @setCwd cwd
         log.info "Found config :" + jsonPath
       catch error
@@ -122,9 +124,7 @@ module.exports =
       # TODO: should validate / create folder paths
       # convert to absolute paths
 
-      console.log @opts.folders
       for folder of @opts.folders
-        console.log folder,@cwd,@opts.folders[folder]
         absFolder = path.join @cwd,@opts.folders[folder]
         @opts.folders[folder] =  absFolder
 

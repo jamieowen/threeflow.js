@@ -16,7 +16,6 @@ THREEFLOW.LightingRig = class LightingRig
       color: 0xefefef
       ambient: 0xffffff
       side: THREE.DoubleSide
-      #wireframe: true
       transparent: true
       opacity: 0.5
 

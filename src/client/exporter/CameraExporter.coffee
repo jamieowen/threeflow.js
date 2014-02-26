@@ -8,27 +8,14 @@ class CameraExporter extends BlockExporter
     @camera     = null
 
   addToIndex:(object3d)->
-    if @camera
-      return
-
-    if object3d instanceof THREE.PerspectiveCamera
-      @camera = object3d
-
+    # camera set manually by exporter ( via render( scene, camera ) )
     null
 
   doTraverse:(object3d)->
-    # check here for custom cameras.
-    # we'll use some helper planes for viewport / render size
-    # so we prevent traversing to stop the meshes being rendered.
     true
 
   exportBlock:()->
     result = ''
-
-    if not @camera
-      throw new Error "No camera found.."
-      return result
-
     result += 'camera {\n'
     result += '  type pinhole\n'
 

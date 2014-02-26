@@ -65,7 +65,7 @@ module.exports =
       @status = "queued"
 
       # double check this as we defintely want to delete in no save mode.
-      @options.deleteSc = true if @options.deleteSc is undefined or @options.deleteSc is null
+      @options.deleteSc = if @options.deleteSc is true then true else false
 
       # determine pre render / post render flags.
       flags = @client.server.opts.flags
@@ -73,7 +73,7 @@ module.exports =
 
       if not @options.name or not flags.allowSave
         @filename = "." + @id
-      else if flags.overwrite
+      else if @options.overwrite
         @filename = @options.name
       else
         # calculate index num for file.
@@ -170,7 +170,6 @@ module.exports =
       if not code # exit status is not 0
         if @isComplete()
 
-
         else
           @status = "cancelled"
           log.notice "" # otherwise trails on the end of sunflow output
@@ -182,10 +181,19 @@ module.exports =
               event:'render-cancelled'
               data:null
 
-      else if @client.connected
-        @client.socket.emit 'render-error',
-          event:'render-error'
-          data:code
+      else
+        log.notice "" # otherwise trails on the end of sunflow output
+        log.notice "Render Error. Keep this "
+        @status = "error"
+
+        @cleanUp()
+
+        # TODO : Log Error by keeping sc file.
+
+        if @client.connected
+          @client.socket.emit 'render-error',
+            event:'render-error'
+            data:code
 
       null
 

@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+  <title>Threeflow</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/dat.gui.js"></script>
+
+  <script src="js/three.js"></script>
+  <script src="js/threeflow.js"></script>
+
+  <script src="js/OrbitControls.js"></script>
+</head>
+<style>
+  body{
+    background-color: #efefef;
+    margin:0px;
+    padding:0px;
+    overflow:hidden;
+  }
+</style>
+<body>
+<script>
+
+  var width, height, threeflow, lighting, gui;
+  var camera, scene, renderer, controls;
+
+  init();
+  update();
+
+  function init() {
+
+    // ###
+    // Threeflow Basic setup
+
+    width = 800; height = 600;
+
+    threeflow = new THREEFLOW.SunflowRenderer({overwrite:true});
+    threeflow.setSize( width,height );
+
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize( width,height );
+
+    scene = new THREE.Scene();
+
+    lighting = new THREEFLOW.LightingRig();
+    scene.add( lighting );
+
+    camera = new THREE.PerspectiveCamera( 35, width/height, 1, 10000 );
+    camera.position.set(0,500,1000);
+    camera.lookAt( new THREE.Vector3() );
+
+    controls    = new THREE.OrbitControls(camera,renderer.domElement);
+
+    document.body.appendChild( renderer.domElement );
+
+    gui = new THREEFLOW.Gui(threeflow,lighting);
+    gui.onRender.add( function(){
+      threeflow.render( scene, camera, "suzanne-materials" );
+    });
+
+    // ###
+    // Add scene stuff.
+
+    var geometry, material, mesh, spheres;
+    var size,radius,theta, i, count;
+
+    size = 30;
+    geometry = new THREE.SphereGeometry(size,size);
+    geometry.computeBoundingBox();
+    count = 16;
+    radius = ((size*2)*(count+4))/(Math.PI*2);
+
+    spheres = new THREE.Object3D();
+
+    for( i = 0; i<count; i++ ) {
+      material = new THREEFLOW.ShinyMaterial();
+      material.color.setHSL(i/count,.7,.5);
+      mesh = new THREE.Mesh(geometry,material);
+      theta = ((Math.PI*2)/count)*i;
+
+      mesh.position.x = radius * Math.cos(theta);
+      mesh.position.y = -geometry.boundingBox.min.y;
+      mesh.position.z = radius * Math.sin(theta);
+      spheres.add(mesh);
+    }
+
+    // rotate to bring nicer colours around to front.
+    spheres.rotation.y = Math.PI/2;
+    scene.add(spheres);
+  }
+
+  function update() {
+    requestAnimationFrame( update );
+
+    lighting.update();
+    controls.update();
+
+    renderer.render( scene, camera );
+  }
+
+</script>
+</body>
+</html>

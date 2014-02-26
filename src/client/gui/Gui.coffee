@@ -179,7 +179,7 @@ THREEFLOW.Gui = class Gui
       rotate.pitch = value
       rigLight.pitch = value*(Math.PI/180)
 
-    folder.add rigLight,"distance",300,2000
+    folder.add rigLight,"distance",300,3000
 
     folder.addColor(rigLight,"color").onChange (value)->
       hex = parseInt value, 16

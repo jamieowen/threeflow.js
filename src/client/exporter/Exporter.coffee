@@ -14,7 +14,7 @@ class Exporter
     @caustics           = @addBlockExporter new CausticsExporter(@)
     @gi                 = @addBlockExporter new GiExporter(@)
 
-    @cameras            = @addBlockExporter new CameraExporter(@)
+    @camera             = @addBlockExporter new CameraExporter(@)
     @lights             = @addBlockExporter new LightsExporter(@)
     @materials          = @addBlockExporter new MaterialsExporter(@)
     @geometry           = @addBlockExporter new GeometryExporter(@)

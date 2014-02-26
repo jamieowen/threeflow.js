@@ -1,5 +1,5 @@
 (function() {
-  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, Gui, ImageExporter, LightingBox, LightingRig, LightingRigGui, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, Signal, SunflowRenderer, SunskyLight, TraceDepthsExporter,
+  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, Gui, ImageExporter, LightingBox, LightingRig, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, Signal, SunflowRenderer, SunskyLight, TraceDepthsExporter,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -45,6 +45,8 @@
       this.scale = options.scale || 1;
       this.overwrite = options.overwrite || false;
       this.deleteSc = options.deleteSc === false ? false : true;
+      this.width = options.width || 800;
+      this.height = options.height || 600;
       this.sunflowCl = {
         noGui: false,
         ipr: true,
@@ -72,6 +74,12 @@
       }
     }
 
+    SunflowRenderer.prototype.setSize = function(width, height) {
+      this.width = width;
+      this.height = height;
+      return null;
+    };
+
     SunflowRenderer.prototype.connect = function() {
       if (this.connected) {
         return;
@@ -89,24 +97,29 @@
       return null;
     };
 
-    SunflowRenderer.prototype.render = function(scene, camera, width, height) {
+    SunflowRenderer.prototype.render = function(scene, camera, name) {
       var source;
       if (!this.connected) {
-        throw new Error("[SunflowRenderer] Call connect() before rendering.");
+        throw new Error("[Threeflow] Call connect() before rendering.");
+      } else if (!camera instanceof THREE.PerspectiveCamera) {
+        throw new Error("[Threeflow] Only use THREE.PerspectiveCamera.");
+      } else if (isNaN(this.width) || isNaN(this.height) || isNaN(this.scale)) {
+        throw new Error("[Threeflow] Error with width/height or scale.");
       } else if (!this.rendering) {
         this.onRenderStatus.dispatch({
           status: SunflowRenderer.RENDER_START
         });
         this.rendering = true;
-        this.exporter.image.resolutionX = width * this.scale;
-        this.exporter.image.resolutionY = height * this.scale;
+        this.name = name ? name : this.name;
+        this.exporter.image.resolutionX = this.width * this.scale;
+        this.exporter.image.resolutionY = this.height * this.scale;
+        this.exporter.camera.camera = camera;
         this.exporter.indexScene(scene);
         source = this.exporter.exportCode();
         this.socket.emit("render", {
           source: source,
           options: {
             name: this.name,
-            scale: this.scale,
             overwrite: this.overwrite,
             deleteSc: this.deleteSc
           },
@@ -415,12 +428,6 @@
     }
 
     CameraExporter.prototype.addToIndex = function(object3d) {
-      if (this.camera) {
-        return;
-      }
-      if (object3d instanceof THREE.PerspectiveCamera) {
-        this.camera = object3d;
-      }
       return null;
     };
 
@@ -431,10 +438,6 @@
     CameraExporter.prototype.exportBlock = function() {
       var result;
       result = '';
-      if (!this.camera) {
-        throw new Error("No camera found..");
-        return result;
-      }
       result += 'camera {\n';
       result += '  type pinhole\n';
       this.helperVec.copy(this.camera.position);
@@ -500,7 +503,7 @@
       this.traceDepths = this.addBlockExporter(new TraceDepthsExporter(this));
       this.caustics = this.addBlockExporter(new CausticsExporter(this));
       this.gi = this.addBlockExporter(new GiExporter(this));
-      this.cameras = this.addBlockExporter(new CameraExporter(this));
+      this.camera = this.addBlockExporter(new CameraExporter(this));
       this.lights = this.addBlockExporter(new LightsExporter(this));
       this.materials = this.addBlockExporter(new MaterialsExporter(this));
       this.geometry = this.addBlockExporter(new GeometryExporter(this));
@@ -1296,7 +1299,7 @@
         rotate.pitch = value;
         return rigLight.pitch = value * (Math.PI / 180);
       });
-      folder.add(rigLight, "distance", 300, 2000);
+      folder.add(rigLight, "distance", 300, 3000);
       folder.addColor(rigLight, "color").onChange(function(value) {
         var hex;
         hex = parseInt(value, 16);
@@ -1317,54 +1320,6 @@
     };
 
     return Gui;
-
-  })();
-
-  THREEFLOW.LightingRigGui = LightingRigGui = (function() {
-    function LightingRigGui(rig) {
-      var light, _i, _len, _ref;
-      this.rig = rig;
-      this.gui = new dat.GUI();
-      this.backdropFolder = this.gui.addFolder("Backdrop");
-      this.backdropFolder.add(this.rig.backdropMaterial, "wireframe");
-      this.backdropFolder.add(this.rig.backdropMaterial, "transparent");
-      this.backdropFolder.add(this.rig.backdropMaterial, "opacity", 0, 1);
-      this.backdropFolder.open();
-      _ref = this.rig.lights;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        light = _ref[_i];
-        this.addRigLight(light);
-      }
-    }
-
-    LightingRigGui.prototype.addRigLight = function(rigLight) {
-      var folder, rotate;
-      folder = this.gui.addFolder(rigLight.name);
-      folder.add(rigLight, "enabled");
-      rotate = {
-        yaw: rigLight.yaw * (180 / Math.PI),
-        pitch: rigLight.pitch * (180 / Math.PI)
-      };
-      folder.add(rotate, "yaw", 0, 360).onChange(function(value) {
-        rotate.yaw = value;
-        return rigLight.yaw = value * (Math.PI / 180);
-      });
-      folder.add(rotate, "pitch", 0, 360).onChange(function(value) {
-        rotate.pitch = value;
-        return rigLight.pitch = value * (Math.PI / 180);
-      });
-      folder.add(rigLight, "distance", 300, 2000);
-      folder.addColor(rigLight, "color").onChange(function(value) {
-        var hex;
-        hex = parseInt(value, 16);
-        return console.log(hex);
-      });
-      folder.add(rigLight, "radiance", 0, 100);
-      folder.add(rigLight, "geometryType", THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES);
-      return null;
-    };
-
-    return LightingRigGui;
 
   })();
 

@@ -20,20 +20,12 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
   # pass either a render name, or an options object.
   constructor:(options={})->
 
-    if typeof options is "string"
-      @name       = options
-      @scale      = 1
-      @overwrite  = false
-      @deleteSc   = true
-    else
-      @name       = options.name || null
-      @scale      = options.scale || 1
-      @overwrite  = options.overwrite || false
+    autoConnect = if options.autoConnect is false then false else true
 
-      if options.deleteSc is undefined or options.deleteSc is null or ( typeof options.deleteSc isnt "boolean" )
-        @deleteSc = true
-      else
-        @delteSc = false
+    @name       = options.name || null
+    @scale      = options.scale || 1
+    @overwrite  = options.overwrite || false
+    @deleteSc = if options.deleteSc is false then false else true
 
     # sunflow command line options
     @sunflowCl =
@@ -65,6 +57,9 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     # signals
     @onRenderStatus     = new THREEFLOW.Signal()
     @onConnectionStatus = new THREEFLOW.Signal()
+
+    if autoConnect
+      @connect()
 
   connect:()->
     if @connected
@@ -142,7 +137,6 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     null
 
   onRenderAdded:(data)=>
-    console.log "ADDED",data
     @onRenderStatus.dispatch
       status: SunflowRenderer.RENDER_ADDED
 

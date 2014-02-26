@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <title>Threeflow</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/dat.gui.js"></script>
+  <script src="js/three.js"></script>
+  <script src="js/threeflow.js"></script>
+</head>
+<style>
+  body{
+    background-color: #efefef;
+    margin:0px;
+    padding:0px;
+    overflow:hidden;
+  }
+</style>
+<body>
+<script>
+
+  var width, height, threeflow, lighting, gui;
+  var camera, scene, renderer;
+  var geometry, material, mesh;
+
+  init();
+  update();
+
+  function init() {
+
+    width = 800; height = 600;
+
+    threeflow = new THREEFLOW.SunflowRenderer();
+    //threeflow.setSize( width,height );
+
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize( width,height );
+
+    scene = new THREE.Scene();
+
+    geometry = new THREE.BoxGeometry( 200, 200, 200 );
+    material = new THREEFLOW.ShinyMaterial( { color: 0xff0000, reflection:1 } );
+
+    mesh = new THREE.Mesh( geometry, material );
+    mesh.position.y = 100;
+    scene.add( mesh );
+
+    lighting = new THREEFLOW.LightingRig();
+    scene.add( lighting );
+
+    camera = new THREE.PerspectiveCamera( 75, width/height, 1, 10000 );
+    camera.position.set(0,500,1000);
+    camera.lookAt( mesh.position );
+
+    document.body.appendChild( renderer.domElement );
+
+    gui = new THREEFLOW.Gui(threeflow,lighting);
+    gui.onRender.add( function(){
+      threeflow.render( scene, camera );
+    });
+  }
+
+  function update() {
+    requestAnimationFrame( update );
+
+    lighting.update();
+    renderer.render( scene, camera );
+  }
+
+</script>
+</body>
+</html>

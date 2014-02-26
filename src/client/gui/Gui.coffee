@@ -1,14 +1,13 @@
 
-THREEFLOW.RendererGui = class RendererGui
+THREEFLOW.Gui = class Gui
 
-  constructor:(@renderer)->
+  constructor:(@renderer,@lightingRig)->
     if not window.dat and not window.dat.GUI
       throw new Error "No dat.GUI found."
 
     @gui = new dat.GUI()
 
-    # TODO Should change to signals
-    @onRender = null
+    @onRender = new THREEFLOW.Signal()
 
     updateDisplay = ()=>
       for controller in @gui.__controllers
@@ -40,6 +39,18 @@ THREEFLOW.RendererGui = class RendererGui
     @traceDepthsFolder  = @gui.addFolder "Trace Depths"
     @causticsFolder     = @gui.addFolder "Caustics"
     @giFolder           = @gui.addFolder "Global Illumination"
+
+    if @lightingRig
+      @lightingRigFolder = @gui.addFolder "Lighting Rig"
+      @backdropFolder = @lightingRigFolder.addFolder("Backdrop")
+      @backdropFolder.add(@lightingRig.backdropMaterial,"wireframe")
+      @backdropFolder.add(@lightingRig.backdropMaterial,"transparent")
+      @backdropFolder.add(@lightingRig.backdropMaterial,"opacity",0,1)
+
+      #@backdropFolder.open()
+
+      for light in @lightingRig.lights
+        @addRigLight @lightingRigFolder,light
 
     @overridesFolder    = @gui.addFolder "Overrides"
     @otherFolder        = @gui.addFolder "Other"
@@ -149,15 +160,42 @@ THREEFLOW.RendererGui = class RendererGui
 
     null
 
+  addRigLight:(gui,rigLight)->
+    folder = gui.addFolder rigLight.name
+
+    folder.add rigLight,"enabled"
+
+    # convert to degrees.
+    rotate =
+      yaw: rigLight.yaw*(180/Math.PI)
+      pitch: rigLight.pitch*(180/Math.PI)
+
+    # convert back to radians and set the light
+    folder.add( rotate,"yaw",0,360).onChange (value)->
+      rotate.yaw = value
+      rigLight.yaw = value*(Math.PI/180)
+
+    folder.add( rotate,"pitch",0,360).onChange (value)->
+      rotate.pitch = value
+      rigLight.pitch = value*(Math.PI/180)
+
+    folder.add rigLight,"distance",300,2000
+
+    folder.addColor(rigLight,"color").onChange (value)->
+      hex = parseInt value, 16
+      console.log hex
+
+    folder.add rigLight,"radiance",0,100
+
+    folder.add rigLight,"geometryType",THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES
+
   _onRender:()=>
-    if @onRender
-      @renderer.sunflowCl.ipr = false
-      @onRender()
+    @renderer.sunflowCl.ipr = false
+    @onRender.dispatch()
 
   _onRenderIPR:()=>
-    if @onRender
-      @renderer.sunflowCl.ipr = true
-      @onRender()
+    @renderer.sunflowCl.ipr = true
+    @onRender.dispatch()
 
 
 

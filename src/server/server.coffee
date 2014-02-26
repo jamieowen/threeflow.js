@@ -69,29 +69,32 @@ module.exports =
       @opts = @defaults()
 
       for opt of options.server
-        @opts.server[opt] = options[opt]
+        @opts.server[opt] = options.server[opt]
 
       for opt of options.flags
-        @opts.flags[opt] = options[opt]
+        @opts.flags[opt] = options.flags[opt]
 
       for opt of options.folders
-        @opts.folders[opt] = options[opt]
+        @opts.folders[opt] = options.folders[opt]
 
       null
 
     optionsJSON:(cwd)->
       try
         log.info "Looking for config..."
-        jsonPath = path.join(path,"threeflow.json")
-        jsonOpts = JSON.parse fs.readFileSync(jsonPath)
+        jsonPath = path.join(cwd,"threeflow.json")
+        jsonFile = fs.readFileSync(jsonPath)
+        jsonOpts = JSON.parse jsonFile
         @options jsonOpts
         @setCwd cwd
-        log.info "Using " + jsonPath
+        log.info "Found config :" + jsonPath
       catch error
         @setCwd null
         @options()
-
-        log.warn "No config found.  Use 'threeflow init' to start a project."
+        if error instanceof SyntaxError
+          log.warn "Config found but error parsing it. [ '" + error.message + "' ]"
+        else
+          log.warn "No config found.  Use 'threeflow init' to start a project."
 
       null
 
@@ -112,13 +115,16 @@ module.exports =
         log.notice "Starting up without config for now... (Renders won't be saved!)"
         # use node modules folder
         # shouldn't need to set allowSave = false, as this should be the default
-        @cwd = path.join(__dirname, "..")
+        @cwd = path.join(__dirname,"..")
       else
         log.notice "Starting up with config..."
 
       # TODO: should validate / create folder paths
       # convert to absolute paths
+
+      console.log @opts.folders
       for folder of @opts.folders
+        console.log folder,@cwd,@opts.folders[folder]
         absFolder = path.join @cwd,@opts.folders[folder]
         @opts.folders[folder] =  absFolder
 

@@ -1,5 +1,5 @@
 (function() {
-  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, ImageExporter, LightingBox, LightingRig, LightingRigGui, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, RendererGui, ShinyMaterial, Signal, SunflowRenderer, SunskyLight, TraceDepthsExporter,
+  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, Gui, ImageExporter, LightingBox, LightingRig, LightingRigGui, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, Signal, SunflowRenderer, SunskyLight, TraceDepthsExporter,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -28,6 +28,7 @@
     SunflowRenderer.RENDER_ERROR = "render-error";
 
     function SunflowRenderer(options) {
+      var autoConnect;
       if (options == null) {
         options = {};
       }
@@ -39,21 +40,11 @@
       this.onRenderAdded = __bind(this.onRenderAdded, this);
       this.onDisconnected = __bind(this.onDisconnected, this);
       this.onConnected = __bind(this.onConnected, this);
-      if (typeof options === "string") {
-        this.name = options;
-        this.scale = 1;
-        this.overwrite = false;
-        this.deleteSc = true;
-      } else {
-        this.name = options.name || null;
-        this.scale = options.scale || 1;
-        this.overwrite = options.overwrite || false;
-        if (options.deleteSc === void 0 || options.deleteSc === null || (typeof options.deleteSc !== "boolean")) {
-          this.deleteSc = true;
-        } else {
-          this.delteSc = false;
-        }
-      }
+      autoConnect = options.autoConnect === false ? false : true;
+      this.name = options.name || null;
+      this.scale = options.scale || 1;
+      this.overwrite = options.overwrite || false;
+      this.deleteSc = options.deleteSc === false ? false : true;
       this.sunflowCl = {
         noGui: false,
         ipr: true,
@@ -76,6 +67,9 @@
       this.rendering = false;
       this.onRenderStatus = new THREEFLOW.Signal();
       this.onConnectionStatus = new THREEFLOW.Signal();
+      if (autoConnect) {
+        this.connect();
+      }
     }
 
     SunflowRenderer.prototype.connect = function() {
@@ -152,7 +146,6 @@
     };
 
     SunflowRenderer.prototype.onRenderAdded = function(data) {
-      console.log("ADDED", data);
       this.onRenderStatus.dispatch({
         status: SunflowRenderer.RENDER_ADDED
       });
@@ -206,7 +199,7 @@
 
   THREEFLOW.VERSION = '0.6.0.1';
 
-  THREEFLOW.COMMIT = '779d28e';
+  THREEFLOW.COMMIT = 'fd2db34';
 
   BlockExporter = (function() {
     function BlockExporter(exporter) {
@@ -1121,66 +1114,19 @@
 
   THREEFLOW.InfinitePlaneGeometry.prototype = Object.create(THREE.PlaneGeometry.prototype);
 
-  THREEFLOW.LightingRigGui = LightingRigGui = (function() {
-    function LightingRigGui(rig) {
-      var light, _i, _len, _ref;
-      this.rig = rig;
-      this.gui = new dat.GUI();
-      this.backdropFolder = this.gui.addFolder("Backdrop");
-      this.backdropFolder.add(this.rig.backdropMaterial, "wireframe");
-      this.backdropFolder.add(this.rig.backdropMaterial, "transparent");
-      this.backdropFolder.add(this.rig.backdropMaterial, "opacity", 0, 1);
-      this.backdropFolder.open();
-      _ref = this.rig.lights;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        light = _ref[_i];
-        this.addRigLight(light);
-      }
-    }
-
-    LightingRigGui.prototype.addRigLight = function(rigLight) {
-      var folder, rotate;
-      folder = this.gui.addFolder(rigLight.name);
-      folder.add(rigLight, "enabled");
-      rotate = {
-        yaw: rigLight.yaw * (180 / Math.PI),
-        pitch: rigLight.pitch * (180 / Math.PI)
-      };
-      folder.add(rotate, "yaw", 0, 360).onChange(function(value) {
-        rotate.yaw = value;
-        return rigLight.yaw = value * (Math.PI / 180);
-      });
-      folder.add(rotate, "pitch", 0, 360).onChange(function(value) {
-        rotate.pitch = value;
-        return rigLight.pitch = value * (Math.PI / 180);
-      });
-      folder.add(rigLight, "distance", 300, 2000);
-      folder.addColor(rigLight, "color").onChange(function(value) {
-        var hex;
-        hex = parseInt(value, 16);
-        return console.log(hex);
-      });
-      folder.add(rigLight, "radiance", 0, 100);
-      folder.add(rigLight, "geometryType", THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES);
-      return null;
-    };
-
-    return LightingRigGui;
-
-  })();
-
-  THREEFLOW.RendererGui = RendererGui = (function() {
-    function RendererGui(renderer) {
-      var statusObject, updateDisplay, updateFolder, updateType,
+  THREEFLOW.Gui = Gui = (function() {
+    function Gui(renderer, lightingRig) {
+      var light, statusObject, updateDisplay, updateFolder, updateType, _i, _len, _ref,
         _this = this;
       this.renderer = renderer;
+      this.lightingRig = lightingRig;
       this._onRenderIPR = __bind(this._onRenderIPR, this);
       this._onRender = __bind(this._onRender, this);
       if (!window.dat && !window.dat.GUI) {
         throw new Error("No dat.GUI found.");
       }
       this.gui = new dat.GUI();
-      this.onRender = null;
+      this.onRender = new THREEFLOW.Signal();
       updateDisplay = function() {
         var controller, _i, _len, _ref, _results;
         _ref = _this.gui.__controllers;
@@ -1215,6 +1161,18 @@
       this.traceDepthsFolder = this.gui.addFolder("Trace Depths");
       this.causticsFolder = this.gui.addFolder("Caustics");
       this.giFolder = this.gui.addFolder("Global Illumination");
+      if (this.lightingRig) {
+        this.lightingRigFolder = this.gui.addFolder("Lighting Rig");
+        this.backdropFolder = this.lightingRigFolder.addFolder("Backdrop");
+        this.backdropFolder.add(this.lightingRig.backdropMaterial, "wireframe");
+        this.backdropFolder.add(this.lightingRig.backdropMaterial, "transparent");
+        this.backdropFolder.add(this.lightingRig.backdropMaterial, "opacity", 0, 1);
+        _ref = this.lightingRig.lights;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          light = _ref[_i];
+          this.addRigLight(this.lightingRigFolder, light);
+        }
+      }
       this.overridesFolder = this.gui.addFolder("Overrides");
       this.otherFolder = this.gui.addFolder("Other");
       this.imageFolder.add(this.renderer, "scale");
@@ -1270,13 +1228,13 @@
       ];
       this.giSubFolder = null;
       updateFolder = function(type) {
-        var controller, controllers, fake, giType, giTypeProperty, property, _i, _len;
+        var controller, controllers, fake, giType, giTypeProperty, property, _j, _len1;
         if (!_this.giSubFolder) {
           _this.giSubFolder = _this.giFolder.addFolder(type.name);
         } else {
           controllers = _this.giSubFolder.__controllers.slice(0);
-          for (_i = 0, _len = controllers.length; _i < _len; _i++) {
-            controller = controllers[_i];
+          for (_j = 0, _len1 = controllers.length; _j < _len1; _j++) {
+            controller = controllers[_j];
             _this.giSubFolder.remove(controller);
           }
           _this.giSubFolder.__controllers.splice(0);
@@ -1322,21 +1280,91 @@
       null;
     }
 
-    RendererGui.prototype._onRender = function() {
-      if (this.onRender) {
-        this.renderer.sunflowCl.ipr = false;
-        return this.onRender();
-      }
+    Gui.prototype.addRigLight = function(gui, rigLight) {
+      var folder, rotate;
+      folder = gui.addFolder(rigLight.name);
+      folder.add(rigLight, "enabled");
+      rotate = {
+        yaw: rigLight.yaw * (180 / Math.PI),
+        pitch: rigLight.pitch * (180 / Math.PI)
+      };
+      folder.add(rotate, "yaw", 0, 360).onChange(function(value) {
+        rotate.yaw = value;
+        return rigLight.yaw = value * (Math.PI / 180);
+      });
+      folder.add(rotate, "pitch", 0, 360).onChange(function(value) {
+        rotate.pitch = value;
+        return rigLight.pitch = value * (Math.PI / 180);
+      });
+      folder.add(rigLight, "distance", 300, 2000);
+      folder.addColor(rigLight, "color").onChange(function(value) {
+        var hex;
+        hex = parseInt(value, 16);
+        return console.log(hex);
+      });
+      folder.add(rigLight, "radiance", 0, 100);
+      return folder.add(rigLight, "geometryType", THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES);
     };
 
-    RendererGui.prototype._onRenderIPR = function() {
-      if (this.onRender) {
-        this.renderer.sunflowCl.ipr = true;
-        return this.onRender();
-      }
+    Gui.prototype._onRender = function() {
+      this.renderer.sunflowCl.ipr = false;
+      return this.onRender.dispatch();
     };
 
-    return RendererGui;
+    Gui.prototype._onRenderIPR = function() {
+      this.renderer.sunflowCl.ipr = true;
+      return this.onRender.dispatch();
+    };
+
+    return Gui;
+
+  })();
+
+  THREEFLOW.LightingRigGui = LightingRigGui = (function() {
+    function LightingRigGui(rig) {
+      var light, _i, _len, _ref;
+      this.rig = rig;
+      this.gui = new dat.GUI();
+      this.backdropFolder = this.gui.addFolder("Backdrop");
+      this.backdropFolder.add(this.rig.backdropMaterial, "wireframe");
+      this.backdropFolder.add(this.rig.backdropMaterial, "transparent");
+      this.backdropFolder.add(this.rig.backdropMaterial, "opacity", 0, 1);
+      this.backdropFolder.open();
+      _ref = this.rig.lights;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        light = _ref[_i];
+        this.addRigLight(light);
+      }
+    }
+
+    LightingRigGui.prototype.addRigLight = function(rigLight) {
+      var folder, rotate;
+      folder = this.gui.addFolder(rigLight.name);
+      folder.add(rigLight, "enabled");
+      rotate = {
+        yaw: rigLight.yaw * (180 / Math.PI),
+        pitch: rigLight.pitch * (180 / Math.PI)
+      };
+      folder.add(rotate, "yaw", 0, 360).onChange(function(value) {
+        rotate.yaw = value;
+        return rigLight.yaw = value * (Math.PI / 180);
+      });
+      folder.add(rotate, "pitch", 0, 360).onChange(function(value) {
+        rotate.pitch = value;
+        return rigLight.pitch = value * (Math.PI / 180);
+      });
+      folder.add(rigLight, "distance", 300, 2000);
+      folder.addColor(rigLight, "color").onChange(function(value) {
+        var hex;
+        hex = parseInt(value, 16);
+        return console.log(hex);
+      });
+      folder.add(rigLight, "radiance", 0, 100);
+      folder.add(rigLight, "geometryType", THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES);
+      return null;
+    };
+
+    return LightingRigGui;
 
   })();
 

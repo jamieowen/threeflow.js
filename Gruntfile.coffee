@@ -42,6 +42,11 @@ module.exports = (grunt)->
         flatten:true
         src:"build/*.*"
         dest: "examples/js/"
+      templates:
+        expand:true
+        flatten:true
+        src:"build/*.*"
+        dest: "templates/blank/deploy/js"
 
     imagemin:
       renders:

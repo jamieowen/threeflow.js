@@ -1,7 +1,7 @@
 {
   "name": "threeflow",
   "preferGlobal": true,
-  "version": "0.6.0.1",
+  "version": "0.6.0-1",
   "author": "Jamie Owen <hello@jamieowen.com>",
   "description": "Render three.js scenes using the open source sunflow renderer\"",
   "main": "./lib/threeflow.lib.js",

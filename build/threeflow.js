@@ -493,7 +493,27 @@
   })(BlockExporter);
 
   Exporter = (function() {
+    Exporter.EXCLUDED_OBJECT3D_TYPES = [THREE.Camera, THREE.Light, THREE.Bone, THREE.LOD, THREE.Line, THREE.MorphAnimMesh, THREE.ParticleSystem, THREE.SkinnedMesh, THREE.Sprite, THREE.ArrowHelper, THREE.BoundingBoxHelper, THREE.DirectionalLightHelper, THREE.HemisphereLightHelper, THREE.PointLightHelper, THREE.SpotLightHelper, THREE.ImmediateRenderObject, THREE.LensFlare, THREE.MorphBlendMesh];
+
+    Exporter.__checkedExcluded = false;
+
+    Exporter.__checkExcluded = function() {
+      var CHECK_EXCLUDED_OBJECT3D_TYPES, cls, _i, _len;
+      if (!Exporter.__checkedExcluded) {
+        CHECK_EXCLUDED_OBJECT3D_TYPES = [THREE.TransformControls, THREE.AudioObject];
+        for (_i = 0, _len = CHECK_EXCLUDED_OBJECT3D_TYPES.length; _i < _len; _i++) {
+          cls = CHECK_EXCLUDED_OBJECT3D_TYPES[_i];
+          if (cls !== void 0 && typeof cls === "function") {
+            Exporter.EXCLUDED_OBJECT3D_TYPES.push(cls);
+          }
+        }
+        Exporter.__checkedExcluded = true;
+      }
+      return null;
+    };
+
     function Exporter() {
+      Exporter.__checkExcluded();
       this.exporterSettings = {
         convertPrimitives: false
       };
@@ -521,15 +541,23 @@
     };
 
     Exporter.prototype.indexScene = function(object3d) {
-      var blockExporter, child, doTraverse, _i, _j, _len, _len1, _ref, _ref1;
+      var blockExporter, child, cls, doTraverse, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
+      _ref = Exporter.EXCLUDED_OBJECT3D_TYPES;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        cls = _ref[_i];
+        if (object3d instanceof cls) {
+          console.log("[Threeflow] Ignored object : ", object3d);
+          return;
+        }
+      }
       if (object3d.children.length) {
-        _ref = object3d.children;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          child = _ref[_i];
+        _ref1 = object3d.children;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          child = _ref1[_j];
           doTraverse = true;
-          _ref1 = this.blockExporters;
-          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-            blockExporter = _ref1[_j];
+          _ref2 = this.blockExporters;
+          for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+            blockExporter = _ref2[_k];
             blockExporter.addToIndex(child);
             doTraverse = doTraverse && blockExporter.doTraverse(child);
           }
@@ -570,9 +598,6 @@
     GeometryExporter.prototype.addToIndex = function(object3d) {
       var faceMaterials;
       if (!object3d instanceof THREE.Mesh) {
-        return;
-      }
-      if (object3d instanceof THREE.VertexNormalsHelper) {
         return;
       }
       if (object3d.geometry instanceof THREE.Geometry) {
@@ -975,6 +1000,11 @@
           result += '  diff ' + this.exportColorTHREE(material.color) + '\n';
           result += '  spec ' + this.exportColorTHREE(material.specular) + ' ' + material.shininess + '\n';
           result += '  samples ' + (material.samples || 4) + '\n';
+        } else {
+          console.log("[Threeflow] Unsupported Material type. Will map to black THREEFLOW.DiffuseMaterial");
+          console.log(material);
+          result += '  type diffuse\n';
+          result += '  diff { "sRGB nonlinear" 0 0 0 }\n';
         }
         result += '}\n\n';
       }
@@ -1724,7 +1754,6 @@
       this.transformControls = new THREE.TransformControls(camera, domElement);
       this.transformControls.addEventListener("change", this.onTransformChange);
       this.orbitControls = new THREE.OrbitControls(camera, domElement);
-      this.orbitControls.enabled = false;
       this.pointerDown = false;
       domElement.addEventListener("mousedown", this.onPointerDown, false);
       domElement.addEventListener("mouseup", this.onPointerUp, false);
@@ -1788,6 +1817,7 @@
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
           light = _ref1[_j];
           if (light.enabled) {
+            this.transformControls.attach(light);
             this.add(light);
             this.enabledLights.push(light);
           }

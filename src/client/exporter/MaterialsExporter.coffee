@@ -64,6 +64,11 @@ class MaterialsExporter extends BlockExporter
         result += '  spec ' + @exportColorTHREE(material.specular) + ' ' + material.shininess + '\n'
         # default to 4 for handling THREE.MeshPhongMaterial
         result += '  samples ' + ( material.samples || 4 ) + '\n'
+      else
+        console.log "[Threeflow] Unsupported Material type. Will map to black THREEFLOW.DiffuseMaterial"
+        console.log material
+        result += '  type diffuse\n'
+        result += '  diff { "sRGB nonlinear" 0 0 0 }\n'
 
       result += '}\n\n'
 

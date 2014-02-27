@@ -19,9 +19,6 @@ class GeometryExporter extends BlockExporter
     if not object3d instanceof THREE.Mesh
       return
 
-    if object3d instanceof THREE.VertexNormalsHelper
-      return
-
     if object3d.geometry instanceof THREE.Geometry
 
       # TODO : Skip Primitives Geometry when converting to sunflow primitives.

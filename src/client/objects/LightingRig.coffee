@@ -59,9 +59,7 @@ THREEFLOW.LightingRig = class LightingRig
 
     @transformControls = new THREE.TransformControls( camera, domElement )
     @transformControls.addEventListener "change", @onTransformChange
-
     @orbitControls = new THREE.OrbitControls( camera, domElement )
-    @orbitControls.enabled = false
 
     @pointerDown = false
 
@@ -119,6 +117,7 @@ THREEFLOW.LightingRig = class LightingRig
 
       for light in @lights
         if light.enabled
+          @transformControls.attach light
           @add light
 
           @enabledLights.push light

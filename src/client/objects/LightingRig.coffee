@@ -1,6 +1,6 @@
 
 THREEFLOW.LightingRig = class LightingRig
-  constructor:(camera,domElement)->
+  constructor:(@camera,@domElement)->
 
     THREE.Object3D.call @
 
@@ -57,21 +57,22 @@ THREEFLOW.LightingRig = class LightingRig
     ]
 
 
-    @transformControls = new THREE.TransformControls( camera, domElement )
+    @transformControls = new THREE.TransformControls( @camera, @domElement )
     @transformControls.addEventListener "change", @onTransformChange
-    @orbitControls = new THREE.OrbitControls( camera, domElement )
-
-    @pointerDown = false
-
-    @projector = new THREE.Projector();
-    @raycaster = new THREE.Raycaster();
-    @mouse = new THREE.Vector2();
-
-    domElement.addEventListener "mousedown", @onPointerDown, false
-    domElement.addEventListener "mouseup", @onPointerUp, false
-    domElement.addEventListener "mouseout", @onPointerUp, false
+    @orbitControls = new THREE.OrbitControls( @camera, @domElement )
 
     @add @transformControls
+
+    @projector  = new THREE.Projector();
+    @raycaster  = new THREE.Raycaster();
+    @pointerVec = new THREE.Vector3();
+
+    #@domElement.addEventListener "mousedown", @onPointerDown, false
+    #@domElement.addEventListener "mouseup", @onPointerUp, false
+    #@domElement.addEventListener "mouseout", @onPointerUp, false
+    @domElement.addEventListener "click", @onPointerClick, false
+
+    window.addEventListener "keydown",@onKeyDown
 
     for light in @lights
       light.position.set(Math.random()*500, Math.random()*500, Math.random()*500)
@@ -102,17 +103,55 @@ THREEFLOW.LightingRig = class LightingRig
     else if event.state is "pointer-up" and not @orbitControls.enabled
       @orbitControls.enabled = true
 
+    @transformControls.update()
+
   onPointerDown:(event)=>
-    #event.preventDefault()
+    event.preventDefault()
     null
 
-
   onPointerUp:(event)=>
-    #event.preventDefault()
+    event.preventDefault()
+    null
+
+  onPointerClick:(event)=>
+    event.preventDefault()
+
+    rect = @domElement.getBoundingClientRect()
+
+    x = (event.clientX - rect.left) / rect.width
+    y = (event.clientY - rect.top) / rect.height
+
+    @pointerVec.set( ( x ) * 2 - 1, - ( y ) * 2 + 1, 0.5 )
+
+    @projector.unprojectVector( @pointerVec, @camera );
+
+    @raycaster.set( @camera.position, @pointerVec.sub( @camera.position ).normalize() );
+
+    intersects = @raycaster.intersectObjects( @lights, true );
+
+    if intersects.length
+      intersect = intersects[0]
+      if intersect.object.parent instanceof THREEFLOW.AreaLight
+        rigLight = intersect.object.parent.parent
+        @transformControls.attach rigLight
+    else
+      @transformControls.detach @transformControls.object
+
+    null
+
+  onKeyDown:(event)=>
+
+    switch event.keyCode
+      when 81 then @transformControls.setSpace( if @transformControls.space is "local" then "world" else "local" ) # Q
+      when 87 then @transformControls.setMode("translate") # W
+      when 69 then @transformControls.setMode("rotate") # E
+      when 82 then @transformControls.setMode("scale") # R
+
     null
 
   update:()->
     if @lightsDirty
+      console.log "Lights Dirty"
       @lightsDirty = false
       for light in @enabledLights
         @remove light
@@ -121,7 +160,6 @@ THREEFLOW.LightingRig = class LightingRig
 
       for light in @lights
         if light.enabled
-          @transformControls.attach light
           @add light
 
           @enabledLights.push light

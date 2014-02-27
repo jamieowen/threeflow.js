@@ -30,32 +30,9 @@ THREEFLOW.AreaLight = class AreaLight
     @_radiance    = params.radiance || 100.0
     @samples      = params.samples || 16
 
-    @_geometry = params.geometry || new THREE.PlaneGeometry 10,10
-
-    if @markers
-      @material = new THREE.MeshBasicMaterial
-        wireframe: true
-      @material.color = @_color
-
-      @mesh = new THREE.Mesh @_geometry,@material
-      @add @mesh
-
-      # line for direction
-      lineGeometry = new THREE.Geometry()
-      lineGeometry.vertices.push new THREE.Vector3( 0, 0, 0 )
-      lineGeometry.vertices.push new THREE.Vector3( 0, 0, 100 )
-
-      @line = new THREE.Line lineGeometry, new THREE.LineBasicMaterial
-        color: @_color.getHex()
-
-      #@line.matrixAutoUpdate = false
-      @add @line
-
-    if @simulate
-      # Just use three.js point light for now.
-      @light = new THREE.PointLight params.color,params.intensity
-      @light.color = @_color
-      @add @light
+    @target       = new THREE.Vector3()
+    # geometry setter, creates lights/markers
+    @geometry     = params.geometry || new THREE.PlaneGeometry 100,100
 
   # Extend THREE.Object3D
   @:: = Object.create THREE.Object3D::
@@ -67,6 +44,12 @@ THREEFLOW.AreaLight = class AreaLight
         @_color
       set: (value) ->
         @_color = value
+
+        if @simulate
+          @light.color.setRGB @_color
+
+        if @markers
+          @material.color = @_color
 
     radiance:
       get: ->
@@ -83,12 +66,71 @@ THREEFLOW.AreaLight = class AreaLight
       get: ->
         @_geometry
       set: (value) ->
-        if @_geometry is value
+        if @_geometry is value or not value
           return
 
         @_geometry = value
 
-        # TODO : need to see if update can be made without creating new mesh
-        @remove @mesh
-        @mesh = new THREE.Mesh @_geometry,@material
-        @add @mesh
+        # Need to checked a bettwer way to do this, update vertices?
+        if @mesh
+          @remove @mesh
+
+        if @simulate or @markers
+          # calculate lighting.
+          if not @_geometry.boundingBox
+            @_geometry.computeBoundingBox()
+
+          bb = @_geometry.boundingBox.size()
+
+          # volume/area
+          va = 0
+          dir = new THREE.Vector3()
+          planar = true
+
+          if bb.x is 0
+            va = bb.y * bb.z
+            dir.set(1,0,0)
+          else if bb.y is 0
+            va = bb.x * bb.z
+            dir.set(0,1,0)
+          else if bb.z is 0
+            va = bb.x * bb.y
+            dir.set(0,0,1)
+          else
+            va = bb.x * bb.y * bb.z
+            planar = false
+
+        if @simulate
+          if planar
+            # add directional light
+            @light = new THREE.DirectionalLight @_color,1
+            #@light.target.copy dir
+            @light.color = @_color
+            @add @light
+          else
+            # add point light
+            @light = new THREE.PointLight @_color,1
+            #@light.target.copy dir
+            @light.color = @_color
+            @add @light
+
+        if @markers
+          @material = new THREE.MeshBasicMaterial
+            wireframe: true
+            side: THREE.DoubleSide
+
+          @material.color = @_color
+
+          # line for direction
+          lineGeometry = new THREE.Geometry()
+          lineGeometry.vertices.push new THREE.Vector3( 0, 0, 0 )
+          lineGeometry.vertices.push dir.clone().multiplyScalar(100)
+
+          @line = new THREE.Line lineGeometry, new THREE.LineBasicMaterial
+            color: @_color.getHex()
+
+          @line.matrixAutoUpdate = false
+          @add @line
+
+          @mesh = new THREE.Mesh @_geometry,@material
+          @add @mesh

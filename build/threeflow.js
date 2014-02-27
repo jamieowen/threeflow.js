@@ -1028,9 +1028,6 @@
       if (!(object3d instanceof THREE.Mesh)) {
         return;
       }
-      if (object3d instanceof THREE.VertexNormalsHelper) {
-        return;
-      }
       if (!this.meshIndex[object3d.uuid]) {
         this.meshIndex[object3d.uuid] = object3d;
       }

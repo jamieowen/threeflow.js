@@ -12,9 +12,6 @@ class MeshExporter extends BlockExporter
     if not (object3d instanceof THREE.Mesh)
       return
 
-    if object3d instanceof THREE.VertexNormalsHelper
-      return
-
     if not @meshIndex[object3d.uuid]
       @meshIndex[object3d.uuid] = object3d
 

@@ -63,6 +63,10 @@ THREEFLOW.LightingRig = class LightingRig
 
     @pointerDown = false
 
+    @projector = new THREE.Projector();
+    @raycaster = new THREE.Raycaster();
+    @mouse = new THREE.Vector2();
+
     domElement.addEventListener "mousedown", @onPointerDown, false
     domElement.addEventListener "mouseup", @onPointerUp, false
     domElement.addEventListener "mouseout", @onPointerUp, false

@@ -1752,6 +1752,9 @@
       this.transformControls.addEventListener("change", this.onTransformChange);
       this.orbitControls = new THREE.OrbitControls(camera, domElement);
       this.pointerDown = false;
+      this.projector = new THREE.Projector();
+      this.raycaster = new THREE.Raycaster();
+      this.mouse = new THREE.Vector2();
       domElement.addEventListener("mousedown", this.onPointerDown, false);
       domElement.addEventListener("mouseup", this.onPointerUp, false);
       domElement.addEventListener("mouseout", this.onPointerUp, false);

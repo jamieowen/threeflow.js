@@ -60,6 +60,7 @@
       this.gi = this.exporter.gi;
       this.cameras = this.exporter.cameras;
       this.lights = this.exporter.lights;
+      this.modifiers = this.exporter.modifiers;
       this.materials = this.exporter.materials;
       this.geometry = this.exporter.geometry;
       this.bufferGeometry = this.exporter.bufferGeometry;
@@ -530,6 +531,7 @@
       this.gi = this.addBlockExporter(new GiExporter(this));
       this.camera = this.addBlockExporter(new CameraExporter(this));
       this.lights = this.addBlockExporter(new LightsExporter(this));
+      this.modifiers = this.addBlockExporter(new ModifiersExporter(this));
       this.materials = this.addBlockExporter(new MaterialsExporter(this));
       this.geometry = this.addBlockExporter(new GeometryExporter(this));
       this.bufferGeometry = this.addBlockExporter(new BufferGeometryExporter(this));
@@ -1114,6 +1116,9 @@
           result += '  geometry ' + mesh.geometry.uuid + '\n';
           result += '  transform col' + this.exportTransform(mesh) + '\n';
           result += '  shader ' + mesh.material.uuid + '\n';
+          if (mesh.material.bumpMap) {
+            result += '  modifier ' + mesh.material.uuid + '-MOD\n';
+          }
         }
         result += '}\n\n';
       }
@@ -1134,11 +1139,11 @@
 
     ModifiersExporter.prototype.addToIndex = function(object3d) {
       var material;
-      if (!object3d instanceof THREE.Mesh) {
+      if (!(object3d instanceof THREE.Mesh)) {
         return;
       }
       material = object3d.material;
-      if (!this.modifiersIndex[material.uuid] && material.bumpMap) {
+      if (!this.modifiersIndex[material.uuid] && material.bumpMap instanceof THREE.Texture) {
         this.modifiersIndex[material.uuid] = material;
       }
       return null;
@@ -1149,8 +1154,22 @@
     };
 
     ModifiersExporter.prototype.exportBlock = function() {
-      var result;
+      var material, result, texturePath, uuid;
       result = '';
+      for (uuid in this.modifiersIndex) {
+        material = this.modifiersIndex[uuid];
+        texturePath = this.exporter.textureLinkages[material.bumpMap.uuid];
+        if (!texturePath) {
+          console.log("[Threeflow] Found bumpMap texture on material but no texture linkage. ( Use linkTexturePath() )");
+        } else {
+          result += 'modifier {\n';
+          result += '  name ' + material.uuid + '-MOD\n';
+          result += '  type bump\n';
+          result += '  texture ' + texturePath + '\n';
+          result += '  scale -0.01\n';
+          result += '}\n';
+        }
+      }
       return result;
     };
 

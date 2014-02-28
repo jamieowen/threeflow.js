@@ -56,6 +56,10 @@ class MeshExporter extends BlockExporter
         result += '  transform col' + @exportTransform(mesh) + '\n'
         result += '  shader ' + mesh.material.uuid + '\n'
 
+        if mesh.material.bumpMap
+          result += '  modifier ' + mesh.material.uuid + '-MOD\n'
+
+
       result += '}\n\n'
 
     return result

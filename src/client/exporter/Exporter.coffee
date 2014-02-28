@@ -74,6 +74,7 @@ class Exporter
 
     @camera             = @addBlockExporter new CameraExporter(@)
     @lights             = @addBlockExporter new LightsExporter(@)
+    @modifiers          = @addBlockExporter new ModifiersExporter(@)
     @materials          = @addBlockExporter new MaterialsExporter(@)
     @geometry           = @addBlockExporter new GeometryExporter(@)
     @bufferGeometry     = @addBlockExporter new BufferGeometryExporter(@)

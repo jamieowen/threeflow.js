@@ -47,6 +47,7 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
 
     @cameras            = @exporter.cameras
     @lights             = @exporter.lights
+    @modifiers          = @exporter.modifiers
     @materials          = @exporter.materials
     @geometry           = @exporter.geometry
     @bufferGeometry     = @exporter.bufferGeometry

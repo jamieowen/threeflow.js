@@ -16,10 +16,10 @@
 </head>
 <style>
   body{
-    background-color: #efefef;
+    background-color: #131313;
     margin:0px;
     padding:0px;
-    overflow:hidden;
+    overflow:scroll;
   }
 </style>
 <body>
@@ -44,6 +44,10 @@
     renderer = new THREE.WebGLRenderer();
     renderer.setSize( width,height );
 
+    document.body.appendChild( renderer.domElement );
+    var img = document.body.appendChild( document.createElement("img") );
+    img.src = "renders/suzanne.png";
+
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera( 35, width/height, 1, 30000 );
@@ -53,8 +57,6 @@
     lighting = new THREEFLOW.LightingRig(camera,renderer.domElement);
     lighting.loadState('{"keyRadiance":6,"lights":[{"enabled":true,"color":16777199,"keyRatio":0,"radiance":6,"geometryType":"Plane","target":{"x":-35.976463217623866,"y":114.9826472459399,"z":14.76779791261201},"light":{"x":-378.8596143373222,"y":290.20328094958063,"z":447.80734704797476,"sx":1,"sy":1,"sz":1}},{"enabled":true,"color":16777199,"keyRatio":2,"radiance":3,"geometryType":"Plane","target":{"x":217.81041418261862,"y":60.59184047682686,"z":0},"light":{"x":784.9189739195299,"y":204.48885431421434,"z":218.80207442818107,"sx":1.1760563915268067,"sy":1.1760563915268067,"sz":1.1760563915268067}},{"enabled":true,"color":16777199,"keyRatio":1,"radiance":6,"geometryType":"Plane","target":{"x":-207.30188165286313,"y":32.48094818666641,"z":-131.85555947333944},"light":{"x":-769.2943168229731,"y":381.50515397250257,"z":-894.6262734630952,"sx":0.7378484368043043,"sy":0.7378484368043043,"sz":0.7378484368043043}},{"enabled":true,"color":16777199,"keyRatio":8,"radiance":0.75,"geometryType":"Plane","target":{"x":405.4561720515609,"y":128.06773481919686,"z":-716.9348712525214},"light":{"x":762.4879099396458,"y":310.9158695184617,"z":-409.34363940372657,"sx":1.1752789471525573,"sy":1.1752789471525573,"sz":1.1752789471525573}}]}')
     scene.add( lighting );
-
-    document.body.appendChild( renderer.domElement );
 
     gui = new THREEFLOW.Gui(threeflow,lighting);
     gui.onRender.add( function(){

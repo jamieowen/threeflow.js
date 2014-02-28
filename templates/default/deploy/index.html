@@ -6,7 +6,7 @@
 <style>
   body{
     margin:0px;
-    padding:8px 0px;
+    padding:0px 0px;
     background-color: #131313;
     overflow:hidden;
 
@@ -18,44 +18,38 @@
     width:100%;
     height:100%;
     top:0px;
-    padding-left:240px;
-
-    -moz-box-sizing:    border-box;
-    -webkit-box-sizing: border-box;
-    box-sizing:         border-box;
+    padding:0px;
   }
   .type{
     font-family: Arial,Helvetica,sans-serif;
     font-size: 12px;
-    color:#efefef;
+    color:#131313;
     text-transform: uppercase;
   }
   .link{
     text-decoration: none;
-    display:block;
-  }
-  .header{
-    padding-left:24px;
+    display:inline-block;
+    color:#ffffff;
   }
 
   .menu{
     position:absolute;
+    margin: 20px;
     width:100%;
-    height:30px;
     z-index:100;
   }
 
 
 </style>
 <body>
-  <div class="menu">
-    <h1 class="type header">+  threeflow examples.</h1>
-    <ol>
-      <a target="example_frame" class="link type" href="suzanne.html">suzzanne/materials</a>
-    </ol>
+  <div class="menu type">
+    <h1 class="type header">threeflow.js</h1>
+      <a target="example_frame" class="link type" href="camaro.html">camaro</a> .
+      <a target="example_frame" class="link type" href="lee_perry_smith.html">lee perry smith</a> .
+      <a target="example_frame" class="link type" href="suzanne.html">suzanne</a>
   </div>
 
-  <iframe class="frame" name="example_frame" src="suzanne.html" seamless>
+  <iframe class="frame" name="example_frame" src="camaro.html" seamless>
   </iframe>
 </body>
 </html>

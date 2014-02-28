@@ -1,4 +1,5 @@
 path    = require 'path'
+log     = require '../lib/log'
 
 
 args =
@@ -13,10 +14,26 @@ if args.init
 else if args.update
   console.log "update--"
 
-else if args.start
+else
   threeflow = require( path.join(__dirname,"../lib/server") ).create()
-  threeflow.optionsJSON( process.cwd() )
+  threeflow.javaDetect (success)->
+    if success
+      # force save used for rendering whilst developing - no need for anyone else to use.
+      threeflow.forceSave( args["--force-save"] )
 
-  # force save used for rendering whilst developing - no need for anyone else to use.
-  threeflow.forceSave( args["--force-save"] )
-  threeflow.startup()
+      threeflow.optionsJSON( process.cwd() )
+      threeflow.startup()
+    else
+      log.info "Exiting... :("
+
+
+
+
+
+
+
+
+
+
+
+

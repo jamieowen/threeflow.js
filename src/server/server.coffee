@@ -3,6 +3,7 @@ io                = require 'socket.io'
 http              = require 'http'
 path              = require 'path'
 fs                = require 'fs'
+child_process     = require 'child_process'
 log               = require './log'
 version           = require './version'
 render            = require './render'
@@ -31,7 +32,15 @@ module.exports =
       @clients  = {} # hash of client it to client object.
       @renderQ  = render.createQueue @
 
-    javaDetect:()->
+    javaDetect:(onComplete)->
+      log.info "Detecting Java"
+      child_process.exec "java -version",(error,stdout,stderr)=>
+        if error
+          log.error "Java not found. Install it!"
+          onComplete(false)
+        else
+          onComplete(true)
+
       return true
 
     defaults:()->
@@ -82,7 +91,7 @@ module.exports =
 
     optionsJSON:(cwd)->
       try
-        log.info "Looking for config..."
+        log.info "Looking for config"
         jsonPath = path.join(cwd,"threeflow.json")
         jsonFile = fs.readFileSync(jsonPath)
         jsonOpts = JSON.parse jsonFile
@@ -90,14 +99,14 @@ module.exports =
 
         @opts.flags.allowSave = true
         @setCwd cwd
-        log.info "Found config..."
+        log.info "Found /threeflow.json"
       catch error
         @setCwd null
         @options()
         if error instanceof SyntaxError
-          log.warn "Config found but error parsing it. [ '" + error.message + "' ]"
+          log.warn "Error parsing /threeflow.json. [ '" + error.message + "' ]"
         else
-          log.warn "No config found.  Use 'threeflow init' to start a project."
+          log.warn "No /threeflow.json found.  Use 'threeflow init' to start a project."
 
       null
 
@@ -115,12 +124,12 @@ module.exports =
         @opts = @defaults()
 
       if not @cwd
-        log.notice "Starting up without config for now... (Renders won't be saved!)"
+        log.notice "Starting up without config for now (Renders won't be saved!)"
         # use node modules folder
         # shouldn't need to set allowSave = false, as this should be the default
         @cwd = path.join(__dirname,"..")
       else
-        log.notice "Starting up with config..."
+        log.notice "Starting up..."
 
       # check all renders/textures folders.
       for folder of @opts.folders

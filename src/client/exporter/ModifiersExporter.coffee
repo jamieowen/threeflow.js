@@ -39,7 +39,7 @@ class ModifiersExporter extends BlockExporter
         result += '  type bump\n'
         result += '  texture ' + texturePath + '\n'
         #result += '  scale ' + ( material.bumpScale * 0.01 ) + '\n'
-        result += '  scale ' + (material.bumpScale * -0.005) ) + '\n'
+        result += '  scale ' + (material.bumpScale * -0.005 ) + '\n'
         result += '}\n'
 
     return result

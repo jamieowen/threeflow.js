@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-var arg, args, path, threeflow, _i, _len, _ref;
+var arg, args, log, path, threeflow, _i, _len, _ref;
 
 path = require('path');
+
+log = require('../lib/log');
 
 args = {
   start: true
@@ -17,9 +19,15 @@ if (args.init) {
   console.log("init--");
 } else if (args.update) {
   console.log("update--");
-} else if (args.start) {
+} else {
   threeflow = require(path.join(__dirname, "../lib/server")).create();
-  threeflow.optionsJSON(process.cwd());
-  threeflow.forceSave(args["--force-save"]);
-  threeflow.startup();
+  threeflow.javaDetect(function(success) {
+    if (success) {
+      threeflow.forceSave(args["--force-save"]);
+      threeflow.optionsJSON(process.cwd());
+      return threeflow.startup();
+    } else {
+      return log.info("Exiting... :(");
+    }
+  });
 }

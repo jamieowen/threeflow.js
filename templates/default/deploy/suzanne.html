@@ -82,13 +82,14 @@
     for( i = 0; i<count; i++ )
     {
       materialType = materialTypes[ i%materialTypes.length ];
-      material = new materialType({color:0xffffff});
+      material = new materialType();
+
       if( material instanceof THREEFLOW.ConstantMaterial ){
-        material.color.setRGB(1,1,1);
+        material.color.setRGB(1,1,1); // Set to white / ConstantMaterial acts as a subtle light source when GI is enabled
       }else{
         material.color.setHSL(i/count,.7,.5);
       }
-      console.log(material);
+
       mesh = new THREE.Mesh(geometry,material);
       theta = ((Math.PI*2)/count)*i;
 

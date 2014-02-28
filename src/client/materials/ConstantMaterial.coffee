@@ -2,8 +2,8 @@ THREEFLOW.ConstantMaterial = class ConstantMaterial
 
   constructor:(params = {})->
 
-    THREE.MeshBasicMaterial.call @
+    THREE.MeshLambertMaterial.call @
 
     @setValues params
 
-  @:: = Object.create THREE.MeshBasicMaterial::
+  @:: = Object.create THREE.MeshLambertMaterial::

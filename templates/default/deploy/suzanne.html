@@ -10,6 +10,7 @@
 
   <script src="js/OrbitControls.js"></script>
   <script src="js/TransformControls.js"></script>
+
   <script src="js/SubdivisionModifier.js"></script>
 
 </head>
@@ -65,20 +66,29 @@
 
     // Material Spheres
 
-    var geometry, material, mesh, spheres;
+    var geometry, material, mesh, spheres, materialTypes,materialType;
     var size,radius,theta, i, count;
 
     size = 30;
     geometry = new THREE.SphereGeometry(size,size);
     geometry.computeBoundingBox();
-    count = 16;
+    count = 18;
     radius = ((size*2)*(count+4))/(Math.PI*2);
 
     spheres = new THREE.Object3D();
 
-    for( i = 0; i<count; i++ ) {
-      material = new THREEFLOW.ShinyMaterial();
-      material.color.setHSL(i/count,.7,.5);
+    materialTypes = [ THREEFLOW.ConstantMaterial, THREEFLOW.ShinyMaterial, THREEFLOW.DiffuseMaterial, THREEFLOW.MirrorMaterial, THREEFLOW.PhongMaterial, THREEFLOW.GlassMaterial ];
+
+    for( i = 0; i<count; i++ )
+    {
+      materialType = materialTypes[ i%materialTypes.length ];
+      material = new materialType({color:0xffffff});
+      if( material instanceof THREEFLOW.ConstantMaterial ){
+        material.color.setRGB(1,1,1);
+      }else{
+        material.color.setHSL(i/count,.7,.5);
+      }
+      console.log(material);
       mesh = new THREE.Mesh(geometry,material);
       theta = ((Math.PI*2)/count)*i;
 
@@ -105,15 +115,12 @@
       material = new THREEFLOW.ShinyMaterial();
       mesh = new THREE.Mesh(geometry,material);
 
-      // scale to decent height
       mesh.scale.set(scale,scale,scale);
       mesh.position.y = (geometry.boundingBox.max.y*0.535)*scale;
       mesh.rotation.order = "YXZ";
-      mesh.rotation.x = -(Math.PI/5);
-      mesh.rotation.y = Math.PI/4;
+      mesh.rotation.x = -(Math.PI/5); // rotate so flat on the floor.
+      mesh.rotation.y = Math.PI/12;
 
-      //mesh = new THREE.Mesh( new THREE.SphereGeometry(100), material )
-      //mesh.position.y = 100
       scene.add(mesh);
     });
   }

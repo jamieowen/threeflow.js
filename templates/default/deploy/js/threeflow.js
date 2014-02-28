@@ -1729,11 +1729,11 @@
       if (params == null) {
         params = {};
       }
-      THREE.MeshBasicMaterial.call(this);
+      THREE.MeshLambertMaterial.call(this);
       this.setValues(params);
     }
 
-    ConstantMaterial.prototype = Object.create(THREE.MeshBasicMaterial.prototype);
+    ConstantMaterial.prototype = Object.create(THREE.MeshLambertMaterial.prototype);
 
     return ConstantMaterial;
 

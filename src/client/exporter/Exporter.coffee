@@ -107,10 +107,12 @@ class Exporter
         # TODO : Auto No add-to-index with certain meshes.
 
         for blockExporter in @blockExporters
-          blockExporter.addToIndex( child )
+          if not child._tf_noIndex
+            blockExporter.addToIndex( child )
+
           doTraverse = doTraverse and blockExporter.doTraverse( child )
 
-        if doTraverse
+        if doTraverse and not child._tf_noTraverse
           @indexScene child
 
     null

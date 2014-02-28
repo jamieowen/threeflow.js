@@ -558,10 +558,12 @@
           _ref2 = this.blockExporters;
           for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
             blockExporter = _ref2[_k];
-            blockExporter.addToIndex(child);
+            if (!child._tf_noIndex) {
+              blockExporter.addToIndex(child);
+            }
             doTraverse = doTraverse && blockExporter.doTraverse(child);
           }
-          if (doTraverse) {
+          if (doTraverse && !child._tf_noTraverse) {
             this.indexScene(child);
           }
         }
@@ -870,15 +872,7 @@
     };
 
     LightsExporter.prototype.doTraverse = function(object3d) {
-      if (object3d instanceof THREEFLOW.PointLight) {
-        return false;
-      } else if (object3d instanceof THREEFLOW.SunskyLight) {
-        return false;
-      } else if (object3d instanceof THREEFLOW.AreaLight) {
-        return false;
-      } else {
-        return true;
-      }
+      return true;
     };
 
     LightsExporter.prototype.exportBlock = function() {
@@ -1001,8 +995,7 @@
           result += '  spec ' + this.exportColorTHREE(material.specular) + ' ' + material.shininess + '\n';
           result += '  samples ' + (material.samples || 4) + '\n';
         } else {
-          console.log("[Threeflow] Unsupported Material type. Will map to black THREEFLOW.DiffuseMaterial");
-          console.log(material);
+          console.log("[Threeflow] Unsupported Material type. Will map to black THREEFLOW.DiffuseMaterial.", material);
           result += '  type diffuse\n';
           result += '  diff { "sRGB nonlinear" 0 0 0 }\n';
         }
@@ -1193,6 +1186,11 @@
       this.giFolder = this.gui.addFolder("Global Illumination");
       if (this.lightingRig) {
         this.lightingRigFolder = this.gui.addFolder("Lighting Rig");
+        this.lightingRigFolder.add(this.lightingRig, "saveState").name("Dump JSON").onChange(function() {
+          var state;
+          state = _this.lightingRig.saveState();
+          return console.log(JSON.stringify(state));
+        });
         _ref = this.lightingRig.lights;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           light = _ref[_i];
@@ -1369,17 +1367,32 @@
         params = {};
       }
       THREE.Object3D.call(this);
-      if (params.simulate !== false) {
-        this.simulate = true;
-      }
-      if (params.markers !== false) {
-        this.markers = true;
-      }
+      this._tf_noTraverse = true;
       this._color = new THREE.Color(params.color);
       this._radiance = params.radiance || 100.0;
       this.samples = params.samples || 16;
-      this.target = new THREE.Vector3();
+      this.markerMaterial = new THREE.MeshBasicMaterial({
+        wireframe: true,
+        side: THREE.DoubleSide,
+        color: this._color
+      });
+      this.lineGeometry = new THREE.Geometry();
+      this.lineGeometry.vertices.push(new THREE.Vector3());
+      this.lineGeometry.vertices.push(new THREE.Vector3(0, 0, 100));
+      this.lineMesh = new THREE.Line(this.lineGeometry, new THREE.LineBasicMaterial({
+        color: this._color.getHex()
+      }));
+      this.lineMesh.name = "LINE MESH";
+      this.lineMesh.matrixAutoUpdate = false;
+      this.add(this.lineMesh);
+      this.toIntensity = 1;
+      this.planar = true;
+      this.planarDirection = new THREE.Vector3();
+      this.geometryMesh = null;
       this.geometry = params.geometry || new THREE.PlaneGeometry(100, 100);
+      if (params.simulate !== false) {
+        this.simulate = true;
+      }
     }
 
     AreaLight.prototype = Object.create(THREE.Object3D.prototype);
@@ -1391,12 +1404,10 @@
         },
         set: function(value) {
           this._color = value;
-          if (this.simulate) {
+          if (this.light) {
             this.light.color.setRGB(this._color);
           }
-          if (this.markers) {
-            return this.material.color = this._color;
-          }
+          return this.markerMaterial.color = this._color;
         }
       },
       radiance: {
@@ -1410,72 +1421,90 @@
           return this._radiance = value;
         }
       },
+      simulate: {
+        get: function() {
+          return this._simulate;
+        },
+        set: function(value) {
+          if (this._simulate === value) {
+            return;
+          }
+          this._simulate = value;
+          return this.updateLight();
+        }
+      },
       geometry: {
         get: function() {
           return this._geometry;
         },
         set: function(value) {
-          var bb, dir, lineGeometry, planar, va;
+          var bb, va;
           if (this._geometry === value || !value) {
             return;
           }
           this._geometry = value;
-          if (this.mesh) {
-            this.remove(this.mesh);
+          if (this.geometryMesh) {
+            this.remove(this.geometryMesh);
           }
-          if (this.simulate || this.markers) {
-            if (!this._geometry.boundingBox) {
-              this._geometry.computeBoundingBox();
-            }
-            bb = this._geometry.boundingBox.size();
-            va = 0;
-            dir = new THREE.Vector3();
-            planar = true;
-            if (bb.x === 0) {
-              va = bb.y * bb.z;
-              dir.set(1, 0, 0);
-            } else if (bb.y === 0) {
-              va = bb.x * bb.z;
-              dir.set(0, 1, 0);
-            } else if (bb.z === 0) {
-              va = bb.x * bb.y;
-              dir.set(0, 0, 1);
-            } else {
-              va = bb.x * bb.y * bb.z;
-              planar = false;
-            }
+          if (!this._geometry.boundingBox) {
+            this._geometry.computeBoundingBox();
           }
-          if (this.simulate) {
-            if (planar) {
-              this.light = new THREE.DirectionalLight(this._color, 1);
-              this.light.color = this._color;
-              this.add(this.light);
-            } else {
-              this.light = new THREE.PointLight(this._color, 1);
-              this.light.color = this._color;
-              this.add(this.light);
-            }
+          bb = this._geometry.boundingBox.size();
+          va = 0;
+          this.planar = true;
+          if (bb.x === 0) {
+            va = bb.y * bb.z;
+            this.planarDirection.set(1, 0, 0);
+          } else if (bb.y === 0) {
+            va = bb.x * bb.z;
+            this.planarDirection.set(0, 1, 0);
+          } else if (bb.z === 0) {
+            va = bb.x * bb.y;
+            this.planarDirection.set(0, 0, 1);
+          } else {
+            va = bb.x * bb.y * bb.z;
+            this.planar = false;
           }
-          if (this.markers) {
-            this.material = new THREE.MeshBasicMaterial({
-              wireframe: true,
-              side: THREE.DoubleSide
-            });
-            this.material.color = this._color;
-            lineGeometry = new THREE.Geometry();
-            lineGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
-            lineGeometry.vertices.push(dir.clone().multiplyScalar(100));
-            this.line = new THREE.Line(lineGeometry, new THREE.LineBasicMaterial({
-              color: this._color.getHex()
-            }));
-            this.line.matrixAutoUpdate = false;
-            this.add(this.line);
-            this.mesh = new THREE.Mesh(this._geometry, this.material);
-            return this.add(this.mesh);
+          if (this.planar) {
+            this.toIntensity = va * 0.00001;
+          } else {
+            this.toIntensity = va / 1000000;
           }
+          this.updateLight();
+          this.geometryMesh = new THREE.Mesh(this._geometry, this.markerMaterial);
+          this.add(this.geometryMesh);
+          return this.geometryMesh.name = "GEOMETRY MESH";
         }
       }
     });
+
+    AreaLight.prototype.updateLight = function() {
+      if (!this._simulate && this.light) {
+        this.remove(this.light);
+      } else if (!this._simulate) {
+
+      } else if (this._simulate && !this.light) {
+        if (this.planar) {
+          this.light = new THREE.DirectionalLight(this._color, 1);
+          this.light.position.set(0, 0, 0);
+          this.light.target.position.copy(this.planarDirection);
+        } else {
+          this.light = new THREE.PointLight(this._color, 1);
+        }
+        return this.add(this.light);
+      } else if (this.planar && this.light instanceof THREE.PointLight) {
+        this.remove(this.light);
+        this.light = new THREE.DirectionalLight(this._color, 1);
+        this.light.position.set(0, 0, 0);
+        this.light.target.position.copy(this.planarDirection);
+        console.log("SWAP TO", this.light);
+        return this.add(this.light);
+      } else if (!this.planar && this.light instanceof THREE.DirectionalLight) {
+        this.remove(this.light);
+        this.light = new THREE.PointLight(this._color, 1);
+        return this.add(this.light);
+      }
+    };
 
     return AreaLight;
 
@@ -1506,6 +1535,7 @@
         params = {};
       }
       THREE.Object3D.call(this);
+      this._tf_noTraverse = true;
       if (params.simulate !== false) {
         this.simulate = true;
       }
@@ -1559,6 +1589,7 @@
   THREEFLOW.SunskyLight = SunskyLight = (function() {
     function SunskyLight(params) {
       THREE.Object3D.call(this);
+      this._tf_noTraverse = true;
       params = params || {};
       this.up = params.up || new THREE.Vector3(0, 1, 0);
       this.east = params.east || new THREE.Vector3(0, 0, 1);
@@ -1732,11 +1763,10 @@
 
   THREEFLOW.LightingRig = LightingRig = (function() {
     function LightingRig(camera, domElement) {
-      var light, params, _i, _len, _ref;
+      var params;
       this.camera = camera;
       this.domElement = domElement;
       this.onKeyDown = __bind(this.onKeyDown, this);
-      this.onPointerClick = __bind(this.onPointerClick, this);
       this.onPointerUp = __bind(this.onPointerUp, this);
       this.onPointerDown = __bind(this.onPointerDown, this);
       this.onTransformChange = __bind(this.onTransformChange, this);
@@ -1766,6 +1796,7 @@
             radiance: this.keyRadiance
           }
         }), new THREEFLOW.LightingRigLight(this, false, {
+          enabled: false,
           name: "Fill Light",
           keyRatio: 5,
           light: {
@@ -1773,6 +1804,7 @@
             geometryType: "Plane"
           }
         }), new THREEFLOW.LightingRigLight(this, false, {
+          enabled: false,
           name: "Back/Rim Light",
           keyRatio: 2,
           light: {
@@ -1789,20 +1821,16 @@
           }
         })
       ];
+      this.projector = new THREE.Projector();
+      this.raycaster = new THREE.Raycaster();
+      this.pointerVec = new THREE.Vector3();
+      this.domElement.addEventListener("mousedown", this.onPointerDown, false);
+      this.domElement.addEventListener("mouseup", this.onPointerUp, false);
+      window.addEventListener("keydown", this.onKeyDown);
       this.transformControls = new THREE.TransformControls(this.camera, this.domElement);
       this.transformControls.addEventListener("change", this.onTransformChange);
       this.orbitControls = new THREE.OrbitControls(this.camera, this.domElement);
       this.add(this.transformControls);
-      this.projector = new THREE.Projector();
-      this.raycaster = new THREE.Raycaster();
-      this.pointerVec = new THREE.Vector3();
-      this.domElement.addEventListener("click", this.onPointerClick, false);
-      window.addEventListener("keydown", this.onKeyDown);
-      _ref = this.lights;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        light = _ref[_i];
-        light.position.set(Math.random() * 500, Math.random() * 500, Math.random() * 500);
-      }
       this.enabledLights = [];
       this.lightsDirty = true;
       this.keyRadianceDirty = true;
@@ -1827,59 +1855,153 @@
     });
 
     LightingRig.prototype.onTransformChange = function(event) {
+      var light, _i, _len, _ref;
       if ((event.state === "pointer-down" || event.state === "pointer-hover") && this.orbitControls.enabled) {
         this.orbitControls.enabled = false;
       } else if (event.state === "pointer-up" && !this.orbitControls.enabled) {
         this.orbitControls.enabled = true;
+      }
+      _ref = this.enabledLights;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        light = _ref[_i];
+        light.lookAtDirty = true;
       }
       return this.transformControls.update();
     };
 
     LightingRig.prototype.onPointerDown = function(event) {
       event.preventDefault();
+      /*
+      intersect = @getIntersection()
+      
+      console.log "DOWN", intersect
+      if intersect
+        console.log intersect.object
+        @orbitControls.enabled = false
+      else
+        @orbitControls.enabled = true
+      */
+
+      return null;
+    };
+
+    LightingRig.prototype.saveState = function() {
+      var l, light, state, _i, _len, _ref;
+      state = {};
+      state.keyRadiance = this.keyRadiance;
+      state.lights = [];
+      _ref = this.lights;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        light = _ref[_i];
+        l = {};
+        l.enabled = light.enabled;
+        l.color = light.color;
+        l.keyRatio = light.keyRatio;
+        l.radiance = light.radiance;
+        l.geometryType = light.geometryType;
+        l.target = {};
+        l.target.x = light.targetMesh.position.x;
+        l.target.y = light.targetMesh.position.y;
+        l.target.z = light.targetMesh.position.z;
+        l.light = {};
+        l.light.x = light.light.position.x;
+        l.light.y = light.light.position.y;
+        l.light.z = light.light.position.z;
+        l.light.sx = light.light.scale.x;
+        l.light.sy = light.light.scale.y;
+        l.light.sz = light.light.scale.z;
+        state.lights.push(l);
+      }
+      return state;
+    };
+
+    LightingRig.prototype.loadState = function(state) {
+      var i, light, _i, _len, _ref;
+      if (typeof state === "string") {
+        state = JSON.parse(state);
+      }
+      this.keyRadiance = state.keyRadiance;
+      _ref = state.lights;
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        light = _ref[i];
+        this.lights[i].enabled = light.enabled;
+        this.lights[i].color = light.color;
+        this.lights[i].keyRatio = light.keyRatio;
+        this.lights[i].radiance = light.radiance;
+        this.lights[i].geometryType = light.geometryType;
+        this.lights[i].targetMesh.position.set(light.target.x, light.target.y, light.target.z);
+        this.lights[i].light.position.set(light.light.x, light.light.y, light.light.z);
+        this.lights[i].light.scale.set(light.light.sx, light.light.sy, light.light.sz);
+        this.lights[i].lookAtDirty = true;
+      }
       return null;
     };
 
     LightingRig.prototype.onPointerUp = function(event) {
+      var intersect;
       event.preventDefault();
-      return null;
-    };
-
-    LightingRig.prototype.onPointerClick = function(event) {
-      var intersect, intersects, rect, rigLight, x, y;
-      event.preventDefault();
-      rect = this.domElement.getBoundingClientRect();
-      x = (event.clientX - rect.left) / rect.width;
-      y = (event.clientY - rect.top) / rect.height;
-      this.pointerVec.set(x * 2 - 1, -y * 2 + 1, 0.5);
-      this.projector.unprojectVector(this.pointerVec, this.camera);
-      this.raycaster.set(this.camera.position, this.pointerVec.sub(this.camera.position).normalize());
-      intersects = this.raycaster.intersectObjects(this.lights, true);
-      if (intersects.length) {
-        intersect = intersects[0];
+      intersect = this.getIntersection();
+      if (intersect) {
+        this.orbitControls.enabled = false;
         if (intersect.object.parent instanceof THREEFLOW.AreaLight) {
-          rigLight = intersect.object.parent.parent;
-          this.transformControls.attach(rigLight);
+          this.transformControls.attach(intersect.object.parent);
+        } else if (intersect.object.parent instanceof THREEFLOW.LightingRigLight) {
+          this.transformControls.attach(intersect.object);
         }
+        this.transformControls.setMode("translate");
       } else {
         this.transformControls.detach(this.transformControls.object);
       }
       return null;
     };
 
+    LightingRig.prototype.getIntersection = function() {
+      var intersect, intersects, light, objects, rect, x, y, _i, _len, _ref;
+      rect = this.domElement.getBoundingClientRect();
+      x = (event.clientX - rect.left) / rect.width;
+      y = (event.clientY - rect.top) / rect.height;
+      this.pointerVec.set(x * 2 - 1, -y * 2 + 1, 1);
+      this.projector.unprojectVector(this.pointerVec, this.camera);
+      this.raycaster.set(this.camera.position, this.pointerVec.sub(this.camera.position).normalize());
+      objects = [];
+      _ref = this.enabledLights;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        light = _ref[_i];
+        objects.push(light.light.geometryMesh, light.targetMesh);
+      }
+      intersects = this.raycaster.intersectObjects(objects, true);
+      intersect = null;
+      if (intersects.length) {
+        intersect = intersects[0];
+      }
+      return intersect;
+    };
+
     LightingRig.prototype.onKeyDown = function(event) {
-      switch (event.keyCode) {
-        case 81:
-          this.transformControls.setSpace(this.transformControls.space === "local" ? "world" : "local");
-          break;
-        case 87:
-          this.transformControls.setMode("translate");
-          break;
-        case 69:
-          this.transformControls.setMode("rotate");
-          break;
-        case 82:
-          this.transformControls.setMode("scale");
+      var object;
+      object = this.transformControls.object;
+      if (!object) {
+        return;
+      }
+      if (object instanceof THREEFLOW.AreaLight) {
+        switch (event.keyCode) {
+          case 81:
+            this.transformControls.setSpace(this.transformControls.space === "local" ? "world" : "local");
+            break;
+          case 87:
+            this.transformControls.setMode("translate");
+            break;
+          case 82:
+            this.transformControls.setMode("scale");
+        }
+      } else if (object.parent instanceof THREEFLOW.LightingRigLight) {
+        switch (event.keyCode) {
+          case 81:
+            this.transformControls.setSpace(this.transformControls.space === "local" ? "world" : "local");
+            break;
+          case 87:
+            this.transformControls.setMode("translate");
+        }
       }
       return null;
     };
@@ -1887,12 +2009,13 @@
     LightingRig.prototype.update = function() {
       var light, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3, _results;
       if (this.lightsDirty) {
-        console.log("Lights Dirty");
         this.lightsDirty = false;
         _ref = this.enabledLights;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           light = _ref[_i];
-          this.remove(light);
+          if (light.parent) {
+            this.remove(light);
+          }
         }
         this.enabledLights.splice(0);
         _ref1 = this.lights;
@@ -1979,7 +2102,7 @@
     LightingRigLight.DEFAULT_LIGHT_GEOMETRY_TYPE = "Circle";
 
     function LightingRigLight(rig, isKey, params) {
-      var lightParams;
+      var geometry, lightParams, targetMaterial;
       this.rig = rig;
       this.isKey = isKey;
       if (params == null) {
@@ -1992,16 +2115,17 @@
       } else {
         this._enabled = true;
       }
-      this.target = params.target || new THREE.Vector3();
+      targetMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        wireframe: true
+      });
+      geometry = new THREE.BoxGeometry(30, 30, 30);
+      this.targetMesh = new THREE.Mesh(geometry, targetMaterial);
+      this.targetMesh.position.set(0, 15, 0);
+      this.targetMesh._tf_noIndex = true;
+      this.add(this.targetMesh);
+      this.target = this.targetMesh.position;
       this._keyRatio = params.keyRatio || 0;
-      /*
-      @_pitchPhi = params.pitch || 0
-      @_yawTheta = params.yaw || 0
-      @_distance = params.distance || 500
-      
-      @rotateDirty = true
-      */
-
       this.lightGeomPlane = null;
       this.lightGeomCircle = null;
       this.lightGeomBox = null;
@@ -2015,7 +2139,17 @@
       }
       lightParams.geometry = this.getGeometry(this._geometryType);
       this.light = new THREEFLOW.AreaLight(lightParams);
+      this.light.position.set(0, 0, -100);
       this.add(this.light);
+      this.lookAtDirty = true;
+      /*
+      @_pitchPhi = params.pitch || 0
+      @_yawTheta = params.yaw || 0
+      @_distance = params.distance || 500
+      
+      @rotateDirty = true
+      */
+
       /*
       params.bounce = params.bounce || null
       params.bounce = {} if typeof(params.bounce) is "boolean"
@@ -2147,6 +2281,10 @@
         @bounceDirty = true
       */
 
+      if (this.lookAtDirty) {
+        this.lookAtDirty = false;
+        this.light.lookAt(this.target);
+      }
       if (this.bounceDirty) {
         this.bounceDirty = false;
       }

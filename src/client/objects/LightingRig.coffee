@@ -33,6 +33,7 @@ THREEFLOW.LightingRig = class LightingRig
           radiance: @keyRadiance
 
       new THREEFLOW.LightingRigLight @,false,
+        enabled: false
         name: "Fill Light"
         keyRatio:5
         light:
@@ -41,6 +42,7 @@ THREEFLOW.LightingRig = class LightingRig
 
       new THREEFLOW.LightingRigLight @,false,
         # target the back wall
+        enabled: false
         name: "Back/Rim Light"
         keyRatio:2
         light:
@@ -56,26 +58,20 @@ THREEFLOW.LightingRig = class LightingRig
           geometryType: "Plane"
     ]
 
+    @projector  = new THREE.Projector();
+    @raycaster  = new THREE.Raycaster();
+    @pointerVec = new THREE.Vector3();
+
+    @domElement.addEventListener "mousedown", @onPointerDown, false
+    @domElement.addEventListener "mouseup", @onPointerUp, false
+    #@domElement.addEventListener "mouseout", @onPointerUp, false
+    window.addEventListener "keydown",@onKeyDown
 
     @transformControls = new THREE.TransformControls( @camera, @domElement )
     @transformControls.addEventListener "change", @onTransformChange
     @orbitControls = new THREE.OrbitControls( @camera, @domElement )
 
     @add @transformControls
-
-    @projector  = new THREE.Projector();
-    @raycaster  = new THREE.Raycaster();
-    @pointerVec = new THREE.Vector3();
-
-    #@domElement.addEventListener "mousedown", @onPointerDown, false
-    #@domElement.addEventListener "mouseup", @onPointerUp, false
-    #@domElement.addEventListener "mouseout", @onPointerUp, false
-    @domElement.addEventListener "click", @onPointerClick, false
-
-    window.addEventListener "keydown",@onKeyDown
-
-    for light in @lights
-      light.position.set(Math.random()*500, Math.random()*500, Math.random()*500)
 
     @enabledLights = []
     @lightsDirty = true
@@ -103,65 +99,155 @@ THREEFLOW.LightingRig = class LightingRig
     else if event.state is "pointer-up" and not @orbitControls.enabled
       @orbitControls.enabled = true
 
+    for light in @enabledLights
+      light.lookAtDirty = true
+
     @transformControls.update()
+
 
   onPointerDown:(event)=>
     event.preventDefault()
+    ###
+    intersect = @getIntersection()
+
+    console.log "DOWN", intersect
+    if intersect
+      console.log intersect.object
+      @orbitControls.enabled = false
+    else
+      @orbitControls.enabled = true
+    ###
+    null
+
+  saveState:()->
+    state = {}
+    state.keyRadiance = @keyRadiance
+
+    state.lights = []
+    for light in @lights
+      l = {}
+      l.enabled = light.enabled
+      l.color = light.color
+      l.keyRatio = light.keyRatio
+      l.radiance = light.radiance
+      l.geometryType = light.geometryType
+
+      l.target = {}
+      l.target.x = light.targetMesh.position.x
+      l.target.y = light.targetMesh.position.y
+      l.target.z = light.targetMesh.position.z
+
+      l.light = {}
+      l.light.x = light.light.position.x
+      l.light.y = light.light.position.y
+      l.light.z = light.light.position.z
+      l.light.sx = light.light.scale.x
+      l.light.sy = light.light.scale.y
+      l.light.sz = light.light.scale.z
+
+      state.lights.push l
+
+    state
+
+  loadState:(state)->
+    if typeof state is "string"
+      state = JSON.parse state
+
+    @keyRadiance = state.keyRadiance
+
+    for light,i in state.lights
+      @lights[i].enabled = light.enabled
+      @lights[i].color = light.color
+      @lights[i].keyRatio = light.keyRatio
+      @lights[i].radiance = light.radiance
+      @lights[i].geometryType = light.geometryType
+
+      @lights[i].targetMesh.position.set light.target.x,light.target.y,light.target.z
+      @lights[i].light.position.set light.light.x,light.light.y,light.light.z
+      @lights[i].light.scale.set light.light.sx,light.light.sy,light.light.sz
+
+      @lights[i].lookAtDirty = true
+
     null
 
   onPointerUp:(event)=>
     event.preventDefault()
+
+    intersect = @getIntersection()
+
+    if intersect
+      @orbitControls.enabled = false
+
+      if intersect.object.parent instanceof THREEFLOW.AreaLight
+        @transformControls.attach intersect.object.parent
+      else if intersect.object.parent instanceof THREEFLOW.LightingRigLight
+        @transformControls.attach intersect.object
+
+      @transformControls.setMode("translate")
+    else
+      @transformControls.detach @transformControls.object
+      #@orbitControls.enabled = true
+
     null
 
-  onPointerClick:(event)=>
-    event.preventDefault()
+  getIntersection:()->
 
     rect = @domElement.getBoundingClientRect()
 
     x = (event.clientX - rect.left) / rect.width
     y = (event.clientY - rect.top) / rect.height
 
-    @pointerVec.set( ( x ) * 2 - 1, - ( y ) * 2 + 1, 0.5 )
+    @pointerVec.set( ( x ) * 2 - 1, - ( y ) * 2 + 1, 1 )
+    @projector.unprojectVector( @pointerVec, @camera )
 
-    @projector.unprojectVector( @pointerVec, @camera );
+    @raycaster.set( @camera.position, @pointerVec.sub( @camera.position ).normalize() )
 
-    @raycaster.set( @camera.position, @pointerVec.sub( @camera.position ).normalize() );
+    objects = []
+    for light in @enabledLights
+      objects.push light.light.geometryMesh,light.targetMesh
 
-    intersects = @raycaster.intersectObjects( @lights, true );
+    intersects = @raycaster.intersectObjects( objects, true )
 
+    intersect = null
     if intersects.length
       intersect = intersects[0]
-      if intersect.object.parent instanceof THREEFLOW.AreaLight
-        rigLight = intersect.object.parent.parent
-        @transformControls.attach rigLight
-    else
-      @transformControls.detach @transformControls.object
 
-    null
+    intersect
+
 
   onKeyDown:(event)=>
+    object = @transformControls.object
+    if not object
+      return
 
-    switch event.keyCode
-      when 81 then @transformControls.setSpace( if @transformControls.space is "local" then "world" else "local" ) # Q
-      when 87 then @transformControls.setMode("translate") # W
-      when 69 then @transformControls.setMode("rotate") # E
-      when 82 then @transformControls.setMode("scale") # R
+    if object instanceof THREEFLOW.AreaLight
+      # allow translation and scaling of light
+      switch event.keyCode
+        when 81 then @transformControls.setSpace( if @transformControls.space is "local" then "world" else "local" ) # Q
+        when 87 then @transformControls.setMode("translate") # W
+        when 82 then @transformControls.setMode("scale") # R
+    else if object.parent instanceof THREEFLOW.LightingRigLight
+      # allow only translation of target
+      switch event.keyCode
+        when 81 then @transformControls.setSpace( if @transformControls.space is "local" then "world" else "local" ) # Q
+        when 87 then @transformControls.setMode("translate") # W
+
+    #when 69 then @transformControls.setMode("rotate") # E
 
     null
 
   update:()->
     if @lightsDirty
-      console.log "Lights Dirty"
       @lightsDirty = false
       for light in @enabledLights
-        @remove light
+        if light.parent
+          @remove light
 
       @enabledLights.splice(0)
 
       for light in @lights
         if light.enabled
           @add light
-
           @enabledLights.push light
 
     if @keyRadianceDirty
@@ -204,19 +290,3 @@ THREEFLOW.LightingRig = class LightingRig
 
     @add mesh
     null
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

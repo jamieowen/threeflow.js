@@ -23,16 +23,34 @@ THREEFLOW.AreaLight = class AreaLight
 
     THREE.Object3D.call @
 
-    @simulate     = true if params.simulate isnt false
-    @markers      = true if params.markers isnt false
+    @_tf_noTraverse = true
 
     @_color       = new THREE.Color params.color
     @_radiance    = params.radiance || 100.0
     @samples      = params.samples || 16
 
-    @target       = new THREE.Vector3()
-    # geometry setter, creates lights/markers
-    @geometry     = params.geometry || new THREE.PlaneGeometry 100,100
+    @markerMaterial = new THREE.MeshBasicMaterial
+      wireframe: true
+      side: THREE.DoubleSide
+      color: @_color
+
+    # line drawn to target - will be updated when target is set. ( via geometry first )
+    @lineGeometry = new THREE.Geometry()
+    @lineGeometry.vertices.push new THREE.Vector3()
+    @lineGeometry.vertices.push new THREE.Vector3(0,0,100)
+    @lineMesh = new THREE.Line @lineGeometry, new THREE.LineBasicMaterial
+      color: @_color.getHex()
+    @lineMesh.name = "LINE MESH"
+    @lineMesh.matrixAutoUpdate = false
+    @add @lineMesh
+
+    @toIntensity      = 1
+    @planar           = true
+    @planarDirection  = new THREE.Vector3()
+    @geometryMesh     = null
+    @geometry         = params.geometry || new THREE.PlaneGeometry 100,100
+    @simulate         = true if params.simulate isnt false
+
 
   # Extend THREE.Object3D
   @:: = Object.create THREE.Object3D::
@@ -45,11 +63,10 @@ THREEFLOW.AreaLight = class AreaLight
       set: (value) ->
         @_color = value
 
-        if @simulate
+        if @light
           @light.color.setRGB @_color
 
-        if @markers
-          @material.color = @_color
+        @markerMaterial.color = @_color
 
     radiance:
       get: ->
@@ -58,9 +75,22 @@ THREEFLOW.AreaLight = class AreaLight
         if @_radiance is value
           return
 
-        # TODO : Set the three.js PointLight intensity when simulating?
-
         @_radiance = value
+
+        #if @light
+        #  #@light.intensity = @_radiance * @toIntensity
+        #  console.log "set intensity :", @light.intensity
+
+    simulate:
+      get: ->
+        @_simulate
+      set: (value) ->
+        if @_simulate is value
+          return
+
+        @_simulate = value
+
+        @updateLight()
 
     geometry:
       get: ->
@@ -72,65 +102,80 @@ THREEFLOW.AreaLight = class AreaLight
         @_geometry = value
 
         # Need to checked a bettwer way to do this, update vertices?
-        if @mesh
-          @remove @mesh
+        if @geometryMesh
+          @remove @geometryMesh
 
-        if @simulate or @markers
-          # calculate lighting.
-          if not @_geometry.boundingBox
-            @_geometry.computeBoundingBox()
 
-          bb = @_geometry.boundingBox.size()
+        # calculate lighting.
+        if not @_geometry.boundingBox
+          @_geometry.computeBoundingBox()
 
-          # volume/area
-          va = 0
-          dir = new THREE.Vector3()
-          planar = true
+        bb = @_geometry.boundingBox.size()
 
-          if bb.x is 0
-            va = bb.y * bb.z
-            dir.set(1,0,0)
-          else if bb.y is 0
-            va = bb.x * bb.z
-            dir.set(0,1,0)
-          else if bb.z is 0
-            va = bb.x * bb.y
-            dir.set(0,0,1)
-          else
-            va = bb.x * bb.y * bb.z
-            planar = false
+        # volume/area
+        va = 0
+        @planar = true
 
-        if @simulate
-          if planar
-            # add directional light
-            @light = new THREE.DirectionalLight @_color,1
-            #@light.target.copy dir
-            @light.color = @_color
-            @add @light
-          else
-            # add point light
-            @light = new THREE.PointLight @_color,1
-            #@light.target.copy dir
-            @light.color = @_color
-            @add @light
+        if bb.x is 0
+          va = bb.y * bb.z
+          @planarDirection.set(1,0,0)
+        else if bb.y is 0
+          va = bb.x * bb.z
+          @planarDirection.set(0,1,0)
+        else if bb.z is 0
+          va = bb.x * bb.y
+          @planarDirection.set(0,0,1)
+        else
+          va = bb.x * bb.y * bb.z
+          @planar = false
 
-        if @markers
-          @material = new THREE.MeshBasicMaterial
-            wireframe: true
-            side: THREE.DoubleSide
+        if @planar
+          # ( 100*100 ) / 10000 = 1
+          @toIntensity = ( va * 0.00001 )
+        else
+          # ( 100*100*100 ) / 1000000 = 1
+          @toIntensity = va / 1000000
 
-          @material.color = @_color
+        @updateLight()
 
-          # line for direction
-          lineGeometry = new THREE.Geometry()
-          lineGeometry.vertices.push new THREE.Vector3( 0, 0, 0 )
-          lineGeometry.vertices.push dir.clone().multiplyScalar(100)
+        @geometryMesh = new THREE.Mesh @_geometry,@markerMaterial
+        @add @geometryMesh
 
-          @line = new THREE.Line lineGeometry, new THREE.LineBasicMaterial
-            color: @_color.getHex()
+        @geometryMesh.name = "GEOMETRY MESH"
 
-          @line.matrixAutoUpdate = false
-          @add @line
+  updateLight:()->
+    if not @_simulate and @light
+      @remove @light
+      return
+    else if not @_simulate
+      return
+    else if @_simulate and not @light
+    # create light for first first time
+      if @planar
+        # add directional light
+        @light = new THREE.DirectionalLight @_color,1
+        @light.position.set 0,0,0
+        @light.target.position.copy @planarDirection
+      else
+        # add point light
+        @light = new THREE.PointLight @_color,1
 
-          @mesh = new THREE.Mesh @_geometry,@material
-          @add @mesh
+      @add @light
+
+    else if @planar and @light instanceof THREE.PointLight
+    # ( check we have the right light type - geometry change? )
+      @remove @light
+      # swap to directional light
+      @light = new THREE.DirectionalLight @_color,1
+      @light.position.set 0,0,0
+      @light.target.position.copy @planarDirection
+      console.log "SWAP TO", @light
+      @add @light
+    else if not @planar and @light instanceof THREE.DirectionalLight
+      # swap to point light
+      @remove @light
+      @light = new THREE.PointLight @_color,1
+      @add @light
+
+    # set intensity
+    #@light.intensity = 1 # @_radiance * @toIntensity

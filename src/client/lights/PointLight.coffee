@@ -20,6 +20,7 @@ THREEFLOW.PointLight = class PointLight
   constructor:( params = {} )->
 
     THREE.Object3D.call @
+    @_tf_noTraverse = true
 
     @simulate     = true if params.simulate isnt false
     @markers      = true if params.markers isnt false

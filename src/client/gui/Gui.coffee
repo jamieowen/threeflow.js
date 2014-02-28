@@ -42,9 +42,14 @@ THREEFLOW.Gui = class Gui
 
     if @lightingRig
       @lightingRigFolder = @gui.addFolder "Lighting Rig"
+      @lightingRigFolder.add(@lightingRig,"saveState").name("Dump JSON").onChange ()=>
+        state = @lightingRig.saveState()
+        console.log JSON.stringify(state)
+
 
       for light in @lightingRig.lights
         @addRigLight @lightingRigFolder,light
+
 
       @backdropFolder = @lightingRigFolder.addFolder("Backdrop")
       @backdropFolder.add(@lightingRig.backdropMaterial,"wireframe")
@@ -191,7 +196,7 @@ THREEFLOW.Gui = class Gui
       hex = parseInt value, 16
       console.log hex
 
-    folder.add rigLight,"geometryType",THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES
+    folder.add(rigLight,"geometryType",THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES)
 
   _onRender:()=>
     @renderer.sunflowCl.ipr = false

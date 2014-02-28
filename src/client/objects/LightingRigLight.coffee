@@ -44,16 +44,21 @@ THREEFLOW.LightingRigLight = class LightingRigLight
     else
       @_enabled = true
 
-    @target = params.target || new THREE.Vector3()
+    targetMaterial = new THREE.MeshBasicMaterial
+      color: 0xffffff
+      wireframe:true
+
+    geometry = new THREE.BoxGeometry(30,30,30)
+    @targetMesh = new THREE.Mesh geometry,targetMaterial
+    @targetMesh.position.set 0,15,0
+    @targetMesh._tf_noIndex = true
+
+
+    @add @targetMesh
+
+    @target = @targetMesh.position
+
     @_keyRatio = params.keyRatio || 0
-
-    ###
-    @_pitchPhi = params.pitch || 0
-    @_yawTheta = params.yaw || 0
-    @_distance = params.distance || 500
-
-    @rotateDirty = true
-    ###
 
     @lightGeomPlane = null
     @lightGeomCircle = null
@@ -71,7 +76,20 @@ THREEFLOW.LightingRigLight = class LightingRigLight
     lightParams.geometry = @getGeometry(@_geometryType)
 
     @light = new THREEFLOW.AreaLight lightParams
+    @light.position.set 0,0,-100
     @add @light
+
+    @lookAtDirty = true
+
+
+    ###
+    @_pitchPhi = params.pitch || 0
+    @_yawTheta = params.yaw || 0
+    @_distance = params.distance || 500
+
+    @rotateDirty = true
+    ###
+
 
     ###
     params.bounce = params.bounce || null
@@ -189,6 +207,10 @@ THREEFLOW.LightingRigLight = class LightingRigLight
 
       @bounceDirty = true
     ###
+
+    if @lookAtDirty
+      @lookAtDirty = false
+      @light.lookAt @target
 
     if @bounceDirty
       @bounceDirty = false

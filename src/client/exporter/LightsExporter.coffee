@@ -27,14 +27,7 @@ class LightsExporter extends BlockExporter
     null
 
   doTraverse:(object3d)->
-    if object3d instanceof THREEFLOW.PointLight
-      false
-    else if object3d instanceof THREEFLOW.SunskyLight
-      false
-    else if object3d instanceof THREEFLOW.AreaLight
-      false
-    else
-      true
+    true
 
   exportBlock:()->
     result = ''

@@ -4,8 +4,8 @@ THREEFLOW.DiffuseMaterial = class DiffuseMaterial
 
     params.color = 0xffffff if params.color is undefined
 
-    THREE.MeshLambertMaterial.call @
+    THREE.MeshPhongMaterial.call @
 
     @setValues params
 
-  @:: = Object.create THREE.MeshLambertMaterial::
+  @:: = Object.create THREE.MeshPhongMaterial::

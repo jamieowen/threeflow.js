@@ -1,5 +1,5 @@
 (function() {
-  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, Gui, ImageExporter, LightingRig, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, PhongMaterial, PointLight, ShinyMaterial, Signal, SunflowRenderer, SunskyLight, TraceDepthsExporter,
+  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, Gui, ImageExporter, LightingRig, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, ModifiersExporter, PhongMaterial, PointLight, ShinyMaterial, Signal, SunflowRenderer, SunskyLight, TraceDepthsExporter,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -77,6 +77,11 @@
     SunflowRenderer.prototype.setSize = function(width, height) {
       this.width = width;
       this.height = height;
+      return null;
+    };
+
+    SunflowRenderer.prototype.linkTexturePath = function(texture, path) {
+      this.exporter.linkTexturePath(texture, path);
       return null;
     };
 
@@ -529,7 +534,19 @@
       this.geometry = this.addBlockExporter(new GeometryExporter(this));
       this.bufferGeometry = this.addBlockExporter(new BufferGeometryExporter(this));
       this.meshes = this.addBlockExporter(new MeshExporter(this));
+      this.textureLinkages = {};
     }
+
+    Exporter.prototype.linkTexturePath = function(texture, path) {
+      if (!texture instanceof THREE.Texture) {
+        throw new Error("Texture must be of type THREE.Texture.");
+      }
+      if (path === null) {
+        throw new Error("Texture path must not be null.");
+      }
+      this.textureLinkages[texture.uuid] = path;
+      return null;
+    };
 
     Exporter.prototype.addBlockExporter = function(exporter) {
       if (!exporter instanceof BlockExporter) {
@@ -593,7 +610,7 @@
       GeometryExporter.__super__.constructor.call(this, exporter);
       this.normals = true;
       this.vertexNormals = false;
-      this.uvs = false;
+      this.uvs = true;
       this.geometryIndex = {};
     }
 
@@ -624,7 +641,7 @@
     };
 
     GeometryExporter.prototype.exportBlock = function() {
-      var entry, face, normal, normals, result, uuid, v1, v2, v3, vertex, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _ref, _ref1, _ref2, _ref3, _ref4;
+      var entry, face, normal, normals, result, uuid, uv, uvs, v1, v2, v3, vertex, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _len6, _m, _n, _o, _ref, _ref1, _ref2, _ref3, _ref4;
       result = '';
       for (uuid in this.geometryIndex) {
         entry = this.geometryIndex[uuid];
@@ -678,15 +695,25 @@
           result += '  normals none\n';
         }
         if (this.uvs) {
-          result += '  uvs none\n';
+          uvs = entry.geometry.faceVertexUvs[0];
+          if (uvs.length === entry.geometry.faces.length) {
+            result += '  uvs facevarying\n';
+            for (_n = 0, _len5 = uvs.length; _n < _len5; _n++) {
+              uv = uvs[_n];
+              result += '    ' + uv[0].x + ' ' + uv[0].y + ' ' + uv[1].x + ' ' + uv[1].y + ' ' + uv[2].x + ' ' + uv[2].y + '\n';
+            }
+          } else {
+            console.log("[Threeflow] UV count didn't match face count.", entry.geometry);
+            result += '  uvs none\n';
+          }
         } else {
           result += '  uvs none\n';
         }
         if (entry.faceMaterials) {
           result += '  face_shaders\n';
           _ref4 = entry.geometry.faces;
-          for (_n = 0, _len5 = _ref4.length; _n < _len5; _n++) {
-            face = _ref4[_n];
+          for (_o = 0, _len6 = _ref4.length; _o < _len6; _o++) {
+            face = _ref4[_o];
             result += '    ' + face.materialIndex + '\n';
           }
         }
@@ -965,6 +992,27 @@
       return true;
     };
 
+    MaterialsExporter.prototype.declareDiffOrTexture = function(material) {
+      var hasTexture, result, texturePath;
+      result = '';
+      hasTexture = material.map instanceof THREE.Texture;
+      if (hasTexture) {
+        texturePath = this.exporter.textureLinkages[material.map.uuid];
+      } else {
+        texturePath = null;
+      }
+      if (hasTexture && !texturePath) {
+        console.log("[Threeflow] Found texture on material but no texture linkage. ( Use linkTexturePath() )");
+        hasTexture = false;
+      }
+      if (hasTexture) {
+        result += '  texture "' + texturePath + '"\n';
+      } else {
+        result += '  diff ' + this.exportColorTHREE(material.color) + '\n';
+      }
+      return result;
+    };
+
     MaterialsExporter.prototype.exportBlock = function() {
       var material, result, uuid;
       result = '';
@@ -977,10 +1025,10 @@
           result += '  color ' + this.exportColorTHREE(material.color) + '\n';
         } else if (material instanceof THREEFLOW.DiffuseMaterial || material instanceof THREE.MeshLambertMaterial) {
           result += '  type diffuse\n';
-          result += '  diff ' + this.exportColorTHREE(material.color) + '\n';
+          result += this.declareDiffOrTexture(material);
         } else if (material instanceof THREEFLOW.ShinyMaterial) {
           result += '  type shiny\n';
-          result += '  diff ' + this.exportColorTHREE(material.color) + '\n';
+          result += this.declareDiffOrTexture(material);
           result += '  refl ' + material.reflection + '\n';
         } else if (material instanceof THREEFLOW.GlassMaterial) {
           result += '  type glass\n';
@@ -991,7 +1039,7 @@
           result += '  refl ' + this.exportColorTHREE(material.reflection) + '\n';
         } else if (material instanceof THREEFLOW.PhongMaterial || material instanceof THREE.MeshPhongMaterial) {
           result += '  type phong\n';
-          result += '  diff ' + this.exportColorTHREE(material.color) + '\n';
+          result += this.declareDiffOrTexture(material);
           result += '  spec ' + this.exportColorTHREE(material.specular) + ' ' + material.shininess + '\n';
           result += '  samples ' + (material.samples || 4) + '\n';
         } else {
@@ -1073,6 +1121,40 @@
     };
 
     return MeshExporter;
+
+  })(BlockExporter);
+
+  ModifiersExporter = (function(_super) {
+    __extends(ModifiersExporter, _super);
+
+    function ModifiersExporter(exporter) {
+      ModifiersExporter.__super__.constructor.call(this, exporter);
+      this.modifiersIndex = {};
+    }
+
+    ModifiersExporter.prototype.addToIndex = function(object3d) {
+      var material;
+      if (!object3d instanceof THREE.Mesh) {
+        return;
+      }
+      material = object3d.material;
+      if (!this.modifiersIndex[material.uuid] && material.bumpMap) {
+        this.modifiersIndex[material.uuid] = material;
+      }
+      return null;
+    };
+
+    ModifiersExporter.prototype.doTraverse = function(object3d) {
+      return true;
+    };
+
+    ModifiersExporter.prototype.exportBlock = function() {
+      var result;
+      result = '';
+      return result;
+    };
+
+    return ModifiersExporter;
 
   })(BlockExporter);
 
@@ -1646,11 +1728,11 @@
       if (params.color === void 0) {
         params.color = 0xffffff;
       }
-      THREE.MeshLambertMaterial.call(this);
+      THREE.MeshPhongMaterial.call(this);
       this.setValues(params);
     }
 
-    DiffuseMaterial.prototype = Object.create(THREE.MeshLambertMaterial.prototype);
+    DiffuseMaterial.prototype = Object.create(THREE.MeshPhongMaterial.prototype);
 
     return DiffuseMaterial;
 

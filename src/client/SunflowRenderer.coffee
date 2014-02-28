@@ -66,6 +66,10 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
   setSize:(@width,@height)->
     null
 
+  linkTexturePath:(texture,path)->
+    @exporter.linkTexturePath texture,path
+    null
+
   connect:()->
     if @connected
       return

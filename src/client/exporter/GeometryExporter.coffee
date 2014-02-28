@@ -8,7 +8,7 @@ class GeometryExporter extends BlockExporter
 
     @vertexNormals = false # otherwise facevarying
 
-    @uvs = false
+    @uvs = true
 
     # geometry export can vary according to :
     # 1. same geometry - one material - ( a basic geometry export - with sunflow
@@ -99,7 +99,14 @@ class GeometryExporter extends BlockExporter
         result += '  normals none\n'
 
       if @uvs
-        result += '  uvs none\n'
+        uvs = entry.geometry.faceVertexUvs[0]
+        if uvs.length is entry.geometry.faces.length
+          result += '  uvs facevarying\n'
+          for uv in uvs
+            result += '    ' + uv[0].x + ' ' + uv[0].y + ' ' + uv[1].x + ' ' + uv[1].y + ' ' + uv[2].x + ' ' + uv[2].y + '\n'
+        else
+          console.log "[Threeflow] UV count didn't match face count.", entry.geometry
+          result += '  uvs none\n'
       else
         result += '  uvs none\n'
 

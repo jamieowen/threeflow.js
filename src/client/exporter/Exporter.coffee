@@ -80,6 +80,19 @@ class Exporter
     @meshes             = @addBlockExporter new MeshExporter(@)
 
 
+    @textureLinkages    = {}
+
+
+  linkTexturePath:(texture,path)->
+    if not texture instanceof THREE.Texture
+      throw new Error "Texture must be of type THREE.Texture."
+
+    if path is null
+      throw new Error "Texture path must not be null."
+
+    @textureLinkages[ texture.uuid ] = path
+    null
+
   addBlockExporter:(exporter)->
     if not exporter instanceof BlockExporter
       throw new Error 'Extend BlockExporter'

@@ -183,7 +183,7 @@ module.exports =
 
       else
         log.notice "" # otherwise trails on the end of sunflow output
-        log.notice "Render Error. Keep this "
+        log.notice "Render Error."
         @status = "error"
 
         @cleanUp()

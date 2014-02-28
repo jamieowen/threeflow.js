@@ -57,27 +57,61 @@
 
     gui = new THREEFLOW.Gui(threeflow,lighting);
     gui.onRender.add( function(){
-      threeflow.render( scene, camera, "suzanne-materials" );
+      threeflow.render( scene, camera, "suzanne" );
     });
 
     // ###
     // Add scene stuff.
 
+    // Material Spheres
+
+    var geometry, material, mesh, spheres;
+    var size,radius,theta, i, count;
+
+    size = 30;
+    geometry = new THREE.SphereGeometry(size,size);
+    geometry.computeBoundingBox();
+    count = 16;
+    radius = ((size*2)*(count+4))/(Math.PI*2);
+
+    spheres = new THREE.Object3D();
+
+    for( i = 0; i<count; i++ ) {
+      material = new THREEFLOW.ShinyMaterial();
+      material.color.setHSL(i/count,.7,.5);
+      mesh = new THREE.Mesh(geometry,material);
+      theta = ((Math.PI*2)/count)*i;
+
+      mesh.position.x = radius * Math.cos(theta);
+      mesh.position.y = -geometry.boundingBox.min.y;
+      mesh.position.z = radius * Math.sin(theta);
+      spheres.add(mesh);
+    }
+
+    // rotate to bring nicer colours around to front.
+    spheres.rotation.y = Math.PI/2;
+    scene.add(spheres);
+
+    // Suzanne
+
     var loader = new THREE.JSONLoader();
 
-    loader.load("models/LeePerrySmith.js",function(geometry){
-      //var subdiv = new THREE.SubdivisionModifier(2);
-      //subdiv.modify(geometry);
+    loader.load("models/suzanne.json",function(geometry){
+      var subdiv = new THREE.SubdivisionModifier(2);
+      subdiv.modify(geometry);
       geometry.computeBoundingBox();
 
       var scale = 200 / ( geometry.boundingBox.max.y - geometry.boundingBox.min.y );
-      material = new THREEFLOW.DiffuseMaterial();
+      material = new THREEFLOW.ShinyMaterial();
       mesh = new THREE.Mesh(geometry,material);
 
       // scale to decent height
       mesh.scale.set(scale,scale,scale);
-      mesh.position.y = geometry.boundingBox.max.y*scale;
-      mesh.position.y += 50;
+      mesh.position.y = (geometry.boundingBox.max.y*0.535)*scale;
+      mesh.rotation.order = "YXZ";
+      mesh.rotation.x = -(Math.PI/5);
+      mesh.rotation.y = Math.PI/4;
+
       //mesh = new THREE.Mesh( new THREE.SphereGeometry(100), material )
       //mesh.position.y = 100
       scene.add(mesh);

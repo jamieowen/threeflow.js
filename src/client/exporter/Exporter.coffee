@@ -108,7 +108,7 @@ class Exporter
     # check for exlucded object3d types and ignore
     for cls in Exporter.EXCLUDED_OBJECT3D_TYPES
       if object3d instanceof cls
-        console.log "[Threeflow] Ignored object : ", object3d
+        THREEFLOW.warn "Ignored object.", object3d
         return
 
     if object3d.children.length

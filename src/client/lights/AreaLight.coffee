@@ -79,7 +79,6 @@ THREEFLOW.AreaLight = class AreaLight
 
         #if @light
         #  #@light.intensity = @_radiance * @toIntensity
-        #  console.log "set intensity :", @light.intensity
 
     simulate:
       get: ->
@@ -169,7 +168,7 @@ THREEFLOW.AreaLight = class AreaLight
       @light = new THREE.DirectionalLight @_color,1
       @light.position.set 0,0,0
       @light.target.position.copy @planarDirection
-      console.log "SWAP TO", @light
+
       @add @light
     else if not @planar and @light instanceof THREE.DirectionalLight
       # swap to point light

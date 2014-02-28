@@ -50,7 +50,6 @@ THREEFLOW.Gui = class Gui
       for light in @lightingRig.lights
         @addRigLight @lightingRigFolder,light
 
-
       @backdropFolder = @lightingRigFolder.addFolder("Backdrop")
       @backdropFolder.add(@lightingRig.backdropMaterial,"wireframe")
       @backdropFolder.add(@lightingRig.backdropMaterial,"transparent")
@@ -194,7 +193,6 @@ THREEFLOW.Gui = class Gui
 
     folder.addColor(rigLight,"color").onChange (value)->
       hex = parseInt value, 16
-      console.log hex
 
     folder.add(rigLight,"geometryType",THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES)
 

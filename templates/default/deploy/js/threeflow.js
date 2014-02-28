@@ -1,5 +1,5 @@
 (function() {
-  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, Gui, ImageExporter, LightingRig, LightingRigLight, LightsExporter, MaterialsExporter, MeshExporter, MirrorMaterial, ModifiersExporter, PhongMaterial, PointLight, ShinyMaterial, Signal, SunflowRenderer, SunskyLight, TraceDepthsExporter,
+  var AreaLight, BlockExporter, BucketExporter, BufferGeometryExporter, CameraExporter, CausticsExporter, ConstantMaterial, DiffuseMaterial, Exporter, GeometryExporter, GiExporter, GlassMaterial, Gui, ImageExporter, LightingRig, LightingRigLight, LightsExporter, Log, MaterialsExporter, MeshExporter, MirrorMaterial, ModifiersExporter, PhongMaterial, PointLight, ShinyMaterial, Signal, SunflowRenderer, SunskyLight, TraceDepthsExporter,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -40,6 +40,7 @@
       this.onRenderAdded = __bind(this.onRenderAdded, this);
       this.onDisconnected = __bind(this.onDisconnected, this);
       this.onConnected = __bind(this.onConnected, this);
+      THREEFLOW.log(THREEFLOW.VERSION, "/", THREEFLOW.COMMIT);
       autoConnect = options.autoConnect === false ? false : true;
       this.name = options.name || null;
       this.scale = options.scale || 1;
@@ -132,7 +133,7 @@
           sunflowCl: this.sunflowCl
         });
       } else {
-        console.log("[Render in Progress]");
+        THREEFLOW.log("Render in progress.");
       }
       return null;
     };
@@ -149,7 +150,7 @@
     };
 
     SunflowRenderer.prototype.onConnected = function(data) {
-      console.log("THREEFLOW " + THREEFLOW.VERSION + " [Connected]");
+      THREEFLOW.log("[Connected]");
       this.connected = true;
       this.rendering = false;
       this.setConnectionStatus(SunflowRenderer.CONNECTED);
@@ -157,7 +158,7 @@
     };
 
     SunflowRenderer.prototype.onDisconnected = function(data) {
-      console.log("THREEFLOW " + THREEFLOW.VERSION + " [Disconnected]");
+      THREEFLOW.log("[Disconnected]");
       this.connected = false;
       this.rendering = false;
       this.setConnectionStatus(SunflowRenderer.DISCONNECTED);
@@ -565,7 +566,7 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         cls = _ref[_i];
         if (object3d instanceof cls) {
-          console.log("[Threeflow] Ignored object : ", object3d);
+          THREEFLOW.warn("Ignored object.", object3d);
           return;
         }
       }
@@ -680,7 +681,7 @@
             }
             result += '\n';
           } else {
-            console.log("[Threeflow] Problem with geometry normals. ", entry.geometry);
+            THREEFLOW.warn("Problem with geometry normals.", object3d);
             result += '  normals none\n';
           }
         } else if (this.normals && !this.vertexNormals) {
@@ -705,7 +706,7 @@
               result += '    ' + uv[0].x + ' ' + uv[0].y + ' ' + uv[1].x + ' ' + uv[1].y + ' ' + uv[2].x + ' ' + uv[2].y + '\n';
             }
           } else {
-            console.log("[Threeflow] UV count didn't match face count.", entry.geometry);
+            THREEFLOW.warn("UV count didn't match face count.", entry.geometry);
             result += '  uvs none\n';
           }
         } else {
@@ -1004,7 +1005,7 @@
         texturePath = null;
       }
       if (hasTexture && !texturePath) {
-        console.log("[Threeflow] Found texture on material but no texture linkage. ( Use linkTexturePath() )");
+        THREEFLOW.warn("Found texture on material but no texture linkage.", "( Use linkTexturePath() )");
         hasTexture = false;
       }
       if (hasTexture) {
@@ -1045,7 +1046,7 @@
           result += '  spec ' + this.exportColorTHREE(material.specular) + ' ' + material.shininess + '\n';
           result += '  samples ' + (material.samples || 4) + '\n';
         } else {
-          console.log("[Threeflow] Unsupported Material type. Will map to black THREEFLOW.DiffuseMaterial.", material);
+          THREEFLOW.warn("Unsupported Material type. Will map to black THREEFLOW.DiffuseMaterial.", material);
           result += '  type diffuse\n';
           result += '  diff { "sRGB nonlinear" 0 0 0 }\n';
         }
@@ -1160,7 +1161,7 @@
         material = this.modifiersIndex[uuid];
         texturePath = this.exporter.textureLinkages[material.bumpMap.uuid];
         if (!texturePath) {
-          console.log("[Threeflow] Found bumpMap texture on material but no texture linkage. ( Use linkTexturePath() )");
+          THREEFLOW.warn("Found bumpMap texture on material but no texture linkage.", "( Use linkTexturePath() )");
         } else {
           result += 'modifier {\n';
           result += '  name ' + material.uuid + '-MOD\n';
@@ -1422,8 +1423,7 @@
       }
       folder.addColor(rigLight, "color").onChange(function(value) {
         var hex;
-        hex = parseInt(value, 16);
-        return console.log(hex);
+        return hex = parseInt(value, 16);
       });
       return folder.add(rigLight, "geometryType", THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES);
     };
@@ -1598,7 +1598,6 @@
         this.light = new THREE.DirectionalLight(this._color, 1);
         this.light.position.set(0, 0, 0);
         this.light.target.position.copy(this.planarDirection);
-        console.log("SWAP TO", this.light);
         return this.add(this.light);
       } else if (!this.planar && this.light instanceof THREE.DirectionalLight) {
         this.remove(this.light);
@@ -1975,9 +1974,7 @@
       /*
       intersect = @getIntersection()
       
-      console.log "DOWN", intersect
       if intersect
-        console.log intersect.object
         @orbitControls.enabled = false
       else
         @orbitControls.enabled = true
@@ -2013,6 +2010,14 @@
         l.light.sz = light.light.scale.z;
         state.lights.push(l);
       }
+      state.camera = {};
+      state.camera.x = this.camera.position.x;
+      state.camera.y = this.camera.position.y;
+      state.camera.z = this.camera.position.z;
+      state.camera.rx = this.camera.rotation.x;
+      state.camera.rx = this.camera.rotation.y;
+      state.camera.rz = this.camera.rotation.z;
+      state.camera.ord = this.camera.rotation.order;
       return state;
     };
 
@@ -2034,6 +2039,10 @@
         this.lights[i].light.position.set(light.light.x, light.light.y, light.light.z);
         this.lights[i].light.scale.set(light.light.sx, light.light.sy, light.light.sz);
         this.lights[i].lookAtDirty = true;
+      }
+      if (state.camera) {
+        this.camera.position.set(state.camera.x, state.camera.y, state.camera.z);
+        this.camera.rotation.set(state.camera.rx, state.camera.ry, state.camera.rz, state.camera.ord);
       }
       return null;
     };
@@ -2427,6 +2436,55 @@
     return LightingRigLight;
 
   })();
+
+  Log = (function() {
+    function Log() {
+      this.warn = __bind(this.warn, this);
+      this.log = __bind(this.log, this);
+      this.setEnabled = __bind(this.setEnabled, this);
+      this.enabled = true;
+      if (!window.console) {
+        window.console = {};
+      }
+      if (!window.console.log) {
+        window.console.log = function() {
+          return null;
+        };
+      }
+    }
+
+    Log.prototype.setEnabled = function(value) {
+      this.enabled = value;
+      return null;
+    };
+
+    Log.prototype.args = function(args) {
+      return Array.prototype.slice.call(args, 0);
+    };
+
+    Log.prototype.log = function() {
+      if (this.enabled) {
+        console.log.apply(console, ["[Threeflow]"].concat(this.args(arguments)));
+      }
+      return null;
+    };
+
+    Log.prototype.warn = function() {
+      if (this.enabled) {
+        console.log.apply(console, ["[Threeflow]", "!!!"].concat(this.args(arguments)));
+      }
+      return null;
+    };
+
+    return Log;
+
+  })();
+
+  THREEFLOW.__log = new Log();
+
+  THREEFLOW.log = THREEFLOW.__log.log;
+
+  THREEFLOW.warn = THREEFLOW.__log.warn;
 
   THREEFLOW.Signal = Signal = (function() {
     function Signal() {

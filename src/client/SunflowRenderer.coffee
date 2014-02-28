@@ -20,6 +20,8 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
   # pass either a render name, or an options object.
   constructor:(options={})->
 
+    THREEFLOW.log THREEFLOW.VERSION,"/",THREEFLOW.COMMIT
+
     autoConnect = if options.autoConnect is false then false else true
 
     @name       = options.name || null
@@ -122,7 +124,7 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
           deleteSc: @deleteSc
         sunflowCl: @sunflowCl
     else
-      console.log "[Render in Progress]"
+      THREEFLOW.log "Render in progress."
 
     null
 
@@ -137,14 +139,14 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     null
 
   onConnected:(data)=>
-    console.log "THREEFLOW " + THREEFLOW.VERSION + " [Connected]"
+    THREEFLOW.log "[Connected]"
     @connected = true
     @rendering = false
     @setConnectionStatus SunflowRenderer.CONNECTED
     null
 
   onDisconnected:(data)=>
-    console.log "THREEFLOW " + THREEFLOW.VERSION + " [Disconnected]"
+    THREEFLOW.log "[Disconnected]"
     @connected = false
     @rendering = false # reset as we assume we are not anymore..
 

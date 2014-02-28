@@ -31,7 +31,7 @@ class ModifiersExporter extends BlockExporter
       texturePath = @exporter.textureLinkages[material.bumpMap.uuid]
 
       if not texturePath
-        console.log "[Threeflow] Found bumpMap texture on material but no texture linkage. ( Use linkTexturePath() )"
+        THREEFLOW.warn "Found bumpMap texture on material but no texture linkage.","( Use linkTexturePath() )"
         # no export.
       else
         result += 'modifier {\n'

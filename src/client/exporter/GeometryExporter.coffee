@@ -83,7 +83,7 @@ class GeometryExporter extends BlockExporter
 
           result += '\n'
         else
-          console.log "[Threeflow] Problem with geometry normals. ", entry.geometry
+          THREEFLOW.warn "Problem with geometry normals.",object3d
           result += '  normals none\n'
       else if @normals and not @vertexNormals
         result += '  normals facevarying\n'
@@ -105,7 +105,7 @@ class GeometryExporter extends BlockExporter
           for uv in uvs
             result += '    ' + uv[0].x + ' ' + uv[0].y + ' ' + uv[1].x + ' ' + uv[1].y + ' ' + uv[2].x + ' ' + uv[2].y + '\n'
         else
-          console.log "[Threeflow] UV count didn't match face count.", entry.geometry
+          THREEFLOW.warn "UV count didn't match face count.",entry.geometry
           result += '  uvs none\n'
       else
         result += '  uvs none\n'

@@ -110,9 +110,7 @@ THREEFLOW.LightingRig = class LightingRig
     ###
     intersect = @getIntersection()
 
-    console.log "DOWN", intersect
     if intersect
-      console.log intersect.object
       @orbitControls.enabled = false
     else
       @orbitControls.enabled = true
@@ -124,6 +122,7 @@ THREEFLOW.LightingRig = class LightingRig
     state.keyRadiance = @keyRadiance
 
     state.lights = []
+
     for light in @lights
       l = {}
       l.enabled = light.enabled
@@ -147,6 +146,16 @@ THREEFLOW.LightingRig = class LightingRig
 
       state.lights.push l
 
+    state.camera = {}
+    state.camera.x = @camera.position.x
+    state.camera.y = @camera.position.y
+    state.camera.z = @camera.position.z
+
+    state.camera.rx = @camera.rotation.x
+    state.camera.rx = @camera.rotation.y
+    state.camera.rz = @camera.rotation.z
+    state.camera.ord = @camera.rotation.order
+
     state
 
   loadState:(state)->
@@ -167,6 +176,10 @@ THREEFLOW.LightingRig = class LightingRig
       @lights[i].light.scale.set light.light.sx,light.light.sy,light.light.sz
 
       @lights[i].lookAtDirty = true
+
+    if state.camera
+      @camera.position.set state.camera.x,state.camera.y,state.camera.z
+      @camera.rotation.set state.camera.rx,state.camera.ry,state.camera.rz,state.camera.ord
 
     null
 

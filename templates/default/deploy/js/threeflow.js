@@ -1167,7 +1167,7 @@
           result += '  name ' + material.uuid + '-MOD\n';
           result += '  type bump\n';
           result += '  texture ' + texturePath + '\n';
-          result += '  scale -0.01\n';
+          result += '  scale ' + (-(material.bumpScale * 0.005)) + '\n';
           result += '}\n';
         }
       }

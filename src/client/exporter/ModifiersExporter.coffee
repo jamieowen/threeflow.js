@@ -38,8 +38,8 @@ class ModifiersExporter extends BlockExporter
         result += '  name ' + material.uuid + '-MOD\n'  # add suffix as material uuid already in use.
         result += '  type bump\n'
         result += '  texture ' + texturePath + '\n'
-        #result += '  scale ' + material.bumpScale + '\n'
-        result += '  scale -0.01\n'
+        #result += '  scale ' + ( material.bumpScale * 0.01 ) + '\n'
+        result += '  scale ' + (material.bumpScale * -0.005) ) + '\n'
         result += '}\n'
 
     return result

@@ -2099,6 +2099,10 @@
       state.camera.rx = this.camera.rotation.y;
       state.camera.rz = this.camera.rotation.z;
       state.camera.ord = this.camera.rotation.order;
+      state.orbit = {};
+      state.orbit.x = this.orbitControls.target.x;
+      state.orbit.y = this.orbitControls.target.y;
+      state.orbit.z = this.orbitControls.target.z;
       return state;
     };
 
@@ -2123,6 +2127,12 @@
       if (state.camera) {
         this.camera.position.set(state.camera.x, state.camera.y, state.camera.z);
         this.camera.rotation.set(state.camera.rx, state.camera.ry, state.camera.rz, state.camera.ord);
+      }
+      if (state.orbit) {
+        this.orbitControls.target.x = state.orbit.x;
+        this.orbitControls.target.y = state.orbit.y;
+        this.orbitControls.target.z = state.orbit.z;
+        this.orbitControls.update();
       }
       return null;
     };

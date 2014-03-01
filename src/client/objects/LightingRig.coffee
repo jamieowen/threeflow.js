@@ -156,6 +156,11 @@ THREEFLOW.LightingRig = class LightingRig
     state.camera.rz = @camera.rotation.z
     state.camera.ord = @camera.rotation.order
 
+    state.orbit = {}
+    state.orbit.x = @orbitControls.target.x
+    state.orbit.y = @orbitControls.target.y
+    state.orbit.z = @orbitControls.target.z
+
     state
 
   loadState:(state)->
@@ -180,6 +185,14 @@ THREEFLOW.LightingRig = class LightingRig
     if state.camera
       @camera.position.set state.camera.x,state.camera.y,state.camera.z
       @camera.rotation.set state.camera.rx,state.camera.ry,state.camera.rz,state.camera.ord
+
+    if state.orbit
+      @orbitControls.target.x = state.orbit.x
+      @orbitControls.target.y = state.orbit.y
+      @orbitControls.target.z = state.orbit.z
+
+      @orbitControls.update()
+
 
     null
 

@@ -21,6 +21,11 @@ THREEFLOW.LightingRig = class LightingRig
 
     @createBackdrop params.backdropWall,params.backdropFloor,params.backdropCurve,params.backdropCurveSteps,params.backdropMaterial
 
+    # Only keep the one simulate light on the key light.
+    # and add an ambient light
+    @ambient = new THREE.AmbientLight 0x333333
+    @add @ambient
+
     @_keyRadiance = 5.5
 
     @lights = [
@@ -29,7 +34,7 @@ THREEFLOW.LightingRig = class LightingRig
         light:
           color: 0xffffef
           geometryType: "Plane"
-          radiance: @keyRadiance
+          radiance: @_keyRadiance
 
       new THREEFLOW.LightingRigLight @,false,
         enabled: false
@@ -37,6 +42,7 @@ THREEFLOW.LightingRig = class LightingRig
         light:
           color: 0xffffef
           geometryType: "Plane"
+          simulate: false
 
       new THREEFLOW.LightingRigLight @,false,
         # target the back wall
@@ -45,6 +51,7 @@ THREEFLOW.LightingRig = class LightingRig
         light:
           color: 0xffffef
           geometryType: "Plane"
+          simulate: false
 
       new THREEFLOW.LightingRigLight @,false,
         enabled: false
@@ -52,6 +59,7 @@ THREEFLOW.LightingRig = class LightingRig
         light:
           color: 0xffffef
           geometryType: "Plane"
+          simulate: false
     ]
 
     @projector  = new THREE.Projector();

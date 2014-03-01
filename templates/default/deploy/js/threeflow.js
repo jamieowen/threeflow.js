@@ -1971,6 +1971,8 @@
       });
       this.backdropMaterial = params.backdropMaterial;
       this.createBackdrop(params.backdropWall, params.backdropFloor, params.backdropCurve, params.backdropCurveSteps, params.backdropMaterial);
+      this.ambient = new THREE.AmbientLight(0x333333);
+      this.add(this.ambient);
       this._keyRadiance = 5.5;
       this.lights = [
         new THREEFLOW.LightingRigLight(this, true, {
@@ -1978,28 +1980,31 @@
           light: {
             color: 0xffffef,
             geometryType: "Plane",
-            radiance: this.keyRadiance
+            radiance: this._keyRadiance
           }
         }), new THREEFLOW.LightingRigLight(this, false, {
           enabled: false,
           name: "Fill Light",
           light: {
             color: 0xffffef,
-            geometryType: "Plane"
+            geometryType: "Plane",
+            simulate: false
           }
         }), new THREEFLOW.LightingRigLight(this, false, {
           enabled: false,
           name: "Back/Rim Light",
           light: {
             color: 0xffffef,
-            geometryType: "Plane"
+            geometryType: "Plane",
+            simulate: false
           }
         }), new THREEFLOW.LightingRigLight(this, false, {
           enabled: false,
           name: "Background Light",
           light: {
             color: 0xffffef,
-            geometryType: "Plane"
+            geometryType: "Plane",
+            simulate: false
           }
         })
       ];

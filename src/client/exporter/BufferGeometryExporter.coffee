@@ -9,8 +9,7 @@ class BufferGeometryExporter extends BlockExporter
     @uvs = false
 
     # create a cache for some .sc code that comes from larger models.
-    # rather than generate this everything we hit render.
-    # will have to handle geometry changes later. ( or just switch on/off manually )
+    # rather than generate this everytime we hit render.
     @geometrySourceCache = {}
 
     @bufferGeometryIndex = null

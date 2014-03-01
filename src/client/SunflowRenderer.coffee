@@ -108,24 +108,31 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
 
       @rendering = true
 
-      @name = if name then name else @name
+      THREEFLOW.log "Indexing scene."
+      # trigger the render code on a delay. sometimes the gui doesn't update whilst processing.
+      _render = ()=>
+        @name = if name then name else @name
 
-      @exporter.clean()
+        @exporter.clean()
 
-      @exporter.image.resolutionX = @width*@scale
-      @exporter.image.resolutionY = @height*@scale
-      @exporter.camera.camera = camera
+        @exporter.image.resolutionX = @width*@scale
+        @exporter.image.resolutionY = @height*@scale
+        @exporter.camera.camera = camera
 
-      @exporter.indexObject3d scene
-      source = @exporter.exportCode()
+        @exporter.indexObject3d scene
+        source = @exporter.exportCode()
 
-      @socket.emit "render",
-        source: source
-        options:
-          name: @name
-          overwrite: @overwrite
-          deleteSc: @deleteSc
-        sunflowCl: @sunflowCl
+        THREEFLOW.log "Sending scene file."
+        @socket.emit "render",
+          source: source
+          options:
+            name: @name
+            overwrite: @overwrite
+            deleteSc: @deleteSc
+          sunflowCl: @sunflowCl
+
+      setTimeout _render,20
+
     else
       THREEFLOW.log "Render in progress."
 

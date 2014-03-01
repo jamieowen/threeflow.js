@@ -105,7 +105,8 @@
     };
 
     SunflowRenderer.prototype.render = function(scene, camera, name) {
-      var source;
+      var _render,
+        _this = this;
       if (!this.connected) {
         throw new Error("[Threeflow] Call connect() before rendering.");
       } else if (!camera instanceof THREE.PerspectiveCamera) {
@@ -117,22 +118,28 @@
           status: SunflowRenderer.RENDER_START
         });
         this.rendering = true;
-        this.name = name ? name : this.name;
-        this.exporter.clean();
-        this.exporter.image.resolutionX = this.width * this.scale;
-        this.exporter.image.resolutionY = this.height * this.scale;
-        this.exporter.camera.camera = camera;
-        this.exporter.indexObject3d(scene);
-        source = this.exporter.exportCode();
-        this.socket.emit("render", {
-          source: source,
-          options: {
-            name: this.name,
-            overwrite: this.overwrite,
-            deleteSc: this.deleteSc
-          },
-          sunflowCl: this.sunflowCl
-        });
+        THREEFLOW.log("Indexing scene.");
+        _render = function() {
+          var source;
+          _this.name = name ? name : _this.name;
+          _this.exporter.clean();
+          _this.exporter.image.resolutionX = _this.width * _this.scale;
+          _this.exporter.image.resolutionY = _this.height * _this.scale;
+          _this.exporter.camera.camera = camera;
+          _this.exporter.indexObject3d(scene);
+          source = _this.exporter.exportCode();
+          THREEFLOW.log("Sending scene file.");
+          return _this.socket.emit("render", {
+            source: source,
+            options: {
+              name: _this.name,
+              overwrite: _this.overwrite,
+              deleteSc: _this.deleteSc
+            },
+            sunflowCl: _this.sunflowCl
+          });
+        };
+        setTimeout(_render, 20);
       } else {
         THREEFLOW.log("Render in progress.");
       }

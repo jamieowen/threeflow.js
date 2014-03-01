@@ -8,6 +8,11 @@ class BufferGeometryExporter extends BlockExporter
     @normals = true
     @uvs = false
 
+    # create a cache for some .sc code that comes from larger models.
+    # rather than generate this everything we hit render.
+    # will have to handle geometry changes later. ( or just switch on/off manually )
+    @geometrySourceCache = {}
+
     @bufferGeometryIndex = null
 
   clean:()->
@@ -34,6 +39,11 @@ class BufferGeometryExporter extends BlockExporter
     result = ''
 
     for uuid of @bufferGeometryIndex
+      # pull from cache, if we have it.
+      if @exporter.useGeometrySourceCache and @geometrySourceCache[uuid]
+        result = @geometrySourceCache[uuid]
+        continue
+
       entry = @bufferGeometryIndex[uuid]
       result += 'object {\n'
       result += '  noinstance\n'
@@ -100,5 +110,8 @@ class BufferGeometryExporter extends BlockExporter
           result += '    ' + face.materialIndex + '\n'
 
       result += '}\n\n'
+
+      if @exporter.useGeometrySourceCache
+        @geometrySourceCache[ uuid ] = result
 
     return result

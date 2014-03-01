@@ -75,9 +75,15 @@
       var scale = 200 / ( geometry.boundingBox.max.y - geometry.boundingBox.min.y );
 
       var body,chrome,glass,tire,interior,black;
-      body = new THREEFLOW.ShinyMaterial( {color: 0xff6600, reflectivity: 0.3} );
+      body = new THREEFLOW.ShinyMaterial( {color: 0xff6600, reflection: 0.3} );
       chrome = new THREEFLOW.MirrorMaterial( {color: 0xffffff,reflection: 0xffffff} );
-      glass = new THREEFLOW.GlassMaterial( {color: 0xaaaaaa, eta:1.0, opacity: 0.25, transparent: true } );
+
+      // Haven't been able to get GlassMaterial rendering in a final render.
+      // Gives warning "BCKT   error : Inf shading sample!" and lots of artifacts appear on render.
+      // IPR preview works though.
+      // So use ShinyMaterial instead.
+      glass = new THREEFLOW.ShinyMaterial( {color: 0xaaaaaa, reflection: 0.6, opacity: 0.25, transparent: true } );
+      //glass = new THREEFLOW.GlassMaterial( {color: 0xaaaaaa, eta:1.0, opacity: 0.25, transparent: true } );
       tire = new THREEFLOW.DiffuseMaterial( {color: 0x050505} );
       interior = new THREE.MeshPhongMaterial( { color: 0x050505, shininess: 20} );
       black = new THREE.MeshLambertMaterial( {color: 0x000000} );

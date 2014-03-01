@@ -31,6 +31,7 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
     @width      = options.width || 800
     @height     = options.height || 600
 
+
     # sunflow command line options
     @sunflowCl =
       noGui: false     # do not show sunflow gui

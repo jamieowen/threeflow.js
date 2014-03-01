@@ -80,6 +80,7 @@ class Exporter
     @bufferGeometry     = @addBlockExporter new BufferGeometryExporter(@)
     @meshes             = @addBlockExporter new MeshExporter(@)
 
+    @useGeometrySourceCache = true
 
     @textureLinkages    = {}
 

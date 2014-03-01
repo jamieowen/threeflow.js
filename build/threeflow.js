@@ -339,6 +339,7 @@
       BufferGeometryExporter.__super__.constructor.call(this, exporter);
       this.normals = true;
       this.uvs = false;
+      this.geometrySourceCache = {};
       this.bufferGeometryIndex = null;
     }
 
@@ -368,6 +369,10 @@
       var attributes, entry, face, i, index, indices, normals, offset, offsets, positions, result, result2, tris, uuid, _i, _j, _k, _l, _len, _len1, _m, _n, _o, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
       result = '';
       for (uuid in this.bufferGeometryIndex) {
+        if (this.exporter.useGeometrySourceCache && this.geometrySourceCache[uuid]) {
+          result = this.geometrySourceCache[uuid];
+          continue;
+        }
         entry = this.bufferGeometryIndex[uuid];
         result += 'object {\n';
         result += '  noinstance\n';
@@ -431,6 +436,9 @@
           }
         }
         result += '}\n\n';
+        if (this.exporter.useGeometrySourceCache) {
+          this.geometrySourceCache[uuid] = result;
+        }
       }
       return result;
     };
@@ -560,6 +568,7 @@
       this.geometry = this.addBlockExporter(new GeometryExporter(this));
       this.bufferGeometry = this.addBlockExporter(new BufferGeometryExporter(this));
       this.meshes = this.addBlockExporter(new MeshExporter(this));
+      this.useGeometrySourceCache = true;
       this.textureLinkages = {};
     }
 
@@ -647,6 +656,7 @@
       this.normals = true;
       this.vertexNormals = false;
       this.uvs = true;
+      this.geometrySourceCache = {};
       this.geometryIndex = null;
     }
 
@@ -685,6 +695,10 @@
       var entry, face, normal, normals, result, uuid, uv, uvs, v1, v2, v3, vertex, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _len6, _m, _n, _o, _ref, _ref1, _ref2, _ref3, _ref4;
       result = '';
       for (uuid in this.geometryIndex) {
+        if (this.exporter.useGeometrySourceCache && this.geometrySourceCache[uuid]) {
+          result = this.geometrySourceCache[uuid];
+          continue;
+        }
         entry = this.geometryIndex[uuid];
         result += 'object {\n';
         result += '  noinstance\n';
@@ -759,6 +773,9 @@
           }
         }
         result += '}\n\n';
+        if (this.exporter.useGeometrySourceCache) {
+          this.geometrySourceCache[uuid] = result;
+        }
       }
       return result;
     };

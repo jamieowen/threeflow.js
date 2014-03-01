@@ -54,7 +54,7 @@ module.exports =
           version: "-version"
           command: "java"
           jar: path.join( __dirname, "../sunflow/sunflow.jar")
-          memory: "-Xmx1G"
+          memory: "-Xmx2G"
           args: [
             "-server"
           ]

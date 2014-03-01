@@ -15,7 +15,7 @@ class BucketExporter extends BlockExporter
     @orderTypes = BucketExporter.ORDER_TYPES
     @enabled    = true
     @reverse    = false
-    @size       = 64
+    @size       = 16
     @order      = @orderTypes[0]
 
   clean:()->

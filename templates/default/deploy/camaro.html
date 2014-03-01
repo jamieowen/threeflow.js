@@ -1,113 +1,114 @@
 <!doctype html>
 <html>
-<head>
-  <title>Threeflow</title>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="js/dat.gui.js"></script>
+  <head>
+    <title>Threeflow</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/dat.gui.js"></script>
 
-  <script src="js/three.js"></script>
-  <script src="js/threeflow.js"></script>
+    <script src="js/three.js"></script>
+    <script src="js/threeflow.js"></script>
 
-  <script src="js/OrbitControls.js"></script>
-  <script src="js/TransformControls.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script src="js/TransformControls.js"></script>
 
-  <script src="js/BinaryLoader.js"></script>
+    <script src="js/BinaryLoader.js"></script>
 
-</head>
-<style>
-  body{
-    background-color: #131313;
-    margin:0px;
-    padding:0px;
-    overflow:scroll;
-  }
-</style>
-<body>
-<script>
+  </head>
+  <style>
+    body{
+      background-color: #131313;
+      margin:0px;
+      padding:0px;
+      overflow:scroll;
+    }
+  </style>
 
-  var width, height, threeflow, lighting, gui;
-  var camera, scene, renderer;
+  <body>
+    <script>
 
-  init();
-  update();
+      var width, height, threeflow, lighting, gui;
+      var camera, scene, renderer;
 
-  function init() {
+      init();
+      update();
 
-    // ###
-    // Threeflow Basic setup
+      function init() {
 
-    width = 800; height = 600;
+        // ###
+        // Threeflow Basic setup
 
-    threeflow = new THREEFLOW.SunflowRenderer({overwrite:true});
-    threeflow.setSize( width,height );
+        width = 800; height = 600;
 
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize( width,height );
+        threeflow = new THREEFLOW.SunflowRenderer( {overwrite:false} );
+        threeflow.setSize( width,height );
 
-    THREEFLOW.__log.enabled = false;
-    document.body.appendChild( renderer.domElement );
-    var img = document.body.appendChild( document.createElement("img") );
-    img.src = "renders/camaro.png";
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize( width,height );
 
-    scene = new THREE.Scene();
+        document.body.appendChild( renderer.domElement );
+        var img = document.body.appendChild( document.createElement("img") );
+        img.src = "renders/camaro.png";
 
-    camera = new THREE.PerspectiveCamera( 35, width/height, 1, 30000 );
-    camera.position.set(0,500,1000);
-    camera.lookAt( new THREE.Vector3() );
+        scene = new THREE.Scene();
 
-    lighting = new THREEFLOW.LightingRig(camera,renderer.domElement);
-    lighting.loadState('{"lights":[{"enabled":true,"color":14733805,"radiance":44.896527534198526,"geometryType":"Plane","target":{"x":-376.44834756976303,"y":211.71736342113527,"z":366.81323942907534},"light":{"x":-664.4250071441212,"y":478.66377414587737,"z":629.443786737767,"sx":0.6029171577908687,"sy":0.6029171577908687,"sz":0.6029171577908687}},{"enabled":true,"color":16777199,"radiance":25.255605381165918,"geometryType":"Plane","target":{"x":217.81041418261862,"y":102.00045449485992,"z":176.3440939438861},"light":{"x":541.9178492344969,"y":159.4022976018827,"z":508.66097585349803,"sx":1.9566650852960707,"sy":0.28606604643324796,"sz":0.7423625401435991}},{"enabled":true,"color":16777199,"radiance":25.255605381165918,"geometryType":"Plane","target":{"x":-358.9297352669099,"y":210.27904120113578,"z":-351.73002160325984},"light":{"x":-1137.3712542791613,"y":478.65381754615294,"z":-302.07500597075705,"sx":0.5251717408652797,"sy":0.5251717408652797,"sz":0.5251717408652797}},{"enabled":true,"color":13620966,"radiance":8.979305506839705,"geometryType":"Plane","target":{"x":464.54509657834546,"y":176.79129808686673,"z":-120.9868416144102},"light":{"x":984.3698177527843,"y":288.0694181623479,"z":-200.0281888937119,"sx":1.4667118305656217,"sy":0.6395090016393891,"sz":0.6395090016393891}}],"camera":{"x":-16.88461836778314,"y":186.06100677372322,"z":866.163040414001,"rx":0.021938034766455193,"rz":0.003270417346090236,"ord":"XYZ"}}')
-    scene.add( lighting );
+        camera = new THREE.PerspectiveCamera( 35, width/height, 1, 30000 );
+        camera.position.set(0,500,1000);
+        camera.lookAt( new THREE.Vector3() );
 
-    gui = new THREEFLOW.Gui(threeflow,lighting);
-    gui.onRender.add( function(){
-      threeflow.render( scene, camera, "camaro" );
-    });
+        lighting = new THREEFLOW.LightingRig(camera,renderer.domElement);
+        lighting.loadState('{"lights":[{"enabled":true,"color":14733805,"radiance":44.896527534198526,"geometryType":"Plane","target":{"x":-376.44834756976303,"y":211.71736342113527,"z":366.81323942907534},"light":{"x":-664.4250071441212,"y":478.66377414587737,"z":629.443786737767,"sx":0.6029171577908687,"sy":0.6029171577908687,"sz":0.6029171577908687}},{"enabled":true,"color":16777199,"radiance":25.255605381165918,"geometryType":"Plane","target":{"x":217.81041418261862,"y":102.00045449485992,"z":176.3440939438861},"light":{"x":541.9178492344969,"y":159.4022976018827,"z":508.66097585349803,"sx":1.9566650852960707,"sy":0.28606604643324796,"sz":0.7423625401435991}},{"enabled":true,"color":16777199,"radiance":25.255605381165918,"geometryType":"Plane","target":{"x":-358.9297352669099,"y":210.27904120113578,"z":-351.73002160325984},"light":{"x":-1137.3712542791613,"y":478.65381754615294,"z":-302.07500597075705,"sx":0.5251717408652797,"sy":0.5251717408652797,"sz":0.5251717408652797}},{"enabled":true,"color":13620966,"radiance":8.979305506839705,"geometryType":"Plane","target":{"x":464.54509657834546,"y":176.79129808686673,"z":-120.9868416144102},"light":{"x":984.3698177527843,"y":288.0694181623479,"z":-200.0281888937119,"sx":1.4667118305656217,"sy":0.6395090016393891,"sz":0.6395090016393891}}],"camera":{"x":-261.7822352602755,"y":140.3120944989707,"z":665.0168739874479,"rx":-0.2692358920689084,"rz":-0.029596961977286118,"ord":"XYZ"},"orbit":{"x":-69.80844536780776,"y":63.352776812493396,"z":-26.43283864852452}}');
+        scene.add( lighting );
 
+        gui = new THREEFLOW.Gui(threeflow,lighting);
+        gui.onRender.add( function(){
+          threeflow.render( scene, camera, "camaro" );
+        });
 
-    var mesh,material;
+        var mesh,material;
 
-    var loader = new THREE.BinaryLoader();
+        var loader = new THREE.BinaryLoader();
 
-    loader.load("/models/CamaroNoUv_bin.js",function(geometry){
-      geometry.computeBoundingBox();
+        loader.load("/models/CamaroNoUv_bin.js",function(geometry){
+          geometry.computeBoundingBox();
 
-      var scale = 200 / ( geometry.boundingBox.max.y - geometry.boundingBox.min.y );
+          var scale = 200 / ( geometry.boundingBox.max.y - geometry.boundingBox.min.y );
 
-      var body,chrome,glass,tire,interior,black;
-      body = new THREEFLOW.ShinyMaterial( {color: 0xff6600, reflection: 0.3} );
-      chrome = new THREEFLOW.MirrorMaterial( {color: 0xffffff,reflection: 0xffffff} );
+          var body,chrome,darkchrome,glass,tire,interior,black,lines;
 
-      // Haven't been able to get GlassMaterial rendering in a final render.
-      // Gives warning "BCKT   error : Inf shading sample!" and lots of artifacts appear on render.
-      // IPR preview works though.
-      // So use ShinyMaterial instead.
-      glass = new THREEFLOW.ShinyMaterial( {color: 0xaaaaaa, reflection: 0.6, opacity: 0.25, transparent: true } );
-      //glass = new THREEFLOW.GlassMaterial( {color: 0xaaaaaa, eta:1.0, opacity: 0.25, transparent: true } );
-      tire = new THREEFLOW.DiffuseMaterial( {color: 0x050505} );
-      interior = new THREE.MeshPhongMaterial( { color: 0x050505, shininess: 20} );
-      black = new THREE.MeshLambertMaterial( {color: 0x000000} );
+          body = new THREEFLOW.ShinyMaterial( {color: 0xff6600, reflection: 0.3} );
+          darkchrome = new THREEFLOW.MirrorMaterial( {color: 0x252525} );
+          chrome = new THREEFLOW.MirrorMaterial( {color: 0xbabaff} );
+          lines = new THREEFLOW.DiffuseMaterial( {color: 0x131313} );
 
-      // body,wheels,grill,door lines,windshield,interior,tire,tireling,behind grill
-      material = new THREE.MeshFaceMaterial([body,chrome,chrome,chrome,glass,interior,tire,black,black]);
+          // Haven't been able to get GlassMaterial rendering correctly with a final render with this model.
+          // Gives warning "BCKT   error : Inf shading sample!" and artifacts appear on render.
+          // IPR preview works though.
+          glass = new THREEFLOW.DiffuseMaterial( {color: 0x121212, opacity: 0.25, transparent: true } );
+          //glass = new THREEFLOW.GlassMaterial( {color: 0xaaaaaa, eta:1.0, opacity: 0.25, transparent: true, side:THREE.DoubleSide } );
+          tire = new THREEFLOW.DiffuseMaterial( {color: 0x050505} );
+          interior = new THREE.MeshPhongMaterial( { color: 0x050505, shininess: 20} );
+          black = new THREE.MeshLambertMaterial( {color: 0x000000} );
 
-      mesh = new THREE.Mesh(geometry,material);
+          // body,wheels,grill,door lines,windshield,interior,tire,tireling,behind grill
+          material = new THREE.MeshFaceMaterial([body,chrome,darkchrome,lines,glass,interior,tire,black,black]);
 
-      mesh.scale.set(scale,scale,scale);
-      mesh.position.y = geometry.boundingBox.max.y*scale;
-      mesh.rotation.y = -(Math.PI/4);
+          mesh = new THREE.Mesh(geometry,material);
 
-      scene.add(mesh);
-    });
-  }
+          mesh.scale.set(scale,scale,scale);
+          mesh.position.y = geometry.boundingBox.max.y*scale;
+          mesh.rotation.y = -(Math.PI/4);
 
-  function update() {
-    requestAnimationFrame( update );
+          scene.add(mesh);
+        });
+      }
 
-    lighting.update();
-    renderer.render( scene, camera );
-  }
+      function update() {
+        requestAnimationFrame( update );
 
-</script>
-</body>
+        lighting.update();
+        renderer.render( scene, camera );
+      }
+
+    </script>
+  </body>
 </html>

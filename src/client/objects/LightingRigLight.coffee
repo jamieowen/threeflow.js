@@ -195,6 +195,12 @@ THREEFLOW.LightingRigLight = class LightingRigLight
         if @rig
           @rig.lightsDirty = true
 
+    samples:
+      get: ->
+        @light.samples
+      set: (value) ->
+        @light.samples = value
+
   update:()->
     ###
     if @rotateDirty

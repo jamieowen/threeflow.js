@@ -35,11 +35,6 @@ THREEFLOW.Gui = class Gui
     @gui.add(@,"_onRenderIPR").name("Render IPR")
 
     @imageFolder        = @gui.addFolder "Image"
-    @bucketFolder       = @gui.addFolder "Bucket Size/Order"
-    @traceDepthsFolder  = @gui.addFolder "Trace Depths"
-    @causticsFolder     = @gui.addFolder "Caustics"
-    @giFolder           = @gui.addFolder "Global Illumination"
-
     if @lightingRig
       @lightingRigFolder = @gui.addFolder "Lighting Rig"
       @lightingRigFolder.add(@lightingRig,"saveState").name("Dump JSON").onChange ()=>
@@ -55,8 +50,15 @@ THREEFLOW.Gui = class Gui
       @backdropFolder.add(@lightingRig.backdropMaterial,"transparent")
       @backdropFolder.add(@lightingRig.backdropMaterial,"opacity",0,1)
 
-    @overridesFolder    = @gui.addFolder "Overrides"
-    @otherFolder        = @gui.addFolder "Other"
+    @giFolder           = @gui.addFolder "Global Illumination"
+
+    @traceDepthsFolder  = @gui.addFolder "Trace Depths"
+    @causticsFolder     = @gui.addFolder "Caustics"
+    @bucketFolder       = @gui.addFolder "Bucket"
+
+    @moreFolder         = @gui.addFolder "Later / Other"
+    @overridesFolder    = @moreFolder.addFolder "Overrides"
+    @otherFolder        = @moreFolder.addFolder "Flags"
 
     # add scale in the image folder - although it is not sunflow related
     @imageFolder.add @renderer,"scale"
@@ -189,7 +191,9 @@ THREEFLOW.Gui = class Gui
       folder.add(rigLight,"radiance",0,200)
     else
       #folder.add rigLight, "keyRatio",0,16
-      folder.add(rigLight,"radiance",0,100).listen()
+      folder.add(rigLight,"radiance",0,200)
+
+    folder.add(rigLight,"samples",16,512).step(16)
 
     folder.addColor(rigLight,"color")
 

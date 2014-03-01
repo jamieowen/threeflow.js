@@ -303,7 +303,7 @@
       this.orderTypes = BucketExporter.ORDER_TYPES;
       this.enabled = true;
       this.reverse = false;
-      this.size = 64;
+      this.size = 16;
       this.order = this.orderTypes[0];
     }
 
@@ -1376,10 +1376,6 @@
       this.gui.add(this, "_onRender").name("Render");
       this.gui.add(this, "_onRenderIPR").name("Render IPR");
       this.imageFolder = this.gui.addFolder("Image");
-      this.bucketFolder = this.gui.addFolder("Bucket Size/Order");
-      this.traceDepthsFolder = this.gui.addFolder("Trace Depths");
-      this.causticsFolder = this.gui.addFolder("Caustics");
-      this.giFolder = this.gui.addFolder("Global Illumination");
       if (this.lightingRig) {
         this.lightingRigFolder = this.gui.addFolder("Lighting Rig");
         this.lightingRigFolder.add(this.lightingRig, "saveState").name("Dump JSON").onChange(function() {
@@ -1397,8 +1393,13 @@
         this.backdropFolder.add(this.lightingRig.backdropMaterial, "transparent");
         this.backdropFolder.add(this.lightingRig.backdropMaterial, "opacity", 0, 1);
       }
-      this.overridesFolder = this.gui.addFolder("Overrides");
-      this.otherFolder = this.gui.addFolder("Other");
+      this.giFolder = this.gui.addFolder("Global Illumination");
+      this.traceDepthsFolder = this.gui.addFolder("Trace Depths");
+      this.causticsFolder = this.gui.addFolder("Caustics");
+      this.bucketFolder = this.gui.addFolder("Bucket");
+      this.moreFolder = this.gui.addFolder("Later / Other");
+      this.overridesFolder = this.moreFolder.addFolder("Overrides");
+      this.otherFolder = this.moreFolder.addFolder("Flags");
       this.imageFolder.add(this.renderer, "scale");
       this.imageFolder.add(this.renderer.image, "antialiasMin");
       this.imageFolder.add(this.renderer.image, "antialiasMax");
@@ -1512,8 +1513,9 @@
         folder.open();
         folder.add(rigLight, "radiance", 0, 200);
       } else {
-        folder.add(rigLight, "radiance", 0, 100).listen();
+        folder.add(rigLight, "radiance", 0, 200);
       }
+      folder.add(rigLight, "samples", 16, 512).step(16);
       folder.addColor(rigLight, "color");
       return folder.add(rigLight, "geometryType", THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES);
     };
@@ -1978,7 +1980,7 @@
       });
       this.backdropMaterial = params.backdropMaterial;
       this.createBackdrop(params.backdropWall, params.backdropFloor, params.backdropCurve, params.backdropCurveSteps, params.backdropMaterial);
-      this.ambient = new THREE.AmbientLight(0x333333);
+      this.ambient = new THREE.HemisphereLight(0xefefff, 0xa1efa1);
       this.add(this.ambient);
       this._keyRadiance = 5.5;
       this.lights = [
@@ -2473,6 +2475,14 @@
           if (this.rig) {
             return this.rig.lightsDirty = true;
           }
+        }
+      },
+      samples: {
+        get: function() {
+          return this.light.samples;
+        },
+        set: function(value) {
+          return this.light.samples = value;
         }
       }
     });

@@ -116,7 +116,7 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
       @exporter.image.resolutionY = @height*@scale
       @exporter.camera.camera = camera
 
-      @exporter.indexScene scene
+      @exporter.indexObject3d scene
       source = @exporter.exportCode()
 
       @socket.emit "render",

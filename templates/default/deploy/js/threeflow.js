@@ -122,7 +122,7 @@
         this.exporter.image.resolutionX = this.width * this.scale;
         this.exporter.image.resolutionY = this.height * this.scale;
         this.exporter.camera.camera = camera;
-        this.exporter.indexScene(scene);
+        this.exporter.indexObject3d(scene);
         source = this.exporter.exportCode();
         this.socket.emit("render", {
           source: source,
@@ -369,11 +369,11 @@
       var attributes, entry, face, i, index, indices, normals, offset, offsets, positions, result, result2, tris, uuid, _i, _j, _k, _l, _len, _len1, _m, _n, _o, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
       result = '';
       for (uuid in this.bufferGeometryIndex) {
-        if (this.exporter.useGeometrySourceCache && this.geometrySourceCache[uuid]) {
+        entry = this.bufferGeometryIndex[uuid];
+        if (!entry.geometry._tf_noCache && this.exporter.useGeometrySourceCache && this.geometrySourceCache[uuid]) {
           result = this.geometrySourceCache[uuid];
           continue;
         }
-        entry = this.bufferGeometryIndex[uuid];
         result += 'object {\n';
         result += '  noinstance\n';
         result += '  type generic-mesh\n';
@@ -436,7 +436,7 @@
           }
         }
         result += '}\n\n';
-        if (this.exporter.useGeometrySourceCache) {
+        if (!entry.geometry._tf_noCache && this.exporter.useGeometrySourceCache) {
           this.geometrySourceCache[uuid] = result;
         }
       }
@@ -602,7 +602,7 @@
       return null;
     };
 
-    Exporter.prototype.indexScene = function(object3d) {
+    Exporter.prototype.indexObject3d = function(object3d) {
       var blockExporter, child, cls, doTraverse, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
       _ref = Exporter.EXCLUDED_OBJECT3D_TYPES;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -625,8 +625,8 @@
             }
             doTraverse = doTraverse && blockExporter.doTraverse(child);
           }
-          if (doTraverse && !child._tf_noTraverse) {
-            this.indexScene(child);
+          if (doTraverse && !child._tf_noTraverse && !child._tf_noIndex) {
+            this.indexObject3d(child);
           }
         }
       }
@@ -695,11 +695,11 @@
       var entry, face, normal, normals, result, uuid, uv, uvs, v1, v2, v3, vertex, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _len6, _m, _n, _o, _ref, _ref1, _ref2, _ref3, _ref4;
       result = '';
       for (uuid in this.geometryIndex) {
-        if (this.exporter.useGeometrySourceCache && this.geometrySourceCache[uuid]) {
+        entry = this.geometryIndex[uuid];
+        if (!entry.geometry._tf_noCache && this.exporter.useGeometrySourceCache && this.geometrySourceCache[uuid]) {
           result = this.geometrySourceCache[uuid];
           continue;
         }
-        entry = this.geometryIndex[uuid];
         result += 'object {\n';
         result += '  noinstance\n';
         result += '  type generic-mesh\n';
@@ -773,7 +773,7 @@
           }
         }
         result += '}\n\n';
-        if (this.exporter.useGeometrySourceCache) {
+        if (!entry.geometry._tf_noCache && this.exporter.useGeometrySourceCache) {
           this.geometrySourceCache[uuid] = result;
         }
       }
@@ -1811,6 +1811,9 @@
       if (params == null) {
         params = {};
       }
+      if (params.color === void 0) {
+        params.color = 0xffffff;
+      }
       THREE.MeshLambertMaterial.call(this);
       this.setValues(params);
     }
@@ -2009,6 +2012,7 @@
       this.transformControls = new THREE.TransformControls(this.camera, this.domElement);
       this.transformControls.addEventListener("change", this.onTransformChange);
       this.orbitControls = new THREE.OrbitControls(this.camera, this.domElement);
+      this.transformControls._tf_noIndex = true;
       this.add(this.transformControls);
       this.enabledLights = [];
       this.lightsDirty = true;

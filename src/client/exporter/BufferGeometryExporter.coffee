@@ -39,12 +39,13 @@ class BufferGeometryExporter extends BlockExporter
     result = ''
 
     for uuid of @bufferGeometryIndex
+
+      entry = @bufferGeometryIndex[uuid]
       # pull from cache, if we have it.
-      if @exporter.useGeometrySourceCache and @geometrySourceCache[uuid]
+      if not entry.geometry._tf_noCache and @exporter.useGeometrySourceCache and @geometrySourceCache[uuid]
         result = @geometrySourceCache[uuid]
         continue
 
-      entry = @bufferGeometryIndex[uuid]
       result += 'object {\n'
       result += '  noinstance\n'
       result += '  type generic-mesh\n'
@@ -111,7 +112,7 @@ class BufferGeometryExporter extends BlockExporter
 
       result += '}\n\n'
 
-      if @exporter.useGeometrySourceCache
+      if not entry.geometry._tf_noCache and @exporter.useGeometrySourceCache
         @geometrySourceCache[ uuid ] = result
 
     return result

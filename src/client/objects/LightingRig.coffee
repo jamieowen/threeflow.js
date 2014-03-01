@@ -67,6 +67,9 @@ THREEFLOW.LightingRig = class LightingRig
     @transformControls.addEventListener "change", @onTransformChange
     @orbitControls = new THREE.OrbitControls( @camera, @domElement )
 
+    # set _tf_noIndex here - ( it won't be indexed anyway but will display a warning otherwise )
+    @transformControls._tf_noIndex = true
+
     @add @transformControls
 
     @enabledLights = []

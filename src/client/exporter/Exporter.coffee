@@ -111,7 +111,7 @@ class Exporter
     null
 
   # index the three js scene
-  indexScene:(object3d)->
+  indexObject3d:(object3d)->
 
     # check for exlucded object3d types and ignore
     for cls in Exporter.EXCLUDED_OBJECT3D_TYPES
@@ -126,16 +126,14 @@ class Exporter
         # to exclude elements from the render.
         doTraverse = true
 
-        # TODO : Auto No add-to-index with certain meshes.
-
         for blockExporter in @blockExporters
           if not child._tf_noIndex
             blockExporter.addToIndex( child )
 
           doTraverse = doTraverse and blockExporter.doTraverse( child )
 
-        if doTraverse and not child._tf_noTraverse
-          @indexScene child
+        if doTraverse and not child._tf_noTraverse and not child._tf_noIndex
+          @indexObject3d child
 
     null
 

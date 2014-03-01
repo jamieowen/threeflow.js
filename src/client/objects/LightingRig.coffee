@@ -1,11 +1,10 @@
 
 THREEFLOW.LightingRig = class LightingRig
-  constructor:(@camera,@domElement)->
+  constructor:(@camera,@domElement,params = {})->
 
     THREE.Object3D.call @
 
     # backdrop
-    params = {}
     params.backdropWall       = params.backdropWall || 600
     params.backdropFloor      = params.backdropFloor  || 1500
     params.backdropCurve      = params.backdropCurve || 400
@@ -23,7 +22,7 @@ THREEFLOW.LightingRig = class LightingRig
 
     # Only keep the one simulate light on the key light.
     # and add an ambient light
-    @ambient = new THREE.HemisphereLight(0xefefff,0xa1efa1)
+    @ambient = new THREE.AmbientLight(0x252525)
     @add @ambient
 
     @_keyRadiance = 5.5

@@ -935,7 +935,6 @@
       result += '  filter ' + this.filter + '\n';
       result += '  jitter ' + this.jitter + '\n';
       result += '}\n\n';
-      result += "accel kdtree\n\n";
       return result;
     };
 
@@ -1274,9 +1273,9 @@
     function TraceDepthsExporter(exporter) {
       TraceDepthsExporter.__super__.constructor.call(this, exporter);
       this.enabled = false;
-      this.diffusion = 1;
-      this.reflection = 1;
-      this.refraction = 1;
+      this.diffusion = 4;
+      this.reflection = 4;
+      this.refraction = 4;
     }
 
     TraceDepthsExporter.prototype.clean = function() {
@@ -1957,16 +1956,17 @@
   })();
 
   THREEFLOW.LightingRig = LightingRig = (function() {
-    function LightingRig(camera, domElement) {
-      var params;
+    function LightingRig(camera, domElement, params) {
       this.camera = camera;
       this.domElement = domElement;
+      if (params == null) {
+        params = {};
+      }
       this.onKeyDown = __bind(this.onKeyDown, this);
       this.onPointerUp = __bind(this.onPointerUp, this);
       this.onPointerDown = __bind(this.onPointerDown, this);
       this.onTransformChange = __bind(this.onTransformChange, this);
       THREE.Object3D.call(this);
-      params = {};
       params.backdropWall = params.backdropWall || 600;
       params.backdropFloor = params.backdropFloor || 1500;
       params.backdropCurve = params.backdropCurve || 400;
@@ -1980,7 +1980,7 @@
       });
       this.backdropMaterial = params.backdropMaterial;
       this.createBackdrop(params.backdropWall, params.backdropFloor, params.backdropCurve, params.backdropCurveSteps, params.backdropMaterial);
-      this.ambient = new THREE.HemisphereLight(0xefefff, 0xa1efa1);
+      this.ambient = new THREE.AmbientLight(0x252525);
       this.add(this.ambient);
       this._keyRadiance = 5.5;
       this.lights = [

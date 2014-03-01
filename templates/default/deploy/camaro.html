@@ -34,8 +34,7 @@
 
       function init() {
 
-        // ###
-        // Threeflow Basic setup
+        // three/threeflow setup.
 
         width = 800; height = 600;
 
@@ -64,36 +63,37 @@
           threeflow.render( scene, camera, "camaro" );
         });
 
+        // scene objects.
+
         var mesh,material;
 
         var loader = new THREE.BinaryLoader();
 
         loader.load("/models/CamaroNoUv_bin.js",function(geometry){
-          geometry.computeBoundingBox();
 
-          var scale = 200 / ( geometry.boundingBox.max.y - geometry.boundingBox.min.y );
+          var body,chrome,darkchrome,glass,tire,interior,black,lines,scale;
 
-          var body,chrome,darkchrome,glass,tire,interior,black,lines;
+          body        = new THREEFLOW.ShinyMaterial( {color: 0xff6600, reflection: 0.3} );
+          darkchrome  = new THREEFLOW.MirrorMaterial( {color: 0x252525} );
+          chrome      = new THREEFLOW.MirrorMaterial( {color: 0xbabaff} );
+          lines       = new THREEFLOW.DiffuseMaterial( {color: 0x131313} );
+          tire        = new THREEFLOW.DiffuseMaterial( {color: 0x050505} );
+          interior    = new THREEFLOW.DiffuseMaterial( {color: 0x000000} ); // no point in interior without glass.
+          black       = new THREEFLOW.DiffuseMaterial( {color: 0x000000} );
 
-          body = new THREEFLOW.ShinyMaterial( {color: 0xff6600, reflection: 0.3} );
-          darkchrome = new THREEFLOW.MirrorMaterial( {color: 0x252525} );
-          chrome = new THREEFLOW.MirrorMaterial( {color: 0xbabaff} );
-          lines = new THREEFLOW.DiffuseMaterial( {color: 0x131313} );
+          // Haven't been able to get GlassMaterial rendering correctly on a final render with this model.
+          // Gives warning "BCKT   error : Inf shading sample!" and artifacts appear on render. :(
+          // IPR preview works OK.
 
-          // Haven't been able to get GlassMaterial rendering correctly with a final render with this model.
-          // Gives warning "BCKT   error : Inf shading sample!" and artifacts appear on render.
-          // IPR preview works though.
-          glass = new THREEFLOW.DiffuseMaterial( {color: 0x121212, opacity: 0.25, transparent: true } );
-          //glass = new THREEFLOW.GlassMaterial( {color: 0xaaaaaa, eta:1.0, opacity: 0.25, transparent: true, side:THREE.DoubleSide } );
-          tire = new THREEFLOW.DiffuseMaterial( {color: 0x050505} );
-          interior = new THREE.MeshPhongMaterial( { color: 0x050505, shininess: 20} );
-          black = new THREE.MeshLambertMaterial( {color: 0x000000} );
+          glass = new THREEFLOW.DiffuseMaterial( {color: 0x121212, opacity: 0.25, transparent: true, side:THREE.DoubleSide } );
+          //glass = new THREEFLOW.GlassMaterial( {color: 0xaaaaaa, opacity: 0.25, transparent: true, side:THREE.DoubleSide } );
 
           // body,wheels,grill,door lines,windshield,interior,tire,tireling,behind grill
           material = new THREE.MeshFaceMaterial([body,chrome,darkchrome,lines,glass,interior,tire,black,black]);
 
           mesh = new THREE.Mesh(geometry,material);
-
+          geometry.computeBoundingBox();
+          scale = 200 / ( geometry.boundingBox.max.y - geometry.boundingBox.min.y );
           mesh.scale.set(scale,scale,scale);
           mesh.position.y = geometry.boundingBox.max.y*scale;
           mesh.rotation.y = -(Math.PI/4);

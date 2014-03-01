@@ -31,12 +31,11 @@
 
       function init() {
 
-        // ###
-        // Threeflow Basic setup
+        // three/threeflow setup.
 
         width = 800; height = 600;
 
-        threeflow = new THREEFLOW.SunflowRenderer({overwrite:true});
+        threeflow = new THREEFLOW.SunflowRenderer({overwrite:false});
         threeflow.setSize( width,height );
 
         renderer = new THREE.WebGLRenderer();
@@ -52,8 +51,8 @@
         camera.position.set(0,500,1000);
         camera.lookAt( new THREE.Vector3() );
 
-        lighting = new THREEFLOW.LightingRig(camera,renderer.domElement);
-        lighting.loadState('{"lights":[{"enabled":true,"color":16777199,"radiance":30,"geometryType":"Plane","target":{"x":-211.9274872502022,"y":275.85083879734725,"z":170.55557980904268},"light":{"x":-413.19648050640706,"y":287.7592534400846,"z":339.4519703473842,"sx":0.6029171577908687,"sy":0.6029171577908687,"sz":0.6029171577908687}},{"enabled":true,"color":16777199,"radiance":5,"geometryType":"Plane","target":{"x":217.81041418261862,"y":234.43664495539383,"z":176.3440939438861},"light":{"x":499.3922690493239,"y":227.98373335764214,"z":518.5831468458007,"sx":0.7423625401435991,"sy":0.7423625401435991,"sz":0.7423625401435991}},{"enabled":false,"color":16777199,"radiance":15,"geometryType":"Plane","target":{"x":-207.30188165286313,"y":322.15255588531136,"z":-131.85555947333944},"light":{"x":-508.73030977652644,"y":342.73245422110296,"z":-437.30864347816487,"sx":0.5251717408652797,"sy":0.5251717408652797,"sz":0.5251717408652797}},{"enabled":false,"color":16777199,"radiance":3.75,"geometryType":"Plane","target":{"x":405.4561720515609,"y":128.06773481919686,"z":-716.9348712525214},"light":{"x":762.4879099396458,"y":310.9158695184617,"z":-409.34363940372657,"sx":1.1752789471525573,"sy":1.1752789471525573,"sz":1.1752789471525573}}],"camera":{"x":24.676033380475793,"y":683.9242913090967,"z":908.0378543421425,"rx":0,"rz":0,"ord":"XYZ"},"orbit":{"x":24.676033380475793,"y":183.92429131042095,"z":-91.96214565521048}}');
+        lighting = new THREEFLOW.LightingRig(camera,renderer.domElement,{backdropWall:1200});
+        lighting.loadState('{"lights":[{"enabled":true,"color":15132877,"radiance":23,"geometryType":"Plane","target":{"x":-211.9274872502022,"y":362.3696852835959,"z":170.55557980904268},"light":{"x":-562.1891615435277,"y":356.57149772614065,"z":464.4803080644149,"sx":0.8732337392130417,"sy":0.8732337392130417,"sz":0.8732337392130417}},{"enabled":true,"color":16777199,"radiance":5,"geometryType":"Plane","target":{"x":217.81041418261862,"y":308.73750178636897,"z":165.17806900186446},"light":{"x":476.7744736200646,"y":227.983733026455,"z":329.9698157354218,"sx":0.7423625401435991,"sy":0.7423625401435991,"sz":0.7423625401435991}},{"enabled":true,"color":16777199,"radiance":10,"geometryType":"Plane","target":{"x":-170.96104035953442,"y":322.15255588531136,"z":-131.85555947333944},"light":{"x":-729.2684596895776,"y":303.6113469379644,"z":-209.57416574422376,"sx":0.9120481883586011,"sy":0.9120481883586011,"sz":0.9120481883586011}},{"enabled":false,"color":16777199,"radiance":3.75,"geometryType":"Plane","target":{"x":405.4561720515609,"y":128.06773481919686,"z":-716.9348712525214},"light":{"x":762.4879099396458,"y":310.9158695184617,"z":-409.34363940372657,"sx":1.1752789471525573,"sy":1.1752789471525573,"sz":1.1752789471525573}}],"camera":{"x":-57.22333907033791,"y":166.72492719632493,"z":769.9906686799067,"rx":-0.10946578288538945,"rz":0.010389390347851534,"ord":"XYZ"},"orbit":{"x":37.28795930377746,"y":248.14015024031644,"z":-86.08196256215705}}');
         scene.add( lighting );
 
         gui = new THREEFLOW.Gui(threeflow,lighting);
@@ -61,11 +60,14 @@
           threeflow.render( scene, camera, "lee_perry_smith" );
         });
 
+        // scene objects.
+
         var mesh,material,bumpMap,colorMap;
+
         bumpMap = THREE.ImageUtils.loadTexture( "models/Infinite-Level_02_Disp_NoSmoothUV-4096.jpg" );
         colorMap = THREE.ImageUtils.loadTexture( "models/Map-COL.jpg" );
 
-        // texture paths are relative to the render folder.
+        // texture paths are relative to the render folder. ( may change later )
         threeflow.linkTexturePath( colorMap, "../models/Map-COL.jpg" );
         threeflow.linkTexturePath( bumpMap, "../models/Infinite-Level_02_Disp_NoSmoothUV-4096.jpg" );
 

@@ -24,17 +24,14 @@ Installation via npm. Will run a local socket server that projects can connect t
 ------------------------------------------------------------------------------
 #### Quick render examples so far
 
-*1. Perlin noise scaled THREE.CubeGeometry with THREEFLOW.AreaLight*
-![Geometry Cubes](examples/renders/geometry_cubes.png)
+*1. Camaro
+![Camaro](templates/default/deploy/renders/camaro.png)
 
-*2. Camaro Model with THREE.MeshFaceMaterial,THREEFLOW.Shiny/MirrorMaterial*
-![Camaro](examples/renders/models_camaro.png)
+*2. Lee Perry Smith
+![Lee Perry Smith](templates/default/deploy/renders/lee_perry_smith.png)
 
-*4. THREE.IcosahedronGeometry with THREEFLOW.AreaLight*
-![AreaLight](examples/renders/lights_area.png)
-
-*3. WIP - working on THREE.MorphAnimMesh & THREE.FaceColors support*
-![Camaro](examples/renders/models_flamingo.png)
+*3. Suzanne
+![Suzanne](templates/default/deploy/renders/suzanne.png)
 
 
 

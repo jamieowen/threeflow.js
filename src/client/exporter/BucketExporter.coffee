@@ -18,6 +18,9 @@ class BucketExporter extends BlockExporter
     @size       = 64
     @order      = @orderTypes[0]
 
+  clean:()->
+    null
+
   addToIndex:(object3d)->
     null
 

@@ -109,6 +109,8 @@ THREEFLOW.SunflowRenderer = class SunflowRenderer
 
       @name = if name then name else @name
 
+      @exporter.clean()
+
       @exporter.image.resolutionX = @width*@scale
       @exporter.image.resolutionY = @height*@scale
       @exporter.camera.camera = camera

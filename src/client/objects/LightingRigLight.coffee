@@ -58,7 +58,8 @@ THREEFLOW.LightingRigLight = class LightingRigLight
 
     @target = @targetMesh.position
 
-    @_keyRatio = params.keyRatio || 0
+    # scrap key ratio for now - problems with GUI.
+    @_keyRatio = 0 #params.keyRatio || 0
 
     @lightGeomPlane = null
     @lightGeomCircle = null

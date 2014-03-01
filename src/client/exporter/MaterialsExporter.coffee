@@ -4,7 +4,12 @@ class MaterialsExporter extends BlockExporter
   constructor:(exporter)->
     super(exporter)
 
+    @materialsIndex = null
+
+  clean:()->
     @materialsIndex = {}
+    null
+
 
   addToIndex:(object3d)->
     if object3d instanceof THREE.Mesh

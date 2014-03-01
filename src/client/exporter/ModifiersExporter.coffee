@@ -4,7 +4,11 @@ class ModifiersExporter extends BlockExporter
   constructor:(exporter)->
     super(exporter)
 
+    @modifiersIndex = null
+
+  clean:()->
     @modifiersIndex = {}
+    null
 
   addToIndex:(object3d)->
     if not (object3d instanceof THREE.Mesh)

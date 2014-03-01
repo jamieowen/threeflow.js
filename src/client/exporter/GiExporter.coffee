@@ -47,6 +47,9 @@ class GiExporter extends BlockExporter
       sky: 0xa0a0ef
       ground: 0xefefef
 
+  clean:()->
+    null
+
   addToIndex:(object3d)->
     null
 

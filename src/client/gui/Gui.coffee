@@ -188,11 +188,10 @@ THREEFLOW.Gui = class Gui
       folder.open()
       folder.add(rigLight,"radiance",0,200)
     else
-      folder.add rigLight, "keyRatio",0,16
+      #folder.add rigLight, "keyRatio",0,16
       folder.add(rigLight,"radiance",0,100).listen()
 
-    folder.addColor(rigLight,"color").onChange (value)->
-      hex = parseInt value, 16
+    folder.addColor(rigLight,"color")
 
     folder.add(rigLight,"geometryType",THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES)
 

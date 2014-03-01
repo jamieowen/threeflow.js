@@ -26,7 +26,6 @@ THREEFLOW.LightingRig = class LightingRig
     @lights = [
       new THREEFLOW.LightingRigLight @,true,
         name: "Key Light"
-        keyRatio:0
         light:
           color: 0xffffef
           geometryType: "Plane"
@@ -35,7 +34,6 @@ THREEFLOW.LightingRig = class LightingRig
       new THREEFLOW.LightingRigLight @,false,
         enabled: false
         name: "Fill Light"
-        keyRatio:5
         light:
           color: 0xffffef
           geometryType: "Plane"
@@ -44,7 +42,6 @@ THREEFLOW.LightingRig = class LightingRig
         # target the back wall
         enabled: false
         name: "Back/Rim Light"
-        keyRatio:2
         light:
           color: 0xffffef
           geometryType: "Plane"
@@ -52,7 +49,6 @@ THREEFLOW.LightingRig = class LightingRig
       new THREEFLOW.LightingRigLight @,false,
         enabled: false
         name: "Background Light"
-        keyRatio:8
         light:
           color: 0xffffef
           geometryType: "Plane"
@@ -65,7 +61,7 @@ THREEFLOW.LightingRig = class LightingRig
     @domElement.addEventListener "mousedown", @onPointerDown, false
     @domElement.addEventListener "mouseup", @onPointerUp, false
     #@domElement.addEventListener "mouseout", @onPointerUp, false
-    window.addEventListener "keydown",@onKeyDown
+    window.addEventListener "keydown",@onKeyDown,false
 
     @transformControls = new THREE.TransformControls( @camera, @domElement )
     @transformControls.addEventListener "change", @onTransformChange
@@ -119,7 +115,8 @@ THREEFLOW.LightingRig = class LightingRig
 
   saveState:()->
     state = {}
-    state.keyRadiance = @keyRadiance
+    # scrapping keyRadiance / ratio for now.
+    #state.keyRadiance = @keyRadiance
 
     state.lights = []
 
@@ -127,7 +124,7 @@ THREEFLOW.LightingRig = class LightingRig
       l = {}
       l.enabled = light.enabled
       l.color = light.color
-      l.keyRatio = light.keyRatio
+      #l.keyRatio = light.keyRatio
       l.radiance = light.radiance
       l.geometryType = light.geometryType
 
@@ -167,7 +164,7 @@ THREEFLOW.LightingRig = class LightingRig
     for light,i in state.lights
       @lights[i].enabled = light.enabled
       @lights[i].color = light.color
-      @lights[i].keyRatio = light.keyRatio
+      #@lights[i].keyRatio = light.keyRatio
       @lights[i].radiance = light.radiance
       @lights[i].geometryType = light.geometryType
 
@@ -263,6 +260,7 @@ THREEFLOW.LightingRig = class LightingRig
           @add light
           @enabledLights.push light
 
+    ###
     if @keyRadianceDirty
       @keyRadianceDirty = false
       for light in @lights
@@ -271,6 +269,8 @@ THREEFLOW.LightingRig = class LightingRig
 
         if light.isKey
           light.light.radiance = @keyRadiance
+
+    ###
 
     @orbitControls.update()
     @transformControls.update()

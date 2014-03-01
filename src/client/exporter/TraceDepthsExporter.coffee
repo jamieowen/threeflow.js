@@ -9,6 +9,9 @@ class TraceDepthsExporter extends BlockExporter
     @reflection   = 1
     @refraction   = 1
 
+  clean:()->
+    null
+
   addToIndex:(object3d)->
     null
 

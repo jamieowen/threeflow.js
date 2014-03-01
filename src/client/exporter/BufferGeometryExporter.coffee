@@ -8,7 +8,11 @@ class BufferGeometryExporter extends BlockExporter
     @normals = true
     @uvs = false
 
+    @bufferGeometryIndex = null
+
+  clean:()->
     @bufferGeometryIndex = {}
+    null
 
   addToIndex:(object3d)->
 

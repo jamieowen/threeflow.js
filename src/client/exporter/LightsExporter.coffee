@@ -11,7 +11,11 @@ class LightsExporter extends BlockExporter
 
     @helperVec  = new THREE.Vector3()
 
+    @lightIndex = null
+
+  clean:()->
     @lightIndex = {}
+    null
 
   addToIndex:(object3d)->
     indexed = @lightIndex[object3d.uuid]

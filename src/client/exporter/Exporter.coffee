@@ -102,6 +102,13 @@ class Exporter
 
     exporter
 
+
+  clean:()->
+    for blockExporter in @blockExporters
+      blockExporter.clean()
+
+    null
+
   # index the three js scene
   indexScene:(object3d)->
 

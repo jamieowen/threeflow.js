@@ -118,6 +118,7 @@
         });
         this.rendering = true;
         this.name = name ? name : this.name;
+        this.exporter.clean();
         this.exporter.image.resolutionX = this.width * this.scale;
         this.exporter.image.resolutionY = this.height * this.scale;
         this.exporter.camera.camera = camera;
@@ -219,12 +220,16 @@
 
   THREEFLOW.VERSION = '0.6.0-3';
 
-  THREEFLOW.COMMIT = '4695737';
+  THREEFLOW.COMMIT = '92c8224';
 
   BlockExporter = (function() {
     function BlockExporter(exporter) {
       this.exporter = exporter;
     }
+
+    BlockExporter.prototype.clean = function() {
+      throw new Error('BlockExporter subclasses must override this method.');
+    };
 
     BlockExporter.prototype.addToIndex = function(object3d) {
       throw new Error('BlockExporter subclasses must override this method.');
@@ -295,6 +300,10 @@
       this.order = this.orderTypes[0];
     }
 
+    BucketExporter.prototype.clean = function() {
+      return null;
+    };
+
     BucketExporter.prototype.addToIndex = function(object3d) {
       return null;
     };
@@ -330,8 +339,13 @@
       BufferGeometryExporter.__super__.constructor.call(this, exporter);
       this.normals = true;
       this.uvs = false;
-      this.bufferGeometryIndex = {};
+      this.bufferGeometryIndex = null;
     }
+
+    BufferGeometryExporter.prototype.clean = function() {
+      this.bufferGeometryIndex = {};
+      return null;
+    };
 
     BufferGeometryExporter.prototype.addToIndex = function(object3d) {
       if (!object3d instanceof THREE.Mesh) {
@@ -434,6 +448,11 @@
       this.camera = null;
     }
 
+    CameraExporter.prototype.clean = function() {
+      this.camera = null;
+      return null;
+    };
+
     CameraExporter.prototype.addToIndex = function(object3d) {
       return null;
     };
@@ -474,6 +493,10 @@
       this.kdEstimate = 100;
       this.kdRadius = 0.5;
     }
+
+    CausticsExporter.prototype.clean = function() {
+      return null;
+    };
 
     CausticsExporter.prototype.addToIndex = function(object3d) {
       return null;
@@ -560,6 +583,16 @@
       return exporter;
     };
 
+    Exporter.prototype.clean = function() {
+      var blockExporter, _i, _len, _ref;
+      _ref = this.blockExporters;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        blockExporter = _ref[_i];
+        blockExporter.clean();
+      }
+      return null;
+    };
+
     Exporter.prototype.indexScene = function(object3d) {
       var blockExporter, child, cls, doTraverse, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
       _ref = Exporter.EXCLUDED_OBJECT3D_TYPES;
@@ -614,8 +647,13 @@
       this.normals = true;
       this.vertexNormals = false;
       this.uvs = true;
-      this.geometryIndex = {};
+      this.geometryIndex = null;
     }
+
+    GeometryExporter.prototype.clean = function() {
+      this.geometryIndex = {};
+      return null;
+    };
 
     GeometryExporter.prototype.addToIndex = function(object3d) {
       var faceMaterials;
@@ -775,6 +813,10 @@
       };
     }
 
+    GiExporter.prototype.clean = function() {
+      return null;
+    };
+
     GiExporter.prototype.addToIndex = function(object3d) {
       return null;
     };
@@ -846,6 +888,10 @@
       this.filterTypes = ImageExporter.FILTERS;
     }
 
+    ImageExporter.prototype.clean = function() {
+      return null;
+    };
+
     ImageExporter.prototype.addToIndex = function(object3d) {
       return null;
     };
@@ -885,8 +931,13 @@
         }
       };
       this.helperVec = new THREE.Vector3();
-      this.lightIndex = {};
+      this.lightIndex = null;
     }
+
+    LightsExporter.prototype.clean = function() {
+      this.lightIndex = {};
+      return null;
+    };
 
     LightsExporter.prototype.addToIndex = function(object3d) {
       var indexed;
@@ -970,8 +1021,13 @@
 
     function MaterialsExporter(exporter) {
       MaterialsExporter.__super__.constructor.call(this, exporter);
-      this.materialsIndex = {};
+      this.materialsIndex = null;
     }
+
+    MaterialsExporter.prototype.clean = function() {
+      this.materialsIndex = {};
+      return null;
+    };
 
     MaterialsExporter.prototype.addToIndex = function(object3d) {
       var material, _i, _len, _ref;
@@ -1065,8 +1121,13 @@
     function MeshExporter(exporter) {
       MeshExporter.__super__.constructor.call(this, exporter);
       this.convertPrimitives = true;
-      this.meshIndex = {};
+      this.meshIndex = null;
     }
+
+    MeshExporter.prototype.clean = function() {
+      this.meshIndex = {};
+      return null;
+    };
 
     MeshExporter.prototype.addToIndex = function(object3d) {
       if (!(object3d instanceof THREE.Mesh)) {
@@ -1135,8 +1196,13 @@
 
     function ModifiersExporter(exporter) {
       ModifiersExporter.__super__.constructor.call(this, exporter);
-      this.modifiersIndex = {};
+      this.modifiersIndex = null;
     }
+
+    ModifiersExporter.prototype.clean = function() {
+      this.modifiersIndex = {};
+      return null;
+    };
 
     ModifiersExporter.prototype.addToIndex = function(object3d) {
       var material;
@@ -1188,6 +1254,10 @@
       this.reflection = 1;
       this.refraction = 1;
     }
+
+    TraceDepthsExporter.prototype.clean = function() {
+      return null;
+    };
 
     TraceDepthsExporter.prototype.addToIndex = function(object3d) {
       return null;
@@ -1418,13 +1488,9 @@
         folder.open();
         folder.add(rigLight, "radiance", 0, 200);
       } else {
-        folder.add(rigLight, "keyRatio", 0, 16);
         folder.add(rigLight, "radiance", 0, 100).listen();
       }
-      folder.addColor(rigLight, "color").onChange(function(value) {
-        var hex;
-        return hex = parseInt(value, 16);
-      });
+      folder.addColor(rigLight, "color");
       return folder.add(rigLight, "geometryType", THREEFLOW.LightingRigLight.LIGHT_GEOMETRY_TYPES);
     };
 
@@ -1889,7 +1955,6 @@
       this.lights = [
         new THREEFLOW.LightingRigLight(this, true, {
           name: "Key Light",
-          keyRatio: 0,
           light: {
             color: 0xffffef,
             geometryType: "Plane",
@@ -1898,7 +1963,6 @@
         }), new THREEFLOW.LightingRigLight(this, false, {
           enabled: false,
           name: "Fill Light",
-          keyRatio: 5,
           light: {
             color: 0xffffef,
             geometryType: "Plane"
@@ -1906,7 +1970,6 @@
         }), new THREEFLOW.LightingRigLight(this, false, {
           enabled: false,
           name: "Back/Rim Light",
-          keyRatio: 2,
           light: {
             color: 0xffffef,
             geometryType: "Plane"
@@ -1914,7 +1977,6 @@
         }), new THREEFLOW.LightingRigLight(this, false, {
           enabled: false,
           name: "Background Light",
-          keyRatio: 8,
           light: {
             color: 0xffffef,
             geometryType: "Plane"
@@ -1926,7 +1988,7 @@
       this.pointerVec = new THREE.Vector3();
       this.domElement.addEventListener("mousedown", this.onPointerDown, false);
       this.domElement.addEventListener("mouseup", this.onPointerUp, false);
-      window.addEventListener("keydown", this.onKeyDown);
+      window.addEventListener("keydown", this.onKeyDown, false);
       this.transformControls = new THREE.TransformControls(this.camera, this.domElement);
       this.transformControls.addEventListener("change", this.onTransformChange);
       this.orbitControls = new THREE.OrbitControls(this.camera, this.domElement);
@@ -1986,7 +2048,6 @@
     LightingRig.prototype.saveState = function() {
       var l, light, state, _i, _len, _ref;
       state = {};
-      state.keyRadiance = this.keyRadiance;
       state.lights = [];
       _ref = this.lights;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -1994,7 +2055,6 @@
         l = {};
         l.enabled = light.enabled;
         l.color = light.color;
-        l.keyRatio = light.keyRatio;
         l.radiance = light.radiance;
         l.geometryType = light.geometryType;
         l.target = {};
@@ -2032,7 +2092,6 @@
         light = _ref[i];
         this.lights[i].enabled = light.enabled;
         this.lights[i].color = light.color;
-        this.lights[i].keyRatio = light.keyRatio;
         this.lights[i].radiance = light.radiance;
         this.lights[i].geometryType = light.geometryType;
         this.lights[i].targetMesh.position.set(light.target.x, light.target.y, light.target.z);
@@ -2117,7 +2176,7 @@
     };
 
     LightingRig.prototype.update = function() {
-      var light, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3, _results;
+      var light, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
       if (this.lightsDirty) {
         this.lightsDirty = false;
         _ref = this.enabledLights;
@@ -2137,25 +2196,23 @@
           }
         }
       }
-      if (this.keyRadianceDirty) {
-        this.keyRadianceDirty = false;
-        _ref2 = this.lights;
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          light = _ref2[_k];
-          if (light.keyRatio) {
-            light.radiance = this.keyRadiance / light.keyRatio;
-          }
-          if (light.isKey) {
-            light.light.radiance = this.keyRadiance;
-          }
-        }
-      }
+      /*
+      if @keyRadianceDirty
+        @keyRadianceDirty = false
+        for light in @lights
+          if light.keyRatio
+            light.radiance = @keyRadiance / light.keyRatio
+      
+          if light.isKey
+            light.light.radiance = @keyRadiance
+      */
+
       this.orbitControls.update();
       this.transformControls.update();
-      _ref3 = this.enabledLights;
+      _ref2 = this.enabledLights;
       _results = [];
-      for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
-        light = _ref3[_l];
+      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+        light = _ref2[_k];
         _results.push(light.update());
       }
       return _results;
@@ -2235,7 +2292,7 @@
       this.targetMesh._tf_noIndex = true;
       this.add(this.targetMesh);
       this.target = this.targetMesh.position;
-      this._keyRatio = params.keyRatio || 0;
+      this._keyRatio = 0;
       this.lightGeomPlane = null;
       this.lightGeomCircle = null;
       this.lightGeomBox = null;

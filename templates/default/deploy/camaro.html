@@ -44,6 +44,7 @@
     renderer = new THREE.WebGLRenderer();
     renderer.setSize( width,height );
 
+    THREEFLOW.__log.enabled = false;
     document.body.appendChild( renderer.domElement );
     var img = document.body.appendChild( document.createElement("img") );
     img.src = "renders/camaro.png";
@@ -55,7 +56,7 @@
     camera.lookAt( new THREE.Vector3() );
 
     lighting = new THREEFLOW.LightingRig(camera,renderer.domElement);
-    lighting.loadState('{"keyRadiance":30,"lights":[{"enabled":true,"color":16777199,"keyRatio":0,"radiance":30,"geometryType":"Plane","target":{"x":-211.9274872502022,"y":275.85083879734725,"z":170.55557980904268},"light":{"x":-413.19648050640706,"y":287.7592534400846,"z":339.4519703473842,"sx":0.6029171577908687,"sy":0.6029171577908687,"sz":0.6029171577908687}},{"enabled":true,"color":16777199,"keyRatio":6,"radiance":5,"geometryType":"Plane","target":{"x":217.81041418261862,"y":234.43664495539383,"z":176.3440939438861},"light":{"x":499.3922690493239,"y":227.98373335764214,"z":518.5831468458007,"sx":0.7423625401435991,"sy":0.7423625401435991,"sz":0.7423625401435991}},{"enabled":false,"color":16777199,"keyRatio":2,"radiance":15,"geometryType":"Plane","target":{"x":-207.30188165286313,"y":322.15255588531136,"z":-131.85555947333944},"light":{"x":-508.73030977652644,"y":342.73245422110296,"z":-437.30864347816487,"sx":0.5251717408652797,"sy":0.5251717408652797,"sz":0.5251717408652797}},{"enabled":false,"color":16777199,"keyRatio":8,"radiance":3.75,"geometryType":"Plane","target":{"x":405.4561720515609,"y":128.06773481919686,"z":-716.9348712525214},"light":{"x":762.4879099396458,"y":310.9158695184617,"z":-409.34363940372657,"sx":1.1752789471525573,"sy":1.1752789471525573,"sz":1.1752789471525573}}]}')
+    lighting.loadState('{"lights":[{"enabled":true,"color":14733805,"radiance":44.896527534198526,"geometryType":"Plane","target":{"x":-376.44834756976303,"y":211.71736342113527,"z":366.81323942907534},"light":{"x":-664.4250071441212,"y":478.66377414587737,"z":629.443786737767,"sx":0.6029171577908687,"sy":0.6029171577908687,"sz":0.6029171577908687}},{"enabled":true,"color":16777199,"radiance":25.255605381165918,"geometryType":"Plane","target":{"x":217.81041418261862,"y":102.00045449485992,"z":176.3440939438861},"light":{"x":541.9178492344969,"y":159.4022976018827,"z":508.66097585349803,"sx":1.9566650852960707,"sy":0.28606604643324796,"sz":0.7423625401435991}},{"enabled":true,"color":16777199,"radiance":25.255605381165918,"geometryType":"Plane","target":{"x":-358.9297352669099,"y":210.27904120113578,"z":-351.73002160325984},"light":{"x":-1137.3712542791613,"y":478.65381754615294,"z":-302.07500597075705,"sx":0.5251717408652797,"sy":0.5251717408652797,"sz":0.5251717408652797}},{"enabled":true,"color":13620966,"radiance":8.979305506839705,"geometryType":"Plane","target":{"x":464.54509657834546,"y":176.79129808686673,"z":-120.9868416144102},"light":{"x":984.3698177527843,"y":288.0694181623479,"z":-200.0281888937119,"sx":1.4667118305656217,"sy":0.6395090016393891,"sz":0.6395090016393891}}],"camera":{"x":-16.88461836778314,"y":186.06100677372322,"z":866.163040414001,"rx":0.021938034766455193,"rz":0.003270417346090236,"ord":"XYZ"}}')
     scene.add( lighting );
 
     gui = new THREEFLOW.Gui(threeflow,lighting);
@@ -76,7 +77,7 @@
       var body,chrome,glass,tire,interior,black;
       body = new THREEFLOW.ShinyMaterial( {color: 0xff6600, reflectivity: 0.3} );
       chrome = new THREEFLOW.MirrorMaterial( {color: 0xffffff,reflection: 0xffffff} );
-      glass = new THREEFLOW.GlassMaterial( {color: 0x223344, eta:1.0, opacity: 0.25, transparent: true } );
+      glass = new THREEFLOW.GlassMaterial( {color: 0xaaaaaa, eta:1.0, opacity: 0.25, transparent: true } );
       tire = new THREEFLOW.DiffuseMaterial( {color: 0x050505} );
       interior = new THREE.MeshPhongMaterial( { color: 0x050505, shininess: 20} );
       black = new THREE.MeshLambertMaterial( {color: 0x000000} );

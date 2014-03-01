@@ -10,9 +10,11 @@ class GeometryExporter extends BlockExporter
 
     @uvs = true
 
-    # geometry export can vary according to :
-    # 1. same geometry - one material - ( a basic geometry export - with sunflow
+    @geometryIndex = null
+
+  clean:()->
     @geometryIndex = {}
+    null
 
   addToIndex:(object3d)->
 

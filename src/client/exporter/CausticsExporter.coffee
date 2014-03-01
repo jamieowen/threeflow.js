@@ -9,6 +9,9 @@ class CausticsExporter extends BlockExporter
     @kdEstimate = 100
     @kdRadius   = 0.5
 
+  clean:()->
+    null
+
   addToIndex:(object3d)->
     null
 

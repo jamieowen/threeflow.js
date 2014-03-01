@@ -6,7 +6,11 @@ class MeshExporter extends BlockExporter
 
     @convertPrimitives = true
 
+    @meshIndex = null
+
+  clean:()->
     @meshIndex = {}
+    null
 
   addToIndex:(object3d)->
     if not (object3d instanceof THREE.Mesh)

@@ -7,6 +7,10 @@ class CameraExporter extends BlockExporter
     @helperVec  = new THREE.Vector3()
     @camera     = null
 
+  clean:()->
+    @camera = null
+    null
+
   addToIndex:(object3d)->
     # camera set manually by exporter ( via render( scene, camera ) )
     null

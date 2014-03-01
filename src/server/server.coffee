@@ -21,7 +21,7 @@ module.exports =
   Server: class Server
 
     constructor:()->
-      log.notice "[ THREEFLOW " + version.number + " ]"
+      log.notice "Threeflow " + version.number
 
       @opts     = null
       @app      = null
@@ -90,6 +90,9 @@ module.exports =
       null
 
     optionsJSON:(cwd)->
+      # no config file / no run..  ( cannot write .sc files to node_modules folder )
+      # need to look into this.
+      success = false
       try
         log.info "Looking for config"
         jsonPath = path.join(cwd,"threeflow.json")
@@ -100,15 +103,19 @@ module.exports =
         @opts.flags.allowSave = true
         @setCwd cwd
         log.info "Found /threeflow.json"
+        success = true
       catch error
         @setCwd null
         @options()
         if error instanceof SyntaxError
           log.warn "Error parsing /threeflow.json. [ '" + error.message + "' ]"
         else
-          log.warn "No /threeflow.json found.  Use 'threeflow init' to start a project."
+          log.warn "No /threeflow.json found."
+          log.info "Type 'threeflow init' to start a project."
+          log.info()
+        success = false
 
-      null
+      success
 
     forceSave:(value)->
       if value

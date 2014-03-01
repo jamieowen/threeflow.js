@@ -1,7 +1,7 @@
 {
   "name": "threeflow",
   "preferGlobal": true,
-  "version": "0.6.0-1",
+  "version": "0.6.0-3",
   "author": "Jamie Owen <hello@jamieowen.com>",
   "description": "Render three.js scenes using the open source sunflow renderer\"",
   "main": "./lib/threeflow.lib.js",
@@ -17,7 +17,8 @@
     "express": "~3.4.8",
     "socket.io": "~0.9.16",
     "cli-color": "~0.2.3",
-    "wrench": "~1.5.7"
+    "wrench": "~1.5.7",
+    "ncp": "~0.5.0"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

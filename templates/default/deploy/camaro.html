@@ -73,7 +73,7 @@
 
           var body,chrome,darkchrome,glass,tire,interior,black,lines,scale;
 
-          body        = new THREEFLOW.ShinyMaterial( {color: 0xff6600, reflection: 0.3} );
+          body        = new THREEFLOW.ShinyMaterial( {color: 0xff6600, reflection: 0.01} );
           darkchrome  = new THREEFLOW.MirrorMaterial( {color: 0x252525} );
           chrome      = new THREEFLOW.MirrorMaterial( {color: 0xefefff} );
           lines       = new THREEFLOW.DiffuseMaterial( {color: 0x131313} );
@@ -85,7 +85,7 @@
           // Gives warning "BCKT   error : Inf shading sample!" and artifacts appear on render. :(
           // IPR preview works OK.
 
-          glass = new THREEFLOW.DiffuseMaterial( {color: 0x121212, opacity: 0.25, transparent: true, side:THREE.DoubleSide } );
+          glass = new THREEFLOW.DiffuseMaterial( {color: 0x121212, opacity: 0.25,  transparent: true, side:THREE.DoubleSide } );
           //glass = new THREEFLOW.GlassMaterial( {color: 0xaaaaaa, opacity: 0.25, transparent: true, side:THREE.DoubleSide } );
 
           // body,wheels,grill,door lines,windshield,interior,tire,tireling,behind grill

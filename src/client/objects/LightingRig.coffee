@@ -23,6 +23,7 @@ THREEFLOW.LightingRig = class LightingRig
     # Only keep the one simulate light on the key light.
     # and add an ambient light
     @ambient = new THREE.AmbientLight(0x252525)
+    @ambient._tf_noIndex = true
     @add @ambient
 
     @_keyRadiance = 5.5

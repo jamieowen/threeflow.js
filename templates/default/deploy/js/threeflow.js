@@ -1889,15 +1889,6 @@
       if (params == null) {
         params = {};
       }
-      if (params.reflection === void 0 && params.color === void 0) {
-        params.color = 0xffffff;
-      } else if (params.reflection === void 0) {
-        params.color = params.color;
-      } else if (params.color === void 0) {
-        params.color = params.reflection;
-      } else {
-        params.color = 0xffffff;
-      }
       THREE.MeshPhongMaterial.call(this);
       this.setValues(params);
       this.reflection = this.color;
@@ -1981,6 +1972,7 @@
       this.backdropMaterial = params.backdropMaterial;
       this.createBackdrop(params.backdropWall, params.backdropFloor, params.backdropCurve, params.backdropCurveSteps, params.backdropMaterial);
       this.ambient = new THREE.AmbientLight(0x252525);
+      this.ambient._tf_noIndex = true;
       this.add(this.ambient);
       this._keyRadiance = 5.5;
       this.lights = [

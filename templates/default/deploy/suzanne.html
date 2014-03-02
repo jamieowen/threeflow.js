@@ -33,12 +33,11 @@
 
   function init() {
 
-    // ###
-    // Threeflow Basic setup
+    // three/threeflow setup.
 
     width = 800; height = 600;
 
-    threeflow = new THREEFLOW.SunflowRenderer({overwrite:true});
+    threeflow = new THREEFLOW.SunflowRenderer({overwrite:false});
     threeflow.setSize( width,height );
 
     renderer = new THREE.WebGLRenderer();
@@ -55,7 +54,7 @@
     camera.lookAt( new THREE.Vector3() );
 
     lighting = new THREEFLOW.LightingRig(camera,renderer.domElement);
-    lighting.loadState('{"keyRadiance":6,"lights":[{"enabled":true,"color":16777199,"keyRatio":0,"radiance":6,"geometryType":"Plane","target":{"x":-35.976463217623866,"y":114.9826472459399,"z":14.76779791261201},"light":{"x":-378.8596143373222,"y":290.20328094958063,"z":447.80734704797476,"sx":1,"sy":1,"sz":1}},{"enabled":true,"color":16777199,"keyRatio":2,"radiance":3,"geometryType":"Plane","target":{"x":217.81041418261862,"y":60.59184047682686,"z":0},"light":{"x":784.9189739195299,"y":204.48885431421434,"z":218.80207442818107,"sx":1.1760563915268067,"sy":1.1760563915268067,"sz":1.1760563915268067}},{"enabled":true,"color":16777199,"keyRatio":1,"radiance":6,"geometryType":"Plane","target":{"x":-207.30188165286313,"y":32.48094818666641,"z":-131.85555947333944},"light":{"x":-769.2943168229731,"y":381.50515397250257,"z":-894.6262734630952,"sx":0.7378484368043043,"sy":0.7378484368043043,"sz":0.7378484368043043}},{"enabled":true,"color":16777199,"keyRatio":8,"radiance":0.75,"geometryType":"Plane","target":{"x":405.4561720515609,"y":128.06773481919686,"z":-716.9348712525214},"light":{"x":762.4879099396458,"y":310.9158695184617,"z":-409.34363940372657,"sx":1.1752789471525573,"sy":1.1752789471525573,"sz":1.1752789471525573}}],"camera":{"x":31.211747457675283,"y":4167.539199455567,"z":-794.3920196395455,"rx":0.0073566610039573,"rz":3.1030176333872763,"ord":"XYZ"}}')
+    lighting.loadState('{"lights":[{"enabled":true,"color":16777199,"radiance":2.8,"geometryType":"Plane","target":{"x":-12.459567808882873,"y":114.9826472459399,"z":14.76779791261201},"light":{"x":-366.5120785337208,"y":260.9523304754281,"z":339.970438195328,"sx":0.8694712849625081,"sy":0.8694712849625081,"sz":0.8694712849625081}},{"enabled":true,"color":16777199,"radiance":2.9,"geometryType":"Plane","target":{"x":217.81041418261862,"y":128.33557456872478,"z":138.98316337745297},"light":{"x":519.5714056315434,"y":177.15932106249568,"z":295.1721805555851,"sx":1.089448860281291,"sy":1.089448860281291,"sz":1.089448860281291}},{"enabled":true,"color":16777199,"radiance":1.8,"geometryType":"Plane","target":{"x":-185.76916940427844,"y":87.72641804325235,"z":-189.28097903242576},"light":{"x":-621.2590952033827,"y":306.0766931271131,"z":-330.4685478377719,"sx":0.8994333331226442,"sy":0.8994333331226442,"sz":0.8994333331226442}},{"enabled":false,"color":16777199,"radiance":0.75,"geometryType":"Plane","target":{"x":405.4561720515609,"y":128.06773481919686,"z":-304.85380824896936},"light":{"x":762.4879099396458,"y":310.9158695184617,"z":-409.34363940372657,"sx":1.1752789471525573,"sy":1.1752789471525573,"sz":1.1752789471525573}}],"camera":{"x":-23.262332138785695,"y":578.0420560150965,"z":616.7164058067943,"rx":-0.027764477751554082,"rz":-0.027775129018546656,"ord":"XYZ"},"orbit":{"x":-2.6713272126759544,"y":53.562678204706245,"z":92.640334438154}} ');
     scene.add( lighting );
 
     gui = new THREEFLOW.Gui(threeflow,lighting);
@@ -63,10 +62,7 @@
       threeflow.render( scene, camera, "suzanne" );
     });
 
-    // ###
-    // Add scene stuff.
-
-    // Material Spheres
+    // scene objects.
 
     var geometry, material, mesh, spheres, materialTypes,materialType;
     var size,radius,theta, i, count;
@@ -101,11 +97,10 @@
       spheres.add(mesh);
     }
 
-    // rotate to bring nicer colours around to front.
     spheres.rotation.y = Math.PI/2;
     scene.add(spheres);
 
-    // Suzanne
+    // suzanne
 
     var loader = new THREE.JSONLoader();
 

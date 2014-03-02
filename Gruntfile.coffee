@@ -166,6 +166,14 @@ module.exports = (grunt)->
     console.log "Written ", index
     null
 
+  grunt.registerTask "readme",()->
+    template = grunt.file.read "src/README.md.eco"
+    context = {}
+    context.version = grunt.config.get("pkg.version")
+    context.path = "https://github.com/jamieowen/threeflow.js/tree/develop/"
+    rendered = eco.render template,context
+    grunt.file.write "_README.md",rendered
+    null
   ###
   grunt.registerTask "convert-obj",()->
     files = grunt.file.expand "src/models/*.obj"

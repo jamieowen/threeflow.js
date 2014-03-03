@@ -1,7 +1,7 @@
 
 #threeflow.js : sunflow for three.js
 
-###version 0.6.0-4 - beta
+###version 0.6.0-6 - beta
 
 ###Overview
 
@@ -206,10 +206,10 @@ mesh._tf_noTraverse = true;
 ```
 
 ### Materials
-[Old Material documentation found here](src/client/materials)
+[Old Material documentation found here](REF_MATERIALS.md)
 
 ### Lights
-[Old Lights documentation found here](src/client/lights)
+[Old Lights documentation found here](REF_LIGHTS.md)
 
 
 ### Roadmap

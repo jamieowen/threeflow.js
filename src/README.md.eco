@@ -42,19 +42,19 @@ Then in the browser connect to: http://localhost:3710
 
 ------------------------------------------------------------------------------
 #### Screenshot
-![Screenshot](screenshot.jpg)
+![Screenshot](<%= @rawPath %>screenshot.jpg)
 
 ------------------------------------------------------------------------------
 #### Renders
 
 Camaro / Face Materials
-![Camaro](templates/default/deploy/renders/camaro.png)
+![Camaro](<%= @rawPath %>templates/default/deploy/renders/camaro.png)
 
 Lee Perry Smith / Textures and Bump maps.
-![Lee Perry Smith](templates/default/deploy/renders/lee_perry_smith.png)
+![Lee Perry Smith](<%= @rawPath %>templates/default/deploy/renders/lee_perry_smith.png)
 
 Suzanne / Materials
-![Suzanne](templates/default/deploy/renders/suzanne.png)
+![Suzanne](<%= @rawPath %>templates/default/deploy/renders/suzanne.png)
 
 
 
@@ -206,10 +206,10 @@ mesh._tf_noTraverse = true;
 ```
 
 ### Materials
-[Old Material documentation found here](<%= @path %>src/client/materials)
+[Old Material documentation found here](<%= @gitPath %>REF_MATERIALS.md)
 
 ### Lights
-[Old Lights documentation found here](<%= @path %>src/client/lights)
+[Old Lights documentation found here](<%= @gitPath %>REF_LIGHTS.md)
 
 
 ### Roadmap

@@ -225,9 +225,9 @@
 
   })();
 
-  THREEFLOW.VERSION = '0.6.0-3';
+  THREEFLOW.VERSION = '0.6.0-6';
 
-  THREEFLOW.COMMIT = '92c8224';
+  THREEFLOW.COMMIT = 'e9a0fde';
 
   BlockExporter = (function() {
     function BlockExporter(exporter) {

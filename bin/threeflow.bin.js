@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+#!/usr/bin/env node
 var arg, args, fs, log, ncp, path, templatePath, threeflow, version, wrench, _i, _len, _ref;
 
 path = require('path');

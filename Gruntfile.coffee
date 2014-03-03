@@ -171,9 +171,12 @@ module.exports = (grunt)->
     context = {}
     context.version = grunt.config.get("pkg.version")
     if usePath
-      context.path = "https://github.com/jamieowen/threeflow.js/tree/master/"
+      context.rawPath = "https://raw.github.com/jamieowen/threeflow.js/master/"
+      context.gitPath = "https://github.com/jamieowen/threeflow.js/tree/master/"
     else
-      context.path = ""
+      context.rawPath = ""
+      context.gitPath = ""
+
     rendered = eco.render template,context
     grunt.file.write "README.md",rendered
     null

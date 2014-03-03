@@ -53,7 +53,12 @@
       <a target="example_frame" class="link type" href="suzanne.html">suzanne</a>
   </div>
 
-  <iframe class="frame" name="example_frame" src="camaro.html" seamless>
+  <iframe id="exampleFrame" class="frame" name="example_frame" src="camaro.html" seamless>
   </iframe>
+
+  <script>
+    var iframe = document.getElementById("exampleFrame");
+    iframe.contentWindow.focus();
+  </script>
 </body>
 </html>

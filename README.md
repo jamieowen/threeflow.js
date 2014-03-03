@@ -1,7 +1,7 @@
 
 #threeflow.js : sunflow for three.js
 
-###version 0.6.0-6 - beta
+###version 0.6.0-7 - beta
 
 ###Overview
 

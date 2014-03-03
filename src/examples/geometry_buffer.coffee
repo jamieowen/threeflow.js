@@ -210,7 +210,7 @@ window.onload = ()->
   threeflow.image.antialiasMax = 2
 
   # gui
-  gui = new THREEFLOW.DatGui threeflow
+  gui = new THREEFLOW.RendererGui threeflow
   gui.onRender=()=>
     threeflow.render scene,camera,width,height
 

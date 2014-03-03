@@ -4,8 +4,18 @@ class LightsExporter extends BlockExporter
   constructor:(exporter)->
     super(exporter)
 
+    @override =
+      samples:
+        enabled: false
+        value: 64
+
     @helperVec  = new THREE.Vector3()
+
+    @lightIndex = null
+
+  clean:()->
     @lightIndex = {}
+    null
 
   addToIndex:(object3d)->
     indexed = @lightIndex[object3d.uuid]
@@ -21,14 +31,7 @@ class LightsExporter extends BlockExporter
     null
 
   doTraverse:(object3d)->
-    if object3d instanceof THREEFLOW.PointLight
-      false
-    else if object3d instanceof THREEFLOW.SunskyLight
-      false
-    else if object3d instanceof THREEFLOW.AreaLight
-      false
-    else
-      true
+    true
 
   exportBlock:()->
     result = ''
@@ -44,7 +47,12 @@ class LightsExporter extends BlockExporter
         result += '  east ' + @exportVector(light.east) + '\n'
         result += '  sundir ' + @exportVector(light.direction) + '\n'
         result += '  turbidity ' + light.turbidity + '\n'
-        result += '  samples ' + light.samples + '\n'
+
+        if @override.samples.enabled
+          result += '  samples ' + @override.samples.value + '\n'
+        else
+          result += '  samples ' + light.samples + '\n'
+
         result += '}\n\n'
 
       # Point Light
@@ -63,7 +71,11 @@ class LightsExporter extends BlockExporter
         result += '  name ' + light.uuid + '\n'
         result += '  emit ' + @exportColorTHREE(light.color) + '\n'
         result += '  radiance ' + light.radiance + ' \n'
-        result += '  samples ' + light.samples + ' \n'
+
+        if @override.samples.enabled
+          result += '  samples ' + @override.samples.value + '\n'
+        else
+          result += '  samples ' + light.samples + '\n'
 
         result += '  points ' + light.geometry.vertices.length + '\n'
 

@@ -4,6 +4,9 @@ class BlockExporter
   constructor:(@exporter)->
     #---
 
+  clean:()->
+    throw new Error 'BlockExporter subclasses must override this method.'
+
   # override.
   # Determines if the exporter handles this object type.
   addToIndex:(object3d)->

@@ -3,6 +3,7 @@ THREEFLOW.SunskyLight = class SunskyLight
   constructor:( params )->
 
     THREE.Object3D.call @
+    @_tf_noTraverse = true
 
     params = params || {}
 

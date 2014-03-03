@@ -6,10 +6,17 @@ class MeshExporter extends BlockExporter
 
     @convertPrimitives = true
 
+    @meshIndex = null
+
+  clean:()->
     @meshIndex = {}
+    null
 
   addToIndex:(object3d)->
-    if object3d instanceof THREE.Mesh and not @meshIndex[object3d.uuid]
+    if not (object3d instanceof THREE.Mesh)
+      return
+
+    if not @meshIndex[object3d.uuid]
       @meshIndex[object3d.uuid] = object3d
 
     null
@@ -52,6 +59,10 @@ class MeshExporter extends BlockExporter
         result += '  geometry ' + mesh.geometry.uuid + '\n'
         result += '  transform col' + @exportTransform(mesh) + '\n'
         result += '  shader ' + mesh.material.uuid + '\n'
+
+        if mesh.material.bumpMap
+          result += '  modifier ' + mesh.material.uuid + '-MOD\n'
+
 
       result += '}\n\n'
 

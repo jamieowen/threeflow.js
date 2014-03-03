@@ -74,7 +74,7 @@ window.onload = ()->
   threeflow.traceDepths.diffusion = 4
 
   # gui
-  gui = new THREEFLOW.DatGui threeflow
+  gui = new THREEFLOW.RendererGui threeflow
   gui.onRender=()=>
     threeflow.render scene,camera,width,height
 

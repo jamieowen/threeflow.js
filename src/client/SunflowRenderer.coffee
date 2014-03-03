@@ -1,90 +1,211 @@
 
 window.THREEFLOW = window.THREEFLOW || {}
 
-# helper method for coffee getter/setters
-if not Function::property
-  Function::property = (prop, desc) ->
-    Object.defineProperty @prototype, prop, desc
-
 THREEFLOW.SunflowRenderer = class SunflowRenderer
 
-  constructor:(options)->
-    options = options || {}
+  # connection status
+  @CONNECTING       = "connecting"
+  @CONNECTED        = "connected"
+  @DISCONNECTED     = "disconnected"
+  @ERROR            = "error"
 
-    @pngPath  = options.pngPath || null
-    @scPath   = options.scPath || null
-    @scSave   = options.scSave || false
+  # render status / socket event
+  @RENDER_ADDED     = "render-added"
+  @RENDER_START     = "render-start"
+  @RENDER_PROGRESS  = "render-progress"
+  @RENDER_CANCELLED = "render-cancelled"
+  @RENDER_COMPLETE  = "render-complete"
+  @RENDER_ERROR     = "render-error"
+
+  # pass either a render name, or an options object.
+  constructor:(options={})->
+
+    THREEFLOW.log THREEFLOW.VERSION,"/",THREEFLOW.COMMIT
+
+    autoConnect = if options.autoConnect is false then false else true
+
+    @name       = options.name || null
+    @scale      = options.scale || 1
+    @overwrite  = options.overwrite || false
+    @deleteSc   = if options.deleteSc is false then false else true
+    @width      = options.width || 800
+    @height     = options.height || 600
+
+
+    # sunflow command line options
+    @sunflowCl =
+      noGui: false     # do not show sunflow gui
+      ipr: true       # progressive rendering
+      hiPri: false     # high thread priority
+      # ...loads more, but will add later.
 
     @exporter = new Exporter()
 
     # map block exporters for shorthand access
-    @image        = @exporter.image
-    @traceDepths  = @exporter.traceDepths
-    @caustics     = @exporter.caustics
-    @gi           = @exporter.gi
+    @image              = @exporter.image
+    @bucket             = @exporter.bucket
+    @traceDepths        = @exporter.traceDepths
+    @caustics           = @exporter.caustics
+    @gi                 = @exporter.gi
 
-    @cameras      = @exporter.cameras
-    @lights       = @exporter.lights
-    @materials    = @exporter.materials
-    @geometry     = @exporter.geometry
-    @meshes       = @exporter.meshes
+    @cameras            = @exporter.cameras
+    @lights             = @exporter.lights
+    @modifiers          = @exporter.modifiers
+    @materials          = @exporter.materials
+    @geometry           = @exporter.geometry
+    @bufferGeometry     = @exporter.bufferGeometry
+    @meshes             = @exporter.meshes
 
-    @connected = false
-    @rendering = false
+    @connectionStatus   = ""
+    @connected          = false
+    @rendering          = false
+
+    # signals
+    @onRenderStatus     = new THREEFLOW.Signal()
+    @onConnectionStatus = new THREEFLOW.Signal()
+
+    if autoConnect
+      @connect()
+
+  setSize:(@width,@height)->
+    null
+
+  linkTexturePath:(texture,path)->
+    @exporter.linkTexturePath texture,path
+    null
 
   connect:()->
     if @connected
       return
+
+    @setConnectionStatus SunflowRenderer.CONNECTING
+
     @socket = io.connect @host
 
     @socket.on 'connected',@onConnected
-    @socket.on 'render-start',@onRenderStart
-    @socket.on 'render-progress',@onRenderProgress
-    @socket.on 'render-complete',@onRenderComplete
+    @socket.on 'disconnected',@onDisconnected
+
+    @socket.on SunflowRenderer.RENDER_ADDED,@onRenderAdded
+    @socket.on SunflowRenderer.RENDER_START,@onRenderStart
+    @socket.on SunflowRenderer.RENDER_PROGRESS,@onRenderProgress
+    @socket.on SunflowRenderer.RENDER_COMPLETE,@onRenderComplete
+    @socket.on SunflowRenderer.RENDER_CANCELLED,@onRenderCancelled
+    @socket.on SunflowRenderer.RENDER_ERROR,@onRenderError
 
     null
 
-  render:(scene,camera,width,height)->
+  render:(scene,camera,name)->
     if not @connected
-      throw new Error "[SunflowRenderer] Call connect() before rendering."
+      throw new Error "[Threeflow] Call connect() before rendering."
+    else if not camera instanceof THREE.PerspectiveCamera
+      throw new Error "[Threeflow] Only use THREE.PerspectiveCamera."
+    else if isNaN(@width) or isNaN(@height) or isNaN(@scale)
+      throw new Error "[Threeflow] Error with width/height or scale."
     else if not @rendering
 
-      console.log "RENDER"
+      @onRenderStatus.dispatch
+        status: SunflowRenderer.RENDER_START
 
-      scale = 1;
+      @rendering = true
 
-      @exporter.image.resolutionX = width*scale
-      @exporter.image.resolutionY = height*scale
+      THREEFLOW.log "Indexing scene."
+      # trigger the render code on a delay. sometimes the gui doesn't update whilst processing.
+      _render = ()=>
+        @name = if name then name else @name
 
-      @exporter.indexScene scene
-      scContents = @exporter.exportCode()
+        @exporter.clean()
 
-      @socket.emit "render",
-         scContents:scContents
-         scPath:@scPath
-         scSave:@scSave
-         pngPath:@pngPath
+        @exporter.image.resolutionX = @width*@scale
+        @exporter.image.resolutionY = @height*@scale
+        @exporter.camera.camera = camera
+
+        @exporter.indexObject3d scene
+        source = @exporter.exportCode()
+
+        THREEFLOW.log "Sending scene file."
+        @socket.emit "render",
+          source: source
+          options:
+            name: @name
+            overwrite: @overwrite
+            deleteSc: @deleteSc
+          sunflowCl: @sunflowCl
+
+      setTimeout _render,20
 
     else
-      console.log "QUEUE?"
+      THREEFLOW.log "Render in progress."
+
+    null
+
+  setConnectionStatus:(status)->
+    if @connectionStatus is status
+      return
+
+    @connectionStatus = status
+    @onConnectionStatus.dispatch
+      status: status
 
     null
 
   onConnected:(data)=>
-    console.log "Threeflow conected."
+    THREEFLOW.log "[Connected]"
     @connected = true
+    @rendering = false
+    @setConnectionStatus SunflowRenderer.CONNECTED
+    null
+
+  onDisconnected:(data)=>
+    THREEFLOW.log "[Disconnected]"
+    @connected = false
+    @rendering = false # reset as we assume we are not anymore..
+
+    @setConnectionStatus SunflowRenderer.DISCONNECTED
+    null
+
+  onRenderAdded:(data)=>
+    @onRenderStatus.dispatch
+      status: SunflowRenderer.RENDER_ADDED
+
     null
 
   onRenderStart:(data)=>
-    console.log "onRenderStart"
+    @onRenderStatus.dispatch
+      status: SunflowRenderer.RENDER_START
+
     null
 
   onRenderProgress:(data)=>
-    console.log "onRenderProgress",data
+
+    @onRenderStatus.dispatch
+      status: SunflowRenderer.RENDER_PROGRESS
+      progress: data.progress
+
     null
 
   onRenderComplete:(data)=>
-    console.log "onRenderComplete",data
+    @rendering = false
+    @onRenderStatus.dispatch
+      status: SunflowRenderer.RENDER_COMPLETE
+      duration: data
+
+    null
+
+  onRenderCancelled:(data)=>
+    @rendering = false
+    @onRenderStatus.dispatch
+      status: SunflowRenderer.RENDER_CANCELLED
+
+    null
+
+
+
+  onRenderError:(data)=>
+    @rendering = false
+    @onRenderStatus.dispatch
+      status: SunflowRenderer.RENDER_ERROR
+      message: data
+
     null
 
 

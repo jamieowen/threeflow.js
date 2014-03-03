@@ -1,0 +1,9 @@
+{
+  "server":{
+    "port": 3710,
+    "static":"/deploy"
+  },
+  "folders":{
+    "renders":"/deploy/renders"
+  }
+}

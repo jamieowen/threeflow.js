@@ -4,13 +4,21 @@ class GeometryExporter extends BlockExporter
   constructor:(exporter)->
     super(exporter)
 
-    # one or the other of these.
-    @faceNormals = false
-    @vertexNormals = false
+    @normals = true
 
-    # geometry export can vary according to :
-    # 1. same geometry - one material - ( a basic geometry export - with sunflow
+    @vertexNormals = false # otherwise facevarying
+
+    @uvs = true
+
+    # create a cache for some .sc code that comes from larger models.
+    # rather than generate this everytime we hit render.
+    @geometrySourceCache = {}
+
+    @geometryIndex = null
+
+  clean:()->
     @geometryIndex = {}
+    null
 
   addToIndex:(object3d)->
 
@@ -51,6 +59,13 @@ class GeometryExporter extends BlockExporter
         
     for uuid of @geometryIndex
       entry = @geometryIndex[uuid]
+
+      # pull from cache, if we have it.
+      if not entry.geometry._tf_noCache and @exporter.useGeometrySourceCache and @geometrySourceCache[uuid]
+        result = @geometrySourceCache[uuid]
+        continue
+
+
       result += 'object {\n'
       result += '  noinstance\n'
       result += '  type generic-mesh\n'
@@ -62,23 +77,51 @@ class GeometryExporter extends BlockExporter
 
       result += '  triangles ' + entry.geometry.faces.length + '\n'
 
-      # could optimized this and place in one loop for all face info
       for face in entry.geometry.faces
         result += '    ' + @exportFace(face) + '\n'
 
-      if @faceNormals
-        result += '  normals facevarying\n'
-        result += '    '
+      if @normals and @vertexNormals
+        normals = []
+
         for face in entry.geometry.faces
-          result += @exportVector(face.normal) + ' '
-        result += '\n'
-      else if @vertexNormals
-        result += '  normals none\n'
+          normals[ face.a ] = face.vertexNormals[0]
+          normals[ face.b ] = face.vertexNormals[1]
+          normals[ face.c ] = face.vertexNormals[2]
+
+        if normals.length > 0 and normals.length is entry.geometry.vertices.length
+          result += '  normals vertex\n'
+
+          for normal in normals
+            result += '    ' + normal.x + ' ' + normal.y + ' ' + normal.z + '\n'
+
+          result += '\n'
+        else
+          THREEFLOW.warn "Problem with geometry normals.",object3d
+          result += '  normals none\n'
+      else if @normals and not @vertexNormals
+        result += '  normals facevarying\n'
+
+        for face in entry.geometry.faces
+          v1 = face.vertexNormals[0]
+          v2 = face.vertexNormals[1]
+          v3 = face.vertexNormals[2]
+
+          result += '    ' + v1.x + ' ' + v1.y + ' ' + v1.z + ' ' + v2.x + ' ' + v2.y + ' ' + v2.z + ' ' + v3.x + ' ' + v3.y + ' ' + v3.z + '\n'
+
       else
         result += '  normals none\n'
 
-      # TODO: uvs
-      result += '  uvs none\n'
+      if @uvs
+        uvs = entry.geometry.faceVertexUvs[0]
+        if uvs.length is entry.geometry.faces.length
+          result += '  uvs facevarying\n'
+          for uv in uvs
+            result += '    ' + uv[0].x + ' ' + uv[0].y + ' ' + uv[1].x + ' ' + uv[1].y + ' ' + uv[2].x + ' ' + uv[2].y + '\n'
+        else
+          THREEFLOW.warn "UV count didn't match face count.",entry.geometry
+          result += '  uvs none\n'
+      else
+        result += '  uvs none\n'
 
       if entry.faceMaterials
         result += '  face_shaders\n'
@@ -86,5 +129,8 @@ class GeometryExporter extends BlockExporter
           result += '    ' + face.materialIndex + '\n'
 
       result += '}\n\n'
+
+      if not entry.geometry._tf_noCache and @exporter.useGeometrySourceCache
+        @geometrySourceCache[ uuid ] = result
 
     return result

@@ -27,6 +27,8 @@ class ImageExporter extends BlockExporter
 
     @filterTypes    = ImageExporter.FILTERS
 
+  clean:()->
+    null
 
   addToIndex:(object3d)->
     null

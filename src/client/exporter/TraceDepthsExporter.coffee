@@ -5,9 +5,12 @@ class TraceDepthsExporter extends BlockExporter
     super(exporter)
 
     @enabled      = false
-    @diffusion    = 1
+    @diffusion    = 4
     @reflection   = 4
     @refraction   = 4
+
+  clean:()->
+    null
 
   addToIndex:(object3d)->
     null

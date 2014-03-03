@@ -7,28 +7,19 @@ class CameraExporter extends BlockExporter
     @helperVec  = new THREE.Vector3()
     @camera     = null
 
+  clean:()->
+    @camera = null
+    null
+
   addToIndex:(object3d)->
-    if @camera
-      return
-
-    if object3d instanceof THREE.PerspectiveCamera
-      @camera = object3d
-      console.log "SET CAMERA", @camera
-
+    # camera set manually by exporter ( via render( scene, camera ) )
     null
 
   doTraverse:(object3d)->
-    # check here for custom cameras.
-    # we'll use some helper planes for viewport / render size
-    # so we prevent traversing to stop the meshes being rendered.
     true
 
   exportBlock:()->
     result = ''
-
-    if not @camera
-      return result
-
     result += 'camera {\n'
     result += '  type pinhole\n'
 

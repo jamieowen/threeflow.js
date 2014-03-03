@@ -1,32 +1,65 @@
 
 class Exporter
 
-  # command line options. ( or passed in single liners inside .sc code )
-  # mistakenly defined in the image{} block to begin with
-  @BUCKET_ORDERS = [
-    'hilbert'
-    'spiral'
-    'column'
-    'row'
-    'diagonal'
-    'random' ]
+  # Exclude mesh types from being traversed at all.
+  @EXCLUDED_OBJECT3D_TYPES :[
+    # Core Types
+    THREE.Camera
+    THREE.Light
+    THREE.Bone
+    THREE.LOD
+    THREE.Line
+    THREE.MorphAnimMesh
+    THREE.ParticleSystem
+    THREE.SkinnedMesh
+    THREE.Sprite
 
-  ###
-      bucketSize: 48
-      bucketOrder: ImageExporter.BUCKET_ORDERS[0]
-      bucketOrderReverse: false
+    # Other ( can comment out THREE.Line until support is added )
+    THREE.ArrowHelper             # THREE.Object3D
+    #THREE.AxisHelper              # THREE.Line
+    THREE.BoundingBoxHelper       # THREE.Mesh
+    #THREE.BoxHelper               # THREE.Line
+    #THREE.CameraHelper            # THREE.Line
+    THREE.DirectionalLightHelper  # THREE.Object3D
+    #THREE.EdgesHelper             # THREE.Line
+    #THREE.FaceNormalsHelper       # THREE.Line
+    #THREE.GridHelper              # THREE.Line
+    THREE.HemisphereLightHelper   # THREE.Object3D
+    THREE.PointLightHelper        # THREE.Mesh
+    THREE.SpotLightHelper         # THREE.Object3D
+    #THREE.VertexNormalsHelper     # THREE.Line
+    #THREE.VertexTangentsHelper    # THREE.Line
+    #THREE.WireframeHelper         # THREE.Line
 
-    # format bucket options.
-    bucket = @settings.bucketSize + ' '
-    if @settings.bucketOrderReverse
-      bucket += '"reverse ' + @settings.bucketOrder + '"'
-    else
-      bucket += @settings.bucketOrder
+    THREE.ImmediateRenderObject   # THREE.Object3D
+    THREE.LensFlare               # THREE.Object3D
+    THREE.MorphBlendMesh          # THREE.Mesh
+  ]
 
-    result += '  bucket ' + bucket + '\n'
-  ###
 
+  @__checkedExcluded = false
+  @__checkExcluded = ()->
+    if not Exporter.__checkedExcluded
+
+      # Test for existence of these before adding ( they appear in the examples folder )
+      # add this on the constructor, so any extras that appear after threeflow <script> will show up.
+      CHECK_EXCLUDED_OBJECT3D_TYPES = [
+        THREE.TransformControls # THREE.Object3D
+        THREE.AudioObject       # THREE.Object3D
+      ]
+
+      for cls in CHECK_EXCLUDED_OBJECT3D_TYPES
+        if cls isnt undefined and typeof cls is "function"
+          Exporter.EXCLUDED_OBJECT3D_TYPES.push cls
+
+      Exporter.__checkedExcluded = true
+
+    null
+
+  
   constructor:()->
+    Exporter.__checkExcluded()
+
     # global exporter settings
     @exporterSettings =
       convertPrimitives: false
@@ -34,17 +67,33 @@ class Exporter
     @blockExporters = []
 
     @image              = @addBlockExporter new ImageExporter(@)
+    @bucket             = @addBlockExporter new BucketExporter(@)
     @traceDepths        = @addBlockExporter new TraceDepthsExporter(@)
     @caustics           = @addBlockExporter new CausticsExporter(@)
     @gi                 = @addBlockExporter new GiExporter(@)
 
-    @cameras            = @addBlockExporter new CameraExporter(@)
+    @camera             = @addBlockExporter new CameraExporter(@)
     @lights             = @addBlockExporter new LightsExporter(@)
+    @modifiers          = @addBlockExporter new ModifiersExporter(@)
     @materials          = @addBlockExporter new MaterialsExporter(@)
     @geometry           = @addBlockExporter new GeometryExporter(@)
     @bufferGeometry     = @addBlockExporter new BufferGeometryExporter(@)
     @meshes             = @addBlockExporter new MeshExporter(@)
 
+    @useGeometrySourceCache = true
+
+    @textureLinkages    = {}
+
+
+  linkTexturePath:(texture,path)->
+    if not texture instanceof THREE.Texture
+      throw new Error "Texture must be of type THREE.Texture."
+
+    if path is null
+      throw new Error "Texture path must not be null."
+
+    @textureLinkages[ texture.uuid ] = path
+    null
 
   addBlockExporter:(exporter)->
     if not exporter instanceof BlockExporter
@@ -54,8 +103,22 @@ class Exporter
 
     exporter
 
-  # index the three js scene and
-  indexScene:(object3d)->
+
+  clean:()->
+    for blockExporter in @blockExporters
+      blockExporter.clean()
+
+    null
+
+  # index the three js scene
+  indexObject3d:(object3d)->
+
+    # check for exlucded object3d types and ignore
+    for cls in Exporter.EXCLUDED_OBJECT3D_TYPES
+      if object3d instanceof cls
+        THREEFLOW.warn "Ignored object.", object3d
+        return
+
     if object3d.children.length
       for child in object3d.children
 
@@ -64,11 +127,13 @@ class Exporter
         doTraverse = true
 
         for blockExporter in @blockExporters
-          blockExporter.addToIndex( child )
+          if not child._tf_noIndex
+            blockExporter.addToIndex( child )
+
           doTraverse = doTraverse and blockExporter.doTraverse( child )
 
-        if doTraverse
-          @indexScene child
+        if doTraverse and not child._tf_noTraverse and not child._tf_noIndex
+          @indexObject3d child
 
     null
 

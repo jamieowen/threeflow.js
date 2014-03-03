@@ -1,5 +1,13 @@
-examples
-src
-sunflow/shader_examples
-sunflow/textures
+/src
+/sunflow/shader_examples
+/sunflow/textures
+*.sc
+/renders
+/screenshot.jpg
+/examples
+.idea
+/Gruntfile.coffee
+/build
+/SUPPORTED.md
+/TODO.md
 

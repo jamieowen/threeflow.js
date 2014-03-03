@@ -1,115 +1,234 @@
-express         = require 'express'
-io              = require 'socket.io'
-http            = require 'http'
-path            = require 'path'
-child_process   = require 'child_process'
-fs              = require 'fs'
+express           = require 'express'
+io                = require 'socket.io'
+http              = require 'http'
+path              = require 'path'
+fs                = require 'fs'
+child_process     = require 'child_process'
+log               = require './log'
+version           = require './version'
+render            = require './render'
+wrench            = require 'wrench'
 
-app             = express()
-server          = http.createServer app
-io              = io.listen server
+module.exports =
 
-server.listen 3000
+  create: ()->
+     # clear terminal
+    log.clear()
 
-# http
+    instance = new @Server()
+    instance
 
-app.post '/render',(request,response)->
-  response.send "render"
+  Server: class Server
 
-app.use '/', express.static( path.join( process.cwd(),'examples') )
+    constructor:()->
+      log.notice "Threeflow " + version.number
 
-# sockets
-io.sockets.on 'connection', (socket)->
-  socket.emit 'connected',
-    event:'connected'
-    data: {}
+      @opts     = null
+      @app      = null
+      @server   = null
+      @io       = null
 
-  socket.on 'render', (data)->
+      # connected clients
+      @clients  = {} # hash of client it to client object.
+      @renderQ  = render.createQueue @
 
-    if data.scContents
-
-      pngPath = data.pngPath || null
-      scPath = data.scPath || ".tmp.render.sc"
-
-      fs.writeFileSync scPath,data.scContents
-
-      command = 'java -Xmx1G -server -jar sunflow/sunflow.jar'
-
-      socket.emit 'render-start',
-        event:'render-start'
-        data: 'ok'
-
-      if pngPath
-        command += " -o " + pngPath
-
-      command += " " + scPath
-
-      child = child_process.exec command,(error,stdout,stderror)->
-        console.log "RENDER COMPLETE"
-
-        if not error
-          socket.emit 'render-progress',
-            event:'render-progress'
-            data:null
-
-          socket.emit 'render-complete',
-            event:'render-complete'
-            data:null
+    javaDetect:(onComplete)->
+      log.info "Detecting Java"
+      child_process.exec "java -version",(error,stdout,stderr)=>
+        if error
+          log.error "Java not found. Install it!"
+          onComplete(false)
         else
-          console.log error
+          onComplete(true)
 
-      progressMatch     = /\[\d{1,2}%\]/
-      progressIntMatch  = /\d{1,2}/
+      return true
 
-      # Render time: 0:00:14.4
-      renderTimeMatch    = /Render time: \d*:\d{1,2}:\d{1,2}\.\d*/
+    defaults:()->
+      opts =
+        server:
+          port: 3710
+          debug: false
+          static: "/examples"
 
-      # Done.
-      doneMatch  = /Done\./
-      isDone = false
-      renderTime = null
+        sunflow:
+          version: "-version"
+          command: "java"
+          jar: path.join( __dirname, "../sunflow/sunflow.jar")
+          memory: "-Xmx2G"
+          args: [
+            "-server"
+          ]
 
-      child.stderr.on 'data',(buffer)->
-        progress = progressMatch.exec buffer
+        flags:
+          multipleRenders: false
+          allowSave: false
+          allowQueue: false
+          deleteSc: true
+          cancelRendersOnDisconnect: false
 
-        if progress
-          pInt = progressIntMatch.exec progress[0]
-          pInt = parseInt(pInt[0])
-          pInt = "ERROR" if isNaN(pInt)
+        folders:
+          renders: "/deploy/renders"
+          #textures: "/deploy/textures"
+          #models: "/deploy/models"
+          #hdr: "/hdr"
+          #bakes: "/bakes"
 
-          socket.emit 'render-progress',
-            event:'render-progress'
-            data: pInt
-        else if not isDone
-          # check render time.
-          if not renderTime
-            time = renderTimeMatch.exec buffer
-            if time
-              renderTime = time[0]
+      opts
 
-          done = doneMatch.exec buffer
-          if done
-            isDone = true
-            socket.emit 'render-complete',
-              event:'render-complete'
-              data:renderTime
+    options:( options={} )->
+      @opts = @defaults()
+
+      for opt of options.server
+        @opts.server[opt] = options.server[opt]
+
+      for opt of options.flags
+        @opts.flags[opt] = options.flags[opt]
+
+      for opt of options.folders
+        @opts.folders[opt] = options.folders[opt]
+
+      null
+
+    optionsJSON:(cwd)->
+      # no config file / no run..  ( cannot write .sc files to node_modules folder )
+      # need to look into this.
+      success = false
+      try
+        log.info "Looking for config"
+        jsonPath = path.join(cwd,"threeflow.json")
+        jsonFile = fs.readFileSync(jsonPath)
+        jsonOpts = JSON.parse jsonFile
+        @options jsonOpts
+
+        @opts.flags.allowSave = true
+        @setCwd cwd
+        log.info "Found /threeflow.json"
+        success = true
+      catch error
+        @setCwd null
+        @options()
+        if error instanceof SyntaxError
+          log.warn "Error parsing /threeflow.json. [ '" + error.message + "' ]"
+        else
+          log.warn "No /threeflow.json found."
+          log.info "Type 'threeflow init' to start a project."
+          log.info()
+        success = false
+
+      success
+
+    forceSave:(value)->
+      if value
+        @opts.flags.allowSave = true
+
+      null
+
+    setCwd:(cwd)->
+      @cwd = cwd
+
+    startup:()->
+      if not @opts
+        @opts = @defaults()
+
+      if not @cwd
+        log.notice "Starting up without config for now (Renders won't be saved!)"
+        # use node modules folder
+        # shouldn't need to set allowSave = false, as this should be the default
+        @cwd = path.join(__dirname,"..")
+      else
+        log.notice "Starting up..."
+
+      # check all renders/textures folders.
+      for folder of @opts.folders
+        absFolder = path.join @cwd,@opts.folders[folder]
+        @opts.folders[folder] =  absFolder
+        # validate and create.
+        if not fs.existsSync absFolder
+          wrench.mkdirSyncRecursive absFolder
+
+      @app      = express()
+      @server   = http.createServer @app
+      @io       = io.listen @server,
+        log: @opts.server.debug
+
+      @io.sockets.on 'connection', @onConnection
+
+      @server.listen @opts.server.port
+      log.info "Listening on localhost:" + @opts.server.port
+
+      staticFolder = path.join(@cwd,@opts.server.static)
+      if not fs.existsSync staticFolder
+        wrench.mkdirSyncRecursive staticFolder
+
+      @app.use '/', express.static( staticFolder )
+
+      log.info "Serving " + @opts.server.static
+      log.notice "Waiting for connection... "
+
+    # when we receive a connection
+    onConnection:(socket)=>
+      client = new Client(socket,@)
+      @clients[ client.id ] = client
+
+      log.info "Client Connected : " + client.id
+
+    # removes a client and cleans up.
+    disconnectClient:(client)->
+      log.info "Client Disconnected : " + client.id
+
+      @clients[ client.id ] = null
+      delete @clients[ client.id ]
+
+      @renderQ.removeAllByClient client
+      client.dispose()
+
+  ###
+  Client Object.
+  ###
+
+  Client: class Client
+    constructor:(@socket,@server)->
+      @id = @socket.id
+      @socket.emit 'connected',
+        id: @socket.id
+
+      @socket.on 'render',@onRender
+      @socket.on 'disconnect',@onDisconnect
+
+      @connected = true
+      @renderID = 0
 
 
+    generateRenderID:()->
+      @renderID++
+      @id + "-" + @renderID
 
+    onRender:(renderData)=>
+      log.notice "Received Render..."
 
+      source      = renderData.source
+      options     = renderData.options
+      sunflowCl   = renderData.sunflowCl
 
+      # TODO: need to validate input here .
 
+      ren = render.createRender @,source,options,sunflowCl
+      @server.renderQ.add ren
 
+      @socket.emit 'render-added',
+        id: ren.id
+        status: ren.status
+        message: ren.message
 
+      @server.renderQ.process()
 
-        process.stdout.write buffer
+      null
 
-      #child.stdout.pipe process.stdout
-      #child.stderr.pipe process.stderr
+    onDisconnect:()=>
+      # remove self.
+      @connected = false
+      @server.disconnectClient @
 
-
-    null
-
-  null
-
-
+    dispose:()->
+      @socket = null
+      null

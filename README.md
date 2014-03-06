@@ -1,4 +1,3 @@
-
 #threeflow.js : sunflow for three.js
 
 ###version 0.6.0-7 - beta
@@ -63,7 +62,7 @@ Suzanne / Materials
 ### Usage
 Check the examples for setup but the most basic setup looks like this:
 
-```javascript
+```html
 <!-- Include socket.io !-->
 <script src="/socket.io/socket.io.js"></script>
 
@@ -138,7 +137,6 @@ Check the examples for setup but the most basic setup looks like this:
   }
 
 </script>
-
 ```
 
 ###Rendering

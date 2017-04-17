@@ -1,9 +1,9 @@
 
-#threeflow.js : sunflow for three.js
+# threeflow.js : sunflow for three.js
 
-###version 0.6.0-7 - beta
+### version 0.6.0-7 - beta
 
-###Overview
+### Overview
 
 Threeflow lets you render [three.js](http://threejs.org/) scenes with the [sunflow rendering engine](http://sunflow.sourceforge.net/).  If you don't know what sunflow is - it's an open source 3d ray tracer written in java for creating photo-realistic images, and used quite a lot with other languages like [processing](http://processing.org/) and [structure synth](http://structuresynth.sourceforge.net/).
 
@@ -19,7 +19,7 @@ geometry and assigning materials.
 You can customize the render and lighting rig settings with a gui built with [dat.gui](https://code.google.com/p/dat-gui/)
 
 
-###Installation
+### Installation
 
 Make sure you have [java](https://www.java.com) and [npm/node](http://nodejs.org/) installed; then run the npm install command with the -g option:
 ```shell
@@ -141,7 +141,7 @@ Check the examples for setup but the most basic setup looks like this:
 
 ```
 
-###Rendering
+### Rendering
 Getting use to all the settings and rendering high-quality images is one big art in itself.
 Check the [sunflow wiki](http://www.geneome.com/sunflow-wiki/) for this. Or read about renderers in software like Maya,Cinema 4d or 3dsMax.
 
@@ -155,7 +155,7 @@ Here's some rough ideas:
 
 Other than this, just play around.
 
-###Lighting Rig
+### Lighting Rig
 This gives you 4 THREEFLOW.AreaLights arranged around target points that are configured and saved via the gui. It is modelled on [3 or 4 point lighting](http://en.wikipedia.org/wiki/Three-point_lighting) methods in film and photography.
 
 The lights and target points are interactive using the THREE.TransformControls class. The light can have its scale and position modified and is always facing the target point. The target point can have only its position modified.
@@ -163,7 +163,7 @@ The lights and target points are interactive using the THREE.TransformControls c
 When adjusting the radiance of lights via the gui you will not see any changes in three.js except with the key light.  This was intentional as it was turning into one big mission roughly matching up lighting from three.js to sunflow.
 That will be added later, so for now, either use your imagination intensely or just hit the IPR render button for a quick preview.
 
-###Project structure
+### Project structure
 If you have an existing project you can intialise it without running 'threeflow init' by creating a threeflow.json file in the root folder.
 The threeflow.json file defines a static/deploy folder that will be served and lets you customize render folders.
 
@@ -184,7 +184,7 @@ Then run 'threeflow start' as usual.
 }
 ```
 
-###Geometry Caching
+### Geometry Caching
 It can take a few seconds to build the scene file source for large geometries and this gets annoying when you are constantly previewing renders.
 So threeflow caches geometry scene file source after it first creates it. If you are making changes to the geometry in between each render set a property on the geometry object to prevent this:
 
@@ -192,7 +192,7 @@ So threeflow caches geometry scene file source after it first creates it. If you
 geometry._tf_noCache = true;
 ```
 
-###Excluding Meshes
+### Excluding Meshes
 Threeflow excludes unsupported meshes by default but if you want to exclude other meshes from being rendered you have two options.
 
 To exclude the mesh altogether use:
